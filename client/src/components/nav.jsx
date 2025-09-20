@@ -1,87 +1,76 @@
 import React from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
-import { useAuthStore } from "../store/useAuthStore.js";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useAuthStore } from "../store/useAuthStore";
 import Branding from "./branding.jsx";
 
+const publicNavItems = [
+  { name: "Home", to: "/" },
+  { name: "Search Trains", to: "/trains" },
+  { name: "Contact Us", to: "/contact" },
+];
+
 const userNavItems = [
-  { name: "Home", to: "/", private: false },
-  { name: "Search Trains", to: "/trains", private: false },
-  { name: "My Bookings", to: "/bookings", private: false },
-  { name: "Contact Us", to: "/contact", private: false },
-  { name: "Profile", to: "/profile", private: false },
+  { name: "Home", to: "/" },
+  { name: "Search Trains", to: "/trains" },
+  { name: "My Bookings", to: "/bookings" },
+  { name: "Contact Us", to: "/contact" },
+  { name: "Profile", to: "/profile" },
 ];
 
 const adminNavItems = [
-  { name: "Trains", to: "/admin/trains", private: false },
-  { name: "Stations", to: "/admin/stations", private: false },
-  { name: "Revenue", to: "/admin/revenue", private: false },
-  { name: "Logs", to: "/admin/logs", private: false },
+  { name: "Trains", to: "/admin/trains" },
+  { name: "Stations", to: "/admin/stations" },
+  { name: "Revenue", to: "/admin/revenue" },
+  { name: "Logs", to: "/admin/logs" },
 ];
 
-const Navigation = () => {
-  const { token, clearAuth } = useAuthStore();
-  const routerState = useRouterState();
-  const currentPath = routerState.location.pathname;
+export default function Navigation() {
+  const { token, user, clearAuth } = useAuthStore();
+  const navigate = useNavigate();
 
-  // Switch menu set based on whether path includes "/admin"
-  const navItems = currentPath.includes("/admin")
-    ? adminNavItems
-    : userNavItems;
+  let navItems;
+  if (!token) navItems = publicNavItems;
+  else if (user?.roleId === 1) navItems = adminNavItems;
+  else navItems = userNavItems;
+
+  const handleSignOut = () => {
+    clearAuth();
+    navigate({ to: "/" });
+  };
 
   return (
     <nav className="px-4 py-2 flex justify-between items-center bg-base-300 shadow-md">
       <Branding />
       <ul className="flex space-x-4 items-center">
-        {navItems.map((item) => {
-          if (item.private && !token) {
-            return null;
-          }
-          return (
-            <li key={item.to}>
-              <Link
-                className="btn btn-ghost hover:border hover:border-primary"
-                to={item.to}
-              >
-                {item.name}
-              </Link>
-            </li>
-          );
-        })}
+        {navItems.map((item) => (
+          <li key={item.to}>
+            <Link className="btn btn-ghost hover:border hover:border-primary" to={item.to}>
+              {item.name}
+            </Link>
+          </li>
+        ))}
       </ul>
+
       <ul className="flex space-x-4 items-center">
         <li className="ml-auto">
-          {token ? (
+          {token && user ? (
             <div className="dropdown">
               <label tabIndex={0} className="btn btn-sm btn-primary m-1">
-                Username
-                {/* TODO: replace with real {user.name} */}
+                {user.name}
               </label>
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
-              >
-                <li>
-                  <Link to="/profile">Profile</Link>
-                </li>
-                <li>
-                  <button onClick={clearAuth}>Sign Out</button>
-                </li>
+              <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li><Link to="/profile">Profile</Link></li>
+                <li><button onClick={handleSignOut}>Sign Out</button></li>
               </ul>
             </div>
           ) : (
             <>
-              <Link to="/signin" className="btn btn-sm btn-outline mr-2">
-                Sign In
-              </Link>
-              <Link to="/signup" className="btn btn-sm btn-primary">
-                Sign Up
-              </Link>
+              <Link to="/signin" className="btn btn-sm btn-outline mr-2">Sign In</Link>
+              <Link to="/signup" className="btn btn-sm btn-primary">Sign Up</Link>
             </>
           )}
         </li>
       </ul>
     </nav>
   );
-};
-
-export default Navigation;
+}

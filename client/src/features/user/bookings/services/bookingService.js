@@ -1,7 +1,8 @@
-// src/features/bookings/services/bookingService.js
+// src/features/user/bookings/services/bookingService.js
 import axiosClient from "../../../../services/config/axiosClient";
 import { useAuthStore } from "../../../../store/useAuthStore";
 import { useApiWithFallback } from "../../../../services/useApiWithFallback";
+import { useUserId } from "../../../../hooks/useUserId";
 
 // --- Demo / fallback bookings ---
 const demoBookings = [
@@ -32,14 +33,15 @@ const demoBookings = [
 const createAuthHeaders = (token) =>
   token ? { Authorization: `Bearer ${token}` } : {};
 
-// --- Hook: Get all bookings by userId ---
-export const useGetBookingsByUserId = (userId) => {
+// --- Hook: Get all bookings for logged-in user ---
+export const useGetBookingsByUserId = () => {
   const token = useAuthStore((state) => state.token);
+  const userId = useUserId();
 
   return useApiWithFallback({
     fallbackKey: `bookingsByUser_${userId || "fallback"}`,
     endpoint: async () => {
-      // Short-circuit to demo data if userId missing
+      // return demo bookings if userId is missing
       if (!userId) return demoBookings;
 
       const res = await axiosClient.get(`/users/${userId}/bookings`, {
@@ -54,6 +56,7 @@ export const useGetBookingsByUserId = (userId) => {
 // --- Hook: Get single booking by bookingId ---
 export const useGetBookingById = (bookingId) => {
   const token = useAuthStore((state) => state.token);
+  const userId = useUserId(); // eslint will not warn since we use it below
 
   const fallbackBooking =
     bookingId && demoBookings.find((b) => b.bookingId === bookingId);
@@ -61,8 +64,11 @@ export const useGetBookingById = (bookingId) => {
   return useApiWithFallback({
     fallbackKey: `bookingById_${bookingId || "fallback"}`,
     endpoint: async () => {
-      // Short-circuit to demo data if bookingId missing
+      // return demo if bookingId missing or matches demo
       if (!bookingId || fallbackBooking) return fallbackBooking || null;
+
+      // userId is required for authenticated request
+      if (!userId) return fallbackBooking || null;
 
       const res = await axiosClient.get(`/bookings/${bookingId}`, {
         headers: createAuthHeaders(token),

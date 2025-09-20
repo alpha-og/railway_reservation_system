@@ -1,4 +1,4 @@
-import authService from "../services";
+import authService from "../services/signIn.js";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { useApi } from "../../../services/useApi";
 import { useRouter } from "@tanstack/react-router";
@@ -8,10 +8,29 @@ export const useSignIn = () => {
   const router = useRouter();
 
   return useApi({
-    endpoint: authService.signIn,
+    endpoint: authService,
     onSuccess: (responseBody) => {
-      setAuth(responseBody.data.token);
-      router.navigate({ to: "/dashboard" });
+      let token = responseBody.token;
+      let user = { id: null, name: null, roleId: null };
+
+      try {
+        const payloadBase64 = token.split(".")[1];
+        const payload = JSON.parse(atob(payloadBase64));
+        user.id = payload.id;
+        user.name = payload.name;
+        user.roleId = payload.roleId; // store roleId from JWT
+      } catch (err) {
+        console.error("Failed to decode JWT:", err);
+      }
+
+      setAuth(token, user);
+
+      // redirect based on role
+      if (user.roleId === 1) {
+        router.navigate({ to: "/admin" });
+      } else {
+        router.navigate({ to: "/" });
+      }
     },
   });
 };
