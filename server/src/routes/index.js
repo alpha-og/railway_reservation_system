@@ -6,4 +6,7 @@ export { default as stationDistanceRoutes } from "./stationDistanceRoutes.js";
 export { default as scheduleRoutes } from "./scheduleRoutes.js";
 export { default as coachTypeRoutes } from "./coachTypesRoutes.js";
 export { default as seatTypeRoutes } from "./seatTypeRoutes.js";
+export { default as trainRoutesUser } from "./trainRoutes_user.js";
+export { default as bookingRoutes } from "./bookingRoutes.js";
+export { default as profileRoutes } from "./profileRoutes.js";
 

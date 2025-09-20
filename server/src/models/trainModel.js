@@ -45,7 +45,7 @@ class Train {
       code: result.rows[0].train_code,
       coaches: [],
     };
-    
+
     let currentCoach = null;
     for (const row of result.rows) {
       if (!currentCoach || currentCoach.id !== row.coach_id) {
@@ -71,14 +71,22 @@ class Train {
   static async createTrainWithCoachesAndSeats(name, code, coaches) {
     const client = await pool.connect();
     try {
-      await client.query("BEGIN"); 
+      await client.query("BEGIN");
 
-      const trainQuery = `INSERT INTO ${this.TABLE} (name, code) VALUES ($1, $2) RETURNING *`;
+      const trainQuery = `
+        INSERT INTO ${this.TABLE} (name, code) 
+        VALUES ($1, $2) 
+        RETURNING *
+      `;
       const trainResult = await client.query(trainQuery, [name, code]);
       const newTrain = trainResult.rows[0];
 
       for (const coach of coaches) {
-        const coachQuery = `INSERT INTO coaches (train_id, code, coach_type_id) VALUES ($1, $2, $3) RETURNING *`;
+        const coachQuery = `
+          INSERT INTO coaches (train_id, code, coach_type_id) 
+          VALUES ($1, $2, $3) 
+          RETURNING *
+        `;
         const coachResult = await client.query(coachQuery, [
           newTrain.id,
           coach.code,
@@ -87,7 +95,10 @@ class Train {
         const newCoach = coachResult.rows[0];
 
         for (const seat of coach.seats) {
-          const seatQuery = `INSERT INTO seats (coach_id, seat_number, seat_type_id) VALUES ($1, $2, $3)`;
+          const seatQuery = `
+            INSERT INTO seats (coach_id, seat_number, seat_type_id) 
+            VALUES ($1, $2, $3)
+          `;
           await client.query(seatQuery, [
             newCoach.id,
             seat.seat_number,
@@ -96,13 +107,13 @@ class Train {
         }
       }
 
-      await client.query("COMMIT"); 
-      return this.getTrainDetails(newTrain.id); 
+      await client.query("COMMIT");
+      return this.getTrainDetails(newTrain.id);
     } catch (e) {
-      await client.query("ROLLBACK"); 
+      await client.query("ROLLBACK");
       throw e;
     } finally {
-      client.release(); 
+      client.release();
     }
   }
 
@@ -112,11 +123,13 @@ class Train {
       await client.query("BEGIN");
 
       const trainUpdateQuery = `
-          UPDATE ${this.TABLE}
-          SET name = COALESCE($1, name), code = COALESCE($2, code), updated_at = NOW()
-          WHERE id = $3
-          RETURNING *;
-        `;
+        UPDATE ${this.TABLE}
+        SET name = COALESCE($1, name), 
+            code = COALESCE($2, code), 
+            updated_at = NOW()
+        WHERE id = $3
+        RETURNING *;
+      `;
       const updatedTrainResult = await client.query(trainUpdateQuery, [
         data.name,
         data.code,
@@ -125,11 +138,16 @@ class Train {
       if (updatedTrainResult.rows.length === 0) {
         throw new Error("Train not found for update");
       }
+
       if (data.coaches) {
         await client.query("DELETE FROM coaches WHERE train_id = $1", [trainId]);
 
         for (const coach of data.coaches) {
-          const coachInsertQuery = `INSERT INTO coaches (train_id, code, coach_type_id) VALUES ($1, $2, $3) RETURNING *`;
+          const coachInsertQuery = `
+            INSERT INTO coaches (train_id, code, coach_type_id) 
+            VALUES ($1, $2, $3) 
+            RETURNING *
+          `;
           const coachResult = await client.query(coachInsertQuery, [
             trainId,
             coach.code,
@@ -138,7 +156,10 @@ class Train {
           const newCoach = coachResult.rows[0];
 
           for (const seat of coach.seats) {
-            const seatInsertQuery = `INSERT INTO seats (coach_id, seat_number, seat_type_id) VALUES ($1, $2, $3)`;
+            const seatInsertQuery = `
+              INSERT INTO seats (coach_id, seat_number, seat_type_id) 
+              VALUES ($1, $2, $3)
+            `;
             await client.query(seatInsertQuery, [
               newCoach.id,
               seat.seat_number,
@@ -162,6 +183,89 @@ class Train {
     const query = `DELETE FROM ${this.TABLE} WHERE id = $1 RETURNING *`;
     const result = await queryDB(query, [trainId]);
     return result.rows[0];
+  }
+
+  // User
+  static async searchTrains(from, to, coachClass, date) {
+    let query = `
+      SELECT DISTINCT t.id, t.name, t.code, s.departure_date
+      FROM trains t
+      JOIN schedules s ON s.train_id = t.id
+      JOIN schedule_stops ss_from ON ss_from.schedule_id = s.id
+      JOIN schedule_stops ss_to ON ss_to.schedule_id = s.id
+      WHERE ss_from.station_id = $1
+        AND ss_to.station_id = $2
+        AND s.departure_date = $3
+        AND ss_from.stop_number < ss_to.stop_number
+    `;
+
+    const params = [from, to, date];
+
+    if (coachClass) {
+      query += `
+        AND EXISTS (
+          SELECT 1 FROM coaches c
+          WHERE c.train_id = t.id
+            AND c.coach_type_id = $4
+        )
+      `;
+      params.push(coachClass);
+    }
+
+    const { rows } = await queryDB(query, params);
+    return rows;
+  }
+
+  static async getSchedule(trainId) {
+    const query = `
+      SELECT 
+        st.name AS station_name,
+        ss.stop_number,
+        ss.arrival_time,
+        ss.departure_time
+      FROM schedule_stops ss
+      JOIN schedules sc ON ss.schedule_id = sc.id
+      JOIN stations st ON ss.station_id = st.id
+      WHERE sc.train_id = $1
+      ORDER BY ss.stop_number;
+    `;
+
+    const { rows } = await queryDB(query, [trainId]);
+    return rows;
+  }
+
+  static async getAvailability(trainId, date) {
+    const query = `
+      SELECT 
+        c.id AS coach_id,
+        ct.name AS coach_type,
+        COUNT(s.id) AS total_seats,
+        COUNT(bs.id) FILTER (
+          WHERE b.schedule_id IN (
+            SELECT id FROM schedules 
+            WHERE train_id = c.train_id 
+              AND departure_date = $2
+          )
+        ) AS booked_seats,
+        COUNT(s.id) - COUNT(bs.id) FILTER (
+          WHERE b.schedule_id IN (
+            SELECT id FROM schedules 
+            WHERE train_id = c.train_id 
+              AND departure_date = $2
+          )
+        ) AS available_seats
+      FROM coaches c
+      JOIN coach_types ct ON ct.id = c.coach_type_id
+      JOIN seats s ON s.coach_id = c.id
+      LEFT JOIN booked_seats bs ON bs.seat_id = s.id
+      LEFT JOIN bookings b ON b.id = bs.booking_id
+      WHERE c.train_id = $1
+      GROUP BY c.id, ct.name
+      ORDER BY ct.name;
+    `;
+
+    const { rows } = await queryDB(query, [trainId, date]);
+    return rows;
   }
 }
 

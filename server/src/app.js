@@ -10,6 +10,9 @@ import {
   auditLogRoutes,
   coachTypeRoutes,
   seatTypeRoutes,
+  profileRoutes,
+  bookingRoutes,
+  trainRoutesUser,
 } from "./routes/index.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authenticate from "./middleware/authenticate.js";
@@ -51,6 +54,15 @@ export default function createApp(config) {
   api.use("/admin/coach-types", authenticate("admin"), coachTypeRoutes);
   api.use("/admin/schedules", authenticate("admin"), scheduleRoutes);
   api.use("/admin/seat-types", authenticate("admin"), seatTypeRoutes);
+
+  api.use("/profile", authenticate("customer"), profileRoutes);
+  api.use("/bookings", authenticate("customer"), bookingRoutes);
+  api.use("/trains", authenticate("customer"), trainRoutesUser);
+
+  
+  api.get("/", (req, res) => {
+    res.send("This is the Railway Reservation System API");
+  });
 
   app.use("/api/v1", api);
 
