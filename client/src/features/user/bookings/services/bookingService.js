@@ -1,24 +1,23 @@
-// bookingApi.js
-import { useApi } from "../../../../services/useApi";
+// src/features/bookings/services/bookingService.js
+import axiosClient from "../../../../services/config/axiosClient";
+import { useAuthStore } from "../../../../store/useAuthStore";
+import { useApiWithFallback } from "../../../../services/useApiWithFallback";
 
-// --- Demo/mock booking data ---
+// --- Demo / fallback bookings ---
 const demoBookings = [
   {
-    bookingId: "B1001",
+    bookingId: "DEMO1",
     pnr: "PNR1A2B3C",
     train: { name: "Express A", code: "12345" },
     source: "Station X",
     destination: "Station Y",
     departureDate: "2025-10-25",
-    passengers: [
-      { name: "John Doe", age: 30, seat: "S1-25" },
-      { name: "Jane Doe", age: 28, seat: "S1-26" },
-    ],
-    totalAmount: 1500.0,
+    passengers: [{ name: "John Doe" }],
+    totalAmount: 500.0,
     status: "CONFIRMED",
   },
   {
-    bookingId: "B1002",
+    bookingId: "DEMO2",
     pnr: "PNR4D5E6F",
     train: { name: "Express B", code: "67890" },
     source: "Station P",
@@ -30,60 +29,46 @@ const demoBookings = [
   },
 ];
 
-// --- API functions wrapped in useApi ---
+const createAuthHeaders = (token) =>
+  token ? { Authorization: `Bearer ${token}` } : {};
 
-// Get all bookings by user ID
-export const useGetBookingsByUserId = (userId) =>
-  useApi({
+// --- Hook: Get all bookings by userId ---
+export const useGetBookingsByUserId = (userId) => {
+  const token = useAuthStore((state) => state.token);
+
+  return useApiWithFallback({
+    fallbackKey: `bookingsByUser_${userId || "fallback"}`,
     endpoint: async () => {
-      const res = await fetch(`/api/users/${userId}/bookings`);
-      if (!res.ok) throw new Error(`Failed to fetch bookings (${res.status})`);
-      return res.json();
+      // Short-circuit to demo data if userId missing
+      if (!userId) return demoBookings;
+
+      const res = await axiosClient.get(`/users/${userId}/bookings`, {
+        headers: createAuthHeaders(token),
+      });
+      return res.data;
     },
     fallbackData: demoBookings,
   });
+};
 
-// Get booking by booking ID
-export const useGetBookingById = (bookingId) =>
-  useApi({
+// --- Hook: Get single booking by bookingId ---
+export const useGetBookingById = (bookingId) => {
+  const token = useAuthStore((state) => state.token);
+
+  const fallbackBooking =
+    bookingId && demoBookings.find((b) => b.bookingId === bookingId);
+
+  return useApiWithFallback({
+    fallbackKey: `bookingById_${bookingId || "fallback"}`,
     endpoint: async () => {
-      const res = await fetch(`/api/bookings/${bookingId}`);
-      if (!res.ok) throw new Error(`Failed to fetch booking (${res.status})`);
-      return res.json();
-    },
-    fallbackData: demoBookings.find((b) => b.bookingId === bookingId) || null,
-  });
+      // Short-circuit to demo data if bookingId missing
+      if (!bookingId || fallbackBooking) return fallbackBooking || null;
 
-// Create a new booking
-export const useCreateBooking = () =>
-  useApi({
-    endpoint: async (bookingData) => {
-      const res = await fetch(`/api/bookings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingData),
+      const res = await axiosClient.get(`/bookings/${bookingId}`, {
+        headers: createAuthHeaders(token),
       });
-      if (!res.ok) throw new Error(`Failed to create booking (${res.status})`);
-      return res.json();
+      return res.data;
     },
-    fallbackData: null,
-    onError: (err) =>
-      console.warn("Create booking failed, using demo fallback", err),
+    fallbackData: fallbackBooking || null,
   });
-
-// Update a booking
-export const useUpdateBooking = (bookingId) =>
-  useApi({
-    endpoint: async (updateData) => {
-      const res = await fetch(`/api/bookings/${bookingId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      });
-      if (!res.ok) throw new Error(`Failed to update booking (${res.status})`);
-      return res.json();
-    },
-    fallbackData: demoBookings.find((b) => b.bookingId === bookingId) || null,
-    onError: (err) =>
-      console.warn("Update booking failed, using demo fallback", err),
-  });
+};
