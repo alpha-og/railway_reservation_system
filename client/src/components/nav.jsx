@@ -14,7 +14,6 @@ const userNavItems = [
   { name: "Search Trains", to: "/trains" },
   { name: "My Bookings", to: "/bookings" },
   { name: "Contact Us", to: "/contact" },
-  { name: "Profile", to: "/profile" },
 ];
 
 const adminNavItems = [

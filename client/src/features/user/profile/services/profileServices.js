@@ -1,35 +1,58 @@
-// Mock user database
-let mockUser = {
+// src/features/user/profile/services/profileServices.js
+import axiosClient from "../../../../services/config/axiosClient.js";
+import { useAuthStore } from "../../../../store/useAuthStore.js";
+import { useApiWithFallback } from "../../../../services/useApiWithFallback.js";
+import { useUserId } from "../../../../hooks/useUserId.js";
+
+// --- Demo / fallback profile ---
+const demoProfile = {
+  id: "user_002",
   name: "Jil Varghese Palliyan",
-  email: "jil@example.com",
+  email: "j@e.com",
   role: "Passenger",
-  password: "123456", // stored in mock DB
+  roleId: 2,
 };
 
-// Get user info
-export async function getUser() {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve({ ...mockUser }), 300); // simulate network delay
+// Helper: attach token header
+const createAuthHeaders = (token) =>
+  token ? { Authorization: `Bearer ${token}` } : {};
+
+// --- Hook: Get logged-in user profile ---
+export const useGetProfile = () => {
+  const token = useAuthStore((state) => state.token);
+  const userId = useUserId();
+
+  return useApiWithFallback({
+    fallbackKey: `profileByUser_${userId || "fallback"}`,
+    endpoint: async () => {
+      // Return demo profile if no userId
+      if (!userId) return { ...demoProfile, isFallback: true };
+
+      const res = await axiosClient.get(`/users/${userId}`, {
+        headers: createAuthHeaders(token),
+      });
+
+      return { ...res.data, isFallback: false };
+    },
+    fallbackData: { ...demoProfile, isFallback: true },
   });
-}
+};
 
-// Update user info
-export async function updateUser(data) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (data.password && data.password !== data.confirmPassword) {
-        reject(new Error("Passwords do not match"));
-        return;
-      }
+// --- Hook: Update logged-in user profile ---
+export const useUpdateProfile = () => {
+  const token = useAuthStore((state) => state.token);
+  const userId = useUserId();
 
-      mockUser = {
-        ...mockUser,
-        name: data.name,
-        email: data.email,
-        password: data.password ? data.password : mockUser.password,
-      };
+  return async (data) => {
+    // If no userId, update demo profile locally
+    if (!userId) {
+      return { ...demoProfile, ...data, isFallback: true };
+    }
 
-      resolve({ ...mockUser });
-    }, 300); // simulate network delay
-  });
-}
+    const res = await axiosClient.put(`/users/${userId}`, data, {
+      headers: createAuthHeaders(token),
+    });
+
+    return { ...res.data, isFallback: false };
+  };
+};
