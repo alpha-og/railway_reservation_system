@@ -1,58 +1,109 @@
-// src/features/trains/services/trainService.js
-
-const mockTrains = [
+/*// Mock data for trains
+let mockTrains = [
   {
-    code: "12345",
-    name: "Express A",
-    source: "Station X",
-    destination: "Station Y",
-    departureTime: "08:00",
-    arrivalTime: "12:00",
-    duration: "4h",
-    classes: ["Sleeper", "AC", "General"],
+    id: 'train-1',
+    train_number: '123A',
+    name: 'Express One',
+    source: 'City A',
+    destination: 'City B',
+    departure_time: '10:00 AM',
   },
   {
-    code: "67890",
-    name: "Express B",
-    source: "Station X",
-    destination: "Station Y",
-    departureTime: "14:00",
-    arrivalTime: "18:30",
-    duration: "4h 30m",
-    classes: ["AC", "General"],
-  },
-  {
-    code: "11111",
-    name: "Express C",
-    source: "Station M",
-    destination: "Station N",
-    departureTime: "10:00",
-    arrivalTime: "15:00",
-    duration: "5h",
-    classes: ["AC", "Sleeper"],
+    id: 'train-2',
+    train_number: '456B',
+    name: 'Superfast Two',
+    source: 'City C',
+    destination: 'City D',
+    departure_time: '02:30 PM',
   },
 ];
 
-// Fetch trains by source and destination
-export const getTrainsByRoute = async (source, destination) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const filtered = mockTrains.filter(
-        (t) =>
-          t.source.toLowerCase() === source?.toLowerCase() &&
-          t.destination.toLowerCase() === destination?.toLowerCase()
-      );
-      resolve(filtered);
-    }, 200); // simulate network delay
-  });
+const trainService = {
+  // GET all trains
+  getAllTrains: async () => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ data: mockTrains });
+      }, 500);
+    });
+  },
+
+  // GET a single train by ID
+  getTrainById: async (id) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const train = mockTrains.find(t => t.id === id);
+        if (train) {
+          resolve({ data: train });
+        } else {
+          reject({ response: { status: 404, data: 'Train not found' } });
+        }
+      }, 500);
+    });
+  },
+
+  // POST (Create) a new train
+  createTrain: async (trainData) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newTrain = { ...trainData, id: `train-${Date.now()}` };
+        mockTrains.push(newTrain);
+        resolve({ data: newTrain });
+      }, 500);
+    });
+  },
+
+  // PUT (Update) an existing train
+  updateTrain: async (id, trainData) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const index = mockTrains.findIndex(t => t.id === id);
+        if (index !== -1) {
+          mockTrains[index] = { ...trainData, id };
+          resolve({ data: mockTrains[index] });
+        } else {
+          reject({ response: { status: 404, data: 'Train not found' } });
+        }
+      }, 500);
+    });
+  },
+
+  // DELETE a train
+  deleteTrain: async (id) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        mockTrains = mockTrains.filter(train => train.id !== id);
+        resolve({ status: 204 });
+      }, 500);
+    });
+  },
 };
 
-// Fetch train by train ID
-export const getTrainById = async (trainId) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const train = mockTrains.find((t) => t.code === trainId);
-      resolve(train);
-    }, 200); // simulate network delay
-  });
+export default trainService;*/
+
+let trains = [
+  { id: 1, train_number: 'TRN-101', name: 'Superfast Express', source: 'Mumbai', destination: 'Delhi', departure_time: '08:00' },
+  { id: 2, train_number: 'TRN-202', name: 'Rajdhani Express', source: 'Kolkata', destination: 'Chennai', departure_time: '12:30' },
+  { id: 3, train_number: 'TRN-303', name: 'Shatabdi Express', source: 'Delhi', destination: 'Jaipur', departure_time: '16:45' },
+];
+
+const trainService = {
+  getAllTrains: () => Promise.resolve({ data: trains }),
+  getTrainById: (id) => Promise.resolve({ data: trains.find(t => t.id === parseInt(id)) }),
+  createTrain: (newTrain) => {
+    const id = trains.length > 0 ? Math.max(...trains.map(t => t.id)) + 1 : 1;
+    const train = { id, ...newTrain };
+    trains.push(train);
+    return Promise.resolve({ data: train });
+  },
+  updateTrain: (id, updatedTrain) => {
+    trains = trains.map(t => t.id === parseInt(id) ? { ...t, ...updatedTrain } : t);
+    return Promise.resolve({ data: trains.find(t => t.id === parseInt(id)) });
+  },
+  deleteTrain: (id) => {
+    trains = trains.filter(t => t.id !== parseInt(id));
+    return Promise.resolve({ message: 'Train deleted successfully' });
+  },
 };
+
+export default trainService;
