@@ -13,6 +13,9 @@ import {
   profileRoutes,
   bookingRoutes,
   trainRoutesUser,
+  stationRoutesUser,
+  coachTypeRoutesUser,
+  roleRoutes,
 } from "./routes/index.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authenticate from "./middleware/authenticate.js";
@@ -42,6 +45,11 @@ export default function createApp(config) {
     res.send("This is the Railway Reservation System API");
   });
 
+  api.use("/trains", trainRoutesUser);
+  api.use("/roles", roleRoutes);
+  api.use("/stations", authenticate("customer"), stationRoutesUser);
+  api.use("/coach-types", authenticate("customer"), coachTypeRoutesUser);
+
   api.use("/auth", authRoutes);
   api.use("/admin/trains", authenticate("admin"), trainRoutes);
   api.use("/admin/stations", authenticate("admin"), stationRoutes);
@@ -57,9 +65,7 @@ export default function createApp(config) {
 
   api.use("/profile", authenticate("customer"), profileRoutes);
   api.use("/bookings", authenticate("customer"), bookingRoutes);
-  api.use("/trains", authenticate("customer"), trainRoutesUser);
 
-  
   api.get("/", (req, res) => {
     res.send("This is the Railway Reservation System API");
   });
