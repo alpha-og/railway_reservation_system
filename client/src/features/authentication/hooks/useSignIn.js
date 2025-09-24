@@ -10,14 +10,13 @@ export const useSignIn = () => {
   return useApi({
     endpoint: authService,
     onSuccess: (responseBody) => {
-      let token = responseBody.token;
+      let { token } = responseBody.data;
       let user = { id: null, name: null, roleId: null };
 
       try {
         const payloadBase64 = token.split(".")[1];
         const payload = JSON.parse(atob(payloadBase64));
-        user.id = payload.id;
-        user.name = payload.name;
+        user.id = payload.userId;
         user.roleId = payload.roleId; // store roleId from JWT
       } catch (err) {
         console.error("Failed to decode JWT:", err);
@@ -26,7 +25,7 @@ export const useSignIn = () => {
       setAuth(token, user);
 
       // redirect based on role
-      if (user.roleId === 1) {
+      if (user.roleId === "admin") {
         router.navigate({ to: "/admin" });
       } else {
         router.navigate({ to: "/" });
