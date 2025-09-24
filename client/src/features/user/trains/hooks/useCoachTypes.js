@@ -22,11 +22,5 @@ export const useCoachTypes = () => {
     resolve();
   }, [resolve]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      console.log(coachTypes);
-    }
-  }, [isSuccess, coachTypes]);
-
   return { coachTypes, error, isSuccess, isLoading, isError, isFallback };
 };
