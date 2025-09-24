@@ -2,9 +2,13 @@ import jwt from "jsonwebtoken";
 import config from "./config.js";
 
 export const getToken = (user) => {
-  const token = jwt.sign({ id: user.id }, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn,
-  });
+  const token = jwt.sign(
+    { userId: user.id, roleId: user.role_id },
+    config.jwt.secret,
+    {
+      expiresIn: config.jwt.expiresIn,
+    },
+  );
   return token;
 };
 
