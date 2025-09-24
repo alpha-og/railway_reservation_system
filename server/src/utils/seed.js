@@ -65,6 +65,36 @@ const seedData = {
     { name: "Tejas Express", code: "22119" },
     { name: "Vande Bharat Express", code: "22435" },
   ],
+
+  // Station distances in kilometers - realistic distances between major Indian cities
+  stationDistances: [
+    // Delhi routes
+    { from: "NDLS", to: "JP", distance: 308 },      // Delhi to Jaipur
+    { from: "NDLS", to: "LKO", distance: 556 },     // Delhi to Lucknow
+    { from: "NDLS", to: "ADI", distance: 934 },     // Delhi to Ahmedabad
+    { from: "NDLS", to: "BCT", distance: 1384 },    // Delhi to Mumbai
+    { from: "NDLS", to: "SC", distance: 1579 },     // Delhi to Hyderabad
+    { from: "NDLS", to: "MAS", distance: 2180 },    // Delhi to Chennai
+    { from: "NDLS", to: "SBC", distance: 2444 },    // Delhi to Bangalore
+    { from: "NDLS", to: "HWH", distance: 1441 },    // Delhi to Kolkata
+    
+    // Mumbai routes
+    { from: "BCT", to: "PUNE", distance: 192 },     // Mumbai to Pune
+    { from: "BCT", to: "ADI", distance: 545 },      // Mumbai to Ahmedabad
+    { from: "BCT", to: "SC", distance: 713 },       // Mumbai to Hyderabad
+    { from: "BCT", to: "SBC", distance: 1279 },     // Mumbai to Bangalore
+    { from: "BCT", to: "MAS", distance: 1279 },     // Mumbai to Chennai
+    { from: "BCT", to: "HWH", distance: 1968 },     // Mumbai to Kolkata
+    
+    // Other major routes
+    { from: "JP", to: "ADI", distance: 626 },       // Jaipur to Ahmedabad
+    { from: "PUNE", to: "SBC", distance: 840 },     // Pune to Bangalore
+    { from: "SC", to: "SBC", distance: 612 },       // Hyderabad to Bangalore
+    { from: "SC", to: "MAS", distance: 625 },       // Hyderabad to Chennai
+    { from: "SBC", to: "MAS", distance: 362 },      // Bangalore to Chennai
+    { from: "HWH", to: "MAS", distance: 1663 },     // Kolkata to Chennai
+    { from: "LKO", to: "HWH", distance: 585 },      // Lucknow to Kolkata
+  ],
 };
 
 const seedTable = async (tableName, data, options = {}) => {
@@ -239,6 +269,48 @@ const seedUsers = async () => {
     {
       name: "Jane Smith",
       email: "jane.smith@example.com",
+      password_hash:
+        "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
+      role_id: customerRole.id,
+    },
+    {
+      name: "Raj Patel",
+      email: "raj.patel@example.com",
+      password_hash:
+        "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
+      role_id: customerRole.id,
+    },
+    {
+      name: "Priya Sharma",
+      email: "priya.sharma@example.com",
+      password_hash:
+        "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
+      role_id: customerRole.id,
+    },
+    {
+      name: "Amit Kumar",
+      email: "amit.kumar@example.com",
+      password_hash:
+        "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
+      role_id: customerRole.id,
+    },
+    {
+      name: "Sneha Gupta",
+      email: "sneha.gupta@example.com",
+      password_hash:
+        "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
+      role_id: customerRole.id,
+    },
+    {
+      name: "Vikram Singh",
+      email: "vikram.singh@example.com",
+      password_hash:
+        "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
+      role_id: customerRole.id,
+    },
+    {
+      name: "Anita Desai",
+      email: "anita.desai@example.com",
       password_hash:
         "$2b$10$anVmjcJPR9v.jMwJRUvbx.KxGbfpC5XJuVCezCvc0a006249AlxN6", // password: password
       role_id: customerRole.id,
@@ -484,10 +556,1057 @@ const seedScheduleStops = async () => {
   }
 };
 
+const seedStationDistances = async () => {
+  console.log("Seeding station_distances...");
+
+  const stationsResult = await queryDB("SELECT id, code FROM stations");
+  if (stationsResult.rows.length === 0) {
+    console.log("  - Skipping station_distances (no stations found)");
+    return;
+  }
+
+  for (const distanceData of seedData.stationDistances) {
+    const fromStation = stationsResult.rows.find(s => s.code === distanceData.from);
+    const toStation = stationsResult.rows.find(s => s.code === distanceData.to);
+
+    if (!fromStation || !toStation) {
+      console.log(`  - Stations ${distanceData.from} or ${distanceData.to} not found, skipping`);
+      continue;
+    }
+
+    // Check if distance already exists (in either direction)
+    const existsQuery = `
+      SELECT id FROM station_distances 
+      WHERE (from_station_id = $1 AND to_station_id = $2) 
+         OR (from_station_id = $2 AND to_station_id = $1)
+    `;
+    const existsResult = await queryDB(existsQuery, [fromStation.id, toStation.id]);
+
+    if (existsResult.rows.length > 0) {
+      console.log(`  - Distance between ${distanceData.from} and ${distanceData.to} already exists`);
+      continue;
+    }
+
+    const query = `
+      INSERT INTO station_distances (from_station_id, to_station_id, distance, created_at, updated_at)
+      VALUES ($1, $2, $3, NOW(), NOW())
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [fromStation.id, toStation.id, distanceData.distance]);
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Inserted distance ${distanceData.from} -> ${distanceData.to}: ${distanceData.distance}km`);
+      }
+    } catch (error) {
+      console.error(`  ✗ Error inserting distance ${distanceData.from} -> ${distanceData.to}:`, error.message);
+    }
+  }
+};
+
+const seedCoaches = async () => {
+  console.log("Seeding coaches...");
+
+  const trainsResult = await queryDB("SELECT id, code FROM trains");
+  const coachTypesResult = await queryDB("SELECT id, name FROM coach_types");
+
+  if (trainsResult.rows.length === 0 || coachTypesResult.rows.length === 0) {
+    console.log("  - Skipping coaches (missing trains or coach types)");
+    return;
+  }
+
+  // Define coach compositions for different train types
+  const coachCompositions = {
+    "12301": [ // Rajdhani Express - Premium long-distance
+      { type: "AC 1 Tier", count: 2, prefix: "H" },
+      { type: "AC 2 Tier", count: 4, prefix: "A" },
+      { type: "AC 3 Tier", count: 6, prefix: "B" },
+    ],
+    "12002": [ // Shatabdi Express - Day train
+      { type: "AC Chair Car", count: 8, prefix: "CC" },
+      { type: "AC 1 Tier", count: 1, prefix: "EC" }, // Executive Chair
+    ],
+    "12259": [ // Duronto Express - Non-stop premium
+      { type: "AC 2 Tier", count: 3, prefix: "A" },
+      { type: "AC 3 Tier", count: 8, prefix: "B" },
+      { type: "Sleeper Class", count: 4, prefix: "S" },
+    ],
+    "12215": [ // Garib Rath - Economy premium
+      { type: "AC 3 Tier", count: 12, prefix: "B" },
+    ],
+    "12023": [ // Jan Shatabdi - Semi-premium day train
+      { type: "AC Chair Car", count: 6, prefix: "CC" },
+      { type: "AC 2 Tier", count: 2, prefix: "A" },
+    ],
+  };
+
+  for (const train of trainsResult.rows.slice(0, 5)) { // First 5 trains
+    const composition = coachCompositions[train.code];
+    if (!composition) continue;
+
+    for (const coachSpec of composition) {
+      const coachType = coachTypesResult.rows.find(ct => ct.name === coachSpec.type);
+      if (!coachType) continue;
+
+      for (let i = 1; i <= coachSpec.count; i++) {
+        const coachCode = `${coachSpec.prefix}${i}`;
+
+        // Check if coach already exists
+        const existsQuery = `SELECT id FROM coaches WHERE train_id = $1 AND code = $2`;
+        const existsResult = await queryDB(existsQuery, [train.id, coachCode]);
+
+        if (existsResult.rows.length > 0) {
+          console.log(`  - Coach ${coachCode} already exists for train ${train.code}`);
+          continue;
+        }
+
+        const query = `
+          INSERT INTO coaches (train_id, code, coach_type_id, created_at, updated_at)
+          VALUES ($1, $2, $3, NOW(), NOW())
+          RETURNING id;
+        `;
+
+        try {
+          const result = await queryDB(query, [train.id, coachCode, coachType.id]);
+          if (result.rows.length > 0) {
+            console.log(`  ✓ Inserted coach ${coachCode} for train ${train.code}`);
+          }
+        } catch (error) {
+          console.error(`  ✗ Error inserting coach ${coachCode}:`, error.message);
+        }
+      }
+    }
+  }
+};
+
+const seedSeats = async () => {
+  console.log("Seeding seats...");
+
+  const coachesResult = await queryDB(`
+    SELECT c.id, c.code, ct.name as coach_type_name 
+    FROM coaches c 
+    JOIN coach_types ct ON c.coach_type_id = ct.id
+  `);
+  const seatTypesResult = await queryDB("SELECT id, name FROM seat_types");
+
+  if (coachesResult.rows.length === 0 || seatTypesResult.rows.length === 0) {
+    console.log("  - Skipping seats (missing coaches or seat types)");
+    return;
+  }
+
+  // Define seat configurations for different coach types
+  const seatConfigurations = {
+    "AC 1 Tier": {
+      total: 18,
+      types: [
+        { name: "Lower Berth", count: 6 },
+        { name: "Upper Berth", count: 6 },
+        { name: "Side Lower", count: 3 },
+        { name: "Side Upper", count: 3 }
+      ]
+    },
+    "AC 2 Tier": {
+      total: 46,
+      types: [
+        { name: "Lower Berth", count: 16 },
+        { name: "Upper Berth", count: 16 },
+        { name: "Side Lower", count: 7 },
+        { name: "Side Upper", count: 7 }
+      ]
+    },
+    "AC 3 Tier": {
+      total: 64,
+      types: [
+        { name: "Lower Berth", count: 18 },
+        { name: "Middle Berth", count: 18 },
+        { name: "Upper Berth", count: 18 },
+        { name: "Side Lower", count: 5 },
+        { name: "Side Upper", count: 5 }
+      ]
+    },
+    "Sleeper Class": {
+      total: 72,
+      types: [
+        { name: "Lower Berth", count: 24 },
+        { name: "Middle Berth", count: 24 },
+        { name: "Upper Berth", count: 24 }
+      ]
+    },
+    "AC Chair Car": {
+      total: 78,
+      types: [
+        { name: "Chair", count: 78 }
+      ]
+    },
+    "General": {
+      total: 108,
+      types: [
+        { name: "Chair", count: 108 }
+      ]
+    }
+  };
+
+  for (const coach of coachesResult.rows) {
+    const config = seatConfigurations[coach.coach_type_name];
+    if (!config) continue;
+
+    let seatNumber = 1;
+    for (const seatTypeConfig of config.types) {
+      const seatType = seatTypesResult.rows.find(st => st.name === seatTypeConfig.name);
+      if (!seatType) continue;
+
+      for (let i = 0; i < seatTypeConfig.count; i++) {
+        // Check if seat already exists
+        const existsQuery = `SELECT id FROM seats WHERE coach_id = $1 AND seat_number = $2`;
+        const existsResult = await queryDB(existsQuery, [coach.id, seatNumber]);
+
+        if (existsResult.rows.length > 0) {
+          seatNumber++;
+          continue;
+        }
+
+        const query = `
+          INSERT INTO seats (coach_id, seat_number, seat_type_id, created_at, updated_at)
+          VALUES ($1, $2, $3, NOW(), NOW())
+          RETURNING id;
+        `;
+
+        try {
+          const result = await queryDB(query, [coach.id, seatNumber, seatType.id]);
+          if (result.rows.length > 0) {
+            console.log(`  ✓ Inserted seat ${seatNumber} in coach ${coach.code}`);
+          }
+        } catch (error) {
+          console.error(`  ✗ Error inserting seat ${seatNumber}:`, error.message);
+        }
+
+        seatNumber++;
+      }
+    }
+  }
+};
+
+const seedPassengers = async () => {
+  console.log("Seeding passengers...");
+
+  const customersResult = await queryDB(`
+    SELECT u.id FROM users u 
+    JOIN roles r ON u.role_id = r.id 
+    WHERE r.name = 'customer'
+  `);
+
+  if (customersResult.rows.length === 0) {
+    console.log("  - Skipping passengers (no customer users found)");
+    return;
+  }
+
+  const samplePassengers = [
+    // For John Doe user
+    [
+      { name: "John Doe", email: "john.doe@example.com", age: 35 },
+      { name: "Jane Doe", email: "jane.doe@example.com", age: 32 },
+      { name: "Emily Doe", email: "emily.doe@example.com", age: 8 },
+    ],
+    // For Jane Smith user
+    [
+      { name: "Jane Smith", email: "jane.smith@example.com", age: 28 },
+      { name: "Robert Smith", email: "robert.smith@example.com", age: 30 },
+    ],
+    // For Raj Patel user
+    [
+      { name: "Raj Patel", email: "raj.patel@example.com", age: 42 },
+      { name: "Meera Patel", email: "meera.patel@example.com", age: 38 },
+      { name: "Arjun Patel", email: "arjun.patel@example.com", age: 15 },
+      { name: "Kavya Patel", email: "kavya.patel@example.com", age: 12 },
+    ],
+    // For Priya Sharma user
+    [
+      { name: "Priya Sharma", email: "priya.sharma@example.com", age: 26 },
+    ],
+    // For Amit Kumar user
+    [
+      { name: "Amit Kumar", email: "amit.kumar@example.com", age: 33 },
+      { name: "Sunita Kumar", email: "sunita.kumar@example.com", age: 29 },
+      { name: "Dev Kumar", email: "dev.kumar@example.com", age: 5 },
+    ],
+    // For Sneha Gupta user
+    [
+      { name: "Sneha Gupta", email: "sneha.gupta@example.com", age: 31 },
+      { name: "Rohit Gupta", email: "rohit.gupta@example.com", age: 34 },
+    ],
+    // For Vikram Singh user
+    [
+      { name: "Vikram Singh", email: "vikram.singh@example.com", age: 45 },
+      { name: "Deepika Singh", email: "deepika.singh@example.com", age: 41 },
+      { name: "Karan Singh", email: "karan.singh@example.com", age: 18 },
+    ],
+    // For Anita Desai user
+    [
+      { name: "Anita Desai", email: "anita.desai@example.com", age: 29 },
+    ]
+  ];
+
+  for (let userIndex = 0; userIndex < Math.min(customersResult.rows.length, samplePassengers.length); userIndex++) {
+    const user = customersResult.rows[userIndex];
+    const passengers = samplePassengers[userIndex];
+
+    for (const passengerData of passengers) {
+      // Check if passenger already exists
+      const existsQuery = `SELECT id FROM passengers WHERE user_id = $1 AND email = $2`;
+      const existsResult = await queryDB(existsQuery, [user.id, passengerData.email]);
+
+      if (existsResult.rows.length > 0) {
+        console.log(`  - Passenger ${passengerData.email} already exists`);
+        continue;
+      }
+
+      const query = `
+        INSERT INTO passengers (user_id, name, email, age, created_at)
+        VALUES ($1, $2, $3, $4, NOW())
+        RETURNING id;
+      `;
+
+      try {
+        const result = await queryDB(query, [user.id, passengerData.name, passengerData.email, passengerData.age]);
+        if (result.rows.length > 0) {
+          console.log(`  ✓ Inserted passenger ${passengerData.name}`);
+        }
+      } catch (error) {
+        console.error(`  ✗ Error inserting passenger ${passengerData.name}:`, error.message);
+      }
+    }
+  }
+};
+
+const seedBookings = async () => {
+  console.log("Seeding sample bookings...");
+
+  const customersResult = await queryDB(`
+    SELECT u.id FROM users u 
+    JOIN roles r ON u.role_id = r.id 
+    WHERE r.name = 'customer'
+  `);
+  const schedulesResult = await queryDB("SELECT id, train_id FROM schedules LIMIT 3");
+  const stationsResult = await queryDB("SELECT id, code FROM stations");
+  const bookingStatusesResult = await queryDB("SELECT id, name FROM booking_statuses");
+
+  if (customersResult.rows.length === 0 || schedulesResult.rows.length === 0) {
+    console.log("  - Skipping bookings (missing customers or schedules)");
+    return;
+  }
+
+  const confirmedStatus = bookingStatusesResult.rows.find(s => s.name === 'Confirmed');
+  const waitingStatus = bookingStatusesResult.rows.find(s => s.name === 'Waiting');
+
+  const sampleBookings = [
+    {
+      userId: customersResult.rows[0]?.id,
+      scheduleId: schedulesResult.rows[0]?.id,
+      fromStation: "NDLS", // Delhi
+      toStation: "BCT",   // Mumbai
+      statusId: confirmedStatus?.id,
+      totalAmount: 2500.00
+    },
+    {
+      userId: customersResult.rows[1]?.id,
+      scheduleId: schedulesResult.rows[1]?.id,
+      fromStation: "NDLS", // Delhi
+      toStation: "JP",    // Jaipur
+      statusId: waitingStatus?.id,
+      totalAmount: 1200.00
+    },
+    {
+      userId: customersResult.rows[0]?.id,
+      scheduleId: schedulesResult.rows[2]?.id,
+      fromStation: "BCT", // Mumbai
+      toStation: "PUNE", // Pune
+      statusId: confirmedStatus?.id,
+      totalAmount: 800.00
+    }
+  ];
+
+  for (const bookingData of sampleBookings) {
+    if (!bookingData.userId || !bookingData.scheduleId || !bookingData.statusId) continue;
+
+    const fromStation = stationsResult.rows.find(s => s.code === bookingData.fromStation);
+    const toStation = stationsResult.rows.find(s => s.code === bookingData.toStation);
+
+    if (!fromStation || !toStation) continue;
+
+    // Check if similar booking already exists
+    const existsQuery = `
+      SELECT id FROM bookings 
+      WHERE user_id = $1 AND schedule_id = $2 AND from_station_id = $3 AND to_station_id = $4
+    `;
+    const existsResult = await queryDB(existsQuery, [
+      bookingData.userId, bookingData.scheduleId, fromStation.id, toStation.id
+    ]);
+
+    if (existsResult.rows.length > 0) {
+      console.log(`  - Similar booking already exists`);
+      continue;
+    }
+
+    const pnr = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const query = `
+      INSERT INTO bookings (user_id, schedule_id, from_station_id, to_station_id, status_id, total_amount, pnr, booking_date)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        bookingData.userId,
+        bookingData.scheduleId,
+        fromStation.id,
+        toStation.id,
+        bookingData.statusId,
+        bookingData.totalAmount,
+        pnr
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Inserted booking ${pnr} from ${bookingData.fromStation} to ${bookingData.toStation}`);
+        
+        // Create corresponding payment for confirmed bookings
+        if (bookingData.statusId === confirmedStatus?.id) {
+          const completedPaymentStatus = await queryDB("SELECT id FROM payment_statuses WHERE name = 'Completed' LIMIT 1");
+          if (completedPaymentStatus.rows.length > 0) {
+            await queryDB(
+              `INSERT INTO payments (booking_id, amount, status_id, payment_date, created_at) 
+               VALUES ($1, $2, $3, CURRENT_DATE, NOW())`,
+              [result.rows[0].id, bookingData.totalAmount, completedPaymentStatus.rows[0].id]
+            );
+            console.log(`  ✓ Created payment for booking ${pnr}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`  ✗ Error inserting booking:`, error.message);
+    }
+  }
+};
+
+// Enhanced comprehensive bookings with more realistic data
+const seedComprehensiveBookings = async () => {
+  console.log("Seeding comprehensive bookings for demo...");
+
+  const customersResult = await queryDB(`
+    SELECT u.id, u.name FROM users u 
+    JOIN roles r ON u.role_id = r.id 
+    WHERE r.name = 'customer'
+  `);
+  const schedulesResult = await queryDB("SELECT id, train_id, departure_date FROM schedules");
+  const stationsResult = await queryDB("SELECT id, code FROM stations");
+  const bookingStatusesResult = await queryDB("SELECT id, name FROM booking_statuses");
+
+  if (customersResult.rows.length === 0 || schedulesResult.rows.length === 0) {
+    console.log("  - Skipping comprehensive bookings (missing customers or schedules)");
+    return;
+  }
+
+  const confirmedStatus = bookingStatusesResult.rows.find(s => s.name === 'Confirmed');
+  const waitingStatus = bookingStatusesResult.rows.find(s => s.name === 'Waiting');
+  const racStatus = bookingStatusesResult.rows.find(s => s.name === 'RAC');
+  const cancelledStatus = bookingStatusesResult.rows.find(s => s.name === 'Cancelled');
+
+  // Generate realistic booking scenarios across different dates
+  const comprehensiveBookings = [
+    // Family trips
+    {
+      userId: customersResult.rows[2]?.id, // Raj Patel (family of 4)
+      scheduleId: schedulesResult.rows[0]?.id,
+      fromStation: "NDLS", toStation: "BCT",
+      statusId: confirmedStatus?.id,
+      totalAmount: 8500.00,
+      passengerCount: 4
+    },
+    {
+      userId: customersResult.rows[4]?.id, // Amit Kumar (family of 3)
+      scheduleId: schedulesResult.rows[1]?.id,
+      fromStation: "NDLS", toStation: "JP",
+      statusId: confirmedStatus?.id,
+      totalAmount: 3600.00,
+      passengerCount: 3
+    },
+    // Business trips (single passenger)
+    {
+      userId: customersResult.rows[3]?.id, // Priya Sharma
+      scheduleId: schedulesResult.rows[2]?.id,
+      fromStation: "BCT", toStation: "PUNE",
+      statusId: confirmedStatus?.id,
+      totalAmount: 1200.00,
+      passengerCount: 1
+    },
+    {
+      userId: customersResult.rows[7]?.id, // Anita Desai
+      scheduleId: schedulesResult.rows[3]?.id,
+      fromStation: "NDLS", toStation: "MAS",
+      statusId: waitingStatus?.id,
+      totalAmount: 4500.00,
+      passengerCount: 1
+    },
+    // Couple trips
+    {
+      userId: customersResult.rows[1]?.id, // Jane Smith
+      scheduleId: schedulesResult.rows[4]?.id,
+      fromStation: "NDLS", toStation: "LKO",
+      statusId: confirmedStatus?.id,
+      totalAmount: 2400.00,
+      passengerCount: 2
+    },
+    {
+      userId: customersResult.rows[5]?.id, // Sneha Gupta
+      scheduleId: schedulesResult.rows[0]?.id,
+      fromStation: "JP", toStation: "ADI",
+      statusId: racStatus?.id,
+      totalAmount: 3200.00,
+      passengerCount: 2
+    },
+    // Cancelled booking scenarios
+    {
+      userId: customersResult.rows[6]?.id, // Vikram Singh
+      scheduleId: schedulesResult.rows[1]?.id,
+      fromStation: "NDLS", toStation: "JP",
+      statusId: cancelledStatus?.id,
+      totalAmount: 5400.00,
+      passengerCount: 3
+    },
+    // Waiting list scenarios
+    {
+      userId: customersResult.rows[0]?.id, // John Doe
+      scheduleId: schedulesResult.rows[2]?.id,
+      fromStation: "BCT", toStation: "SC",
+      statusId: waitingStatus?.id,
+      totalAmount: 6800.00,
+      passengerCount: 3
+    }
+  ];
+
+  const createdBookings = [];
+
+  for (const bookingData of comprehensiveBookings) {
+    if (!bookingData.userId || !bookingData.scheduleId || !bookingData.statusId) continue;
+
+    const fromStation = stationsResult.rows.find(s => s.code === bookingData.fromStation);
+    const toStation = stationsResult.rows.find(s => s.code === bookingData.toStation);
+
+    if (!fromStation || !toStation) continue;
+
+    // Check if similar booking already exists
+    const existsQuery = `
+      SELECT id FROM bookings 
+      WHERE user_id = $1 AND schedule_id = $2 AND from_station_id = $3 AND to_station_id = $4
+    `;
+    const existsResult = await queryDB(existsQuery, [
+      bookingData.userId, bookingData.scheduleId, fromStation.id, toStation.id
+    ]);
+
+    if (existsResult.rows.length > 0) {
+      console.log(`  - Similar booking already exists`);
+      createdBookings.push({ id: existsResult.rows[0].id, ...bookingData });
+      continue;
+    }
+
+    const pnr = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const query = `
+      INSERT INTO bookings (user_id, schedule_id, from_station_id, to_station_id, status_id, total_amount, pnr, booking_date)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW() - INTERVAL '${Math.floor(Math.random() * 30)} days')
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        bookingData.userId,
+        bookingData.scheduleId,
+        fromStation.id,
+        toStation.id,
+        bookingData.statusId,
+        bookingData.totalAmount,
+        pnr
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Inserted booking ${pnr} from ${bookingData.fromStation} to ${bookingData.toStation}`);
+        createdBookings.push({ id: result.rows[0].id, ...bookingData });
+      }
+    } catch (error) {
+      console.error(`  ✗ Error inserting booking:`, error.message);
+    }
+  }
+
+  return createdBookings;
+};
+
+const seedBookedPassengers = async () => {
+  console.log("Seeding booked passengers...");
+
+  const bookingsResult = await queryDB(`
+    SELECT b.id as booking_id, b.user_id, bs.name as status 
+    FROM bookings b 
+    JOIN booking_statuses bs ON b.status_id = bs.id
+  `);
+  
+  const passengersResult = await queryDB("SELECT id, user_id, name, email, age FROM passengers");
+
+  if (bookingsResult.rows.length === 0 || passengersResult.rows.length === 0) {
+    console.log("  - Skipping booked passengers (missing bookings or passengers)");
+    return;
+  }
+
+  const genders = ['Male', 'Female', 'Other'];
+  const createdBookedPassengers = [];
+
+  for (const booking of bookingsResult.rows) {
+    // Get passengers for this user
+    const userPassengers = passengersResult.rows.filter(p => p.user_id === booking.user_id);
+    
+    if (userPassengers.length === 0) continue;
+
+    // Create booked passenger entries for each passenger in the booking
+    for (let i = 0; i < Math.min(userPassengers.length, 4); i++) {
+      const passenger = userPassengers[i];
+      
+      // Check if booked passenger already exists
+      const existsQuery = `SELECT id FROM booked_passengers WHERE booking_id = $1 AND passenger_id = $2`;
+      const existsResult = await queryDB(existsQuery, [booking.booking_id, passenger.id]);
+
+      if (existsResult.rows.length > 0) {
+        createdBookedPassengers.push({ id: existsResult.rows[0].id, booking_id: booking.booking_id, passenger_id: passenger.id });
+        continue;
+      }
+
+      const gender = passenger.name.includes('Jane') || passenger.name.includes('Emily') || 
+                    passenger.name.includes('Priya') || passenger.name.includes('Sneha') ||
+                    passenger.name.includes('Anita') || passenger.name.includes('Meera') ||
+                    passenger.name.includes('Kavya') || passenger.name.includes('Sunita') ||
+                    passenger.name.includes('Deepika') ? 'Female' : 'Male';
+
+      const query = `
+        INSERT INTO booked_passengers (booking_id, passenger_id, name, gender, age)
+        VALUES ($1, $2, $3, $4, $5)
+        RETURNING id;
+      `;
+
+      try {
+        const result = await queryDB(query, [
+          booking.booking_id,
+          passenger.id,
+          passenger.name,
+          gender,
+          passenger.age
+        ]);
+
+        if (result.rows.length > 0) {
+          console.log(`  ✓ Linked passenger ${passenger.name} to booking`);
+          createdBookedPassengers.push({ 
+            id: result.rows[0].id, 
+            booking_id: booking.booking_id, 
+            passenger_id: passenger.id 
+          });
+        }
+      } catch (error) {
+        console.error(`  ✗ Error linking passenger ${passenger.name}:`, error.message);
+      }
+    }
+  }
+
+  return createdBookedPassengers;
+};
+
+const seedBookedSeats = async () => {
+  console.log("Seeding booked seats...");
+
+  const bookedPassengersResult = await queryDB(`
+    SELECT bp.id as booked_passenger_id, bp.booking_id,
+           b.schedule_id, bs.name as booking_status
+    FROM booked_passengers bp
+    JOIN bookings b ON bp.booking_id = b.id
+    JOIN booking_statuses bs ON b.status_id = bs.id
+  `);
+
+  const seatsResult = await queryDB(`
+    SELECT s.id, s.seat_number, s.coach_id,
+           c.code as coach_code, c.train_id,
+           sch.id as schedule_id
+    FROM seats s
+    JOIN coaches c ON s.coach_id = c.id
+    JOIN schedules sch ON c.train_id = sch.train_id
+    ORDER BY s.coach_id, s.seat_number
+  `);
+
+  if (bookedPassengersResult.rows.length === 0 || seatsResult.rows.length === 0) {
+    console.log("  - Skipping booked seats (missing booked passengers or seats)");
+    return;
+  }
+
+  const usedSeats = new Set();
+
+  for (const bookedPassenger of bookedPassengersResult.rows) {
+    // Only assign seats to confirmed and RAC bookings
+    if (!['Confirmed', 'RAC'].includes(bookedPassenger.booking_status)) continue;
+
+    // Find available seats for this schedule
+    const availableSeats = seatsResult.rows.filter(s => 
+      s.schedule_id === bookedPassenger.schedule_id && 
+      !usedSeats.has(`${s.id}-${bookedPassenger.schedule_id}`)
+    );
+
+    if (availableSeats.length === 0) continue;
+
+    // Pick a random available seat
+    const randomSeat = availableSeats[Math.floor(Math.random() * availableSeats.length)];
+    const seatKey = `${randomSeat.id}-${bookedPassenger.schedule_id}`;
+
+    // Check if seat assignment already exists
+    const existsQuery = `SELECT id FROM booked_seats WHERE booking_id = $1 AND booked_passenger_id = $2`;
+    const existsResult = await queryDB(existsQuery, [
+      bookedPassenger.booking_id, 
+      bookedPassenger.booked_passenger_id
+    ]);
+
+    if (existsResult.rows.length > 0) {
+      continue;
+    }
+
+    const query = `
+      INSERT INTO booked_seats (booking_id, booked_passenger_id, seat_id, created_at, updated_at)
+      VALUES ($1, $2, $3, NOW(), NOW())
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        bookedPassenger.booking_id,
+        bookedPassenger.booked_passenger_id,
+        randomSeat.id
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Assigned seat ${randomSeat.seat_number} in coach ${randomSeat.coach_code}`);
+        usedSeats.add(seatKey);
+      }
+    } catch (error) {
+      console.error(`  ✗ Error assigning seat:`, error.message);
+    }
+  }
+};
+
+const seedPayments = async () => {
+  console.log("Seeding payments...");
+
+  const bookingsResult = await queryDB(`
+    SELECT b.id, b.total_amount, bs.name as status, b.booking_date
+    FROM bookings b
+    JOIN booking_statuses bs ON b.status_id = bs.id
+  `);
+
+  const paymentStatusesResult = await queryDB("SELECT id, name FROM payment_statuses");
+
+  if (bookingsResult.rows.length === 0 || paymentStatusesResult.rows.length === 0) {
+    console.log("  - Skipping payments (missing bookings or payment statuses)");
+    return;
+  }
+
+  const completedStatus = paymentStatusesResult.rows.find(s => s.name === 'Completed');
+  const pendingStatus = paymentStatusesResult.rows.find(s => s.name === 'Pending');
+  const failedStatus = paymentStatusesResult.rows.find(s => s.name === 'Failed');
+  const refundedStatus = paymentStatusesResult.rows.find(s => s.name === 'Refunded');
+
+  for (const booking of bookingsResult.rows) {
+    // Check if payment already exists
+    const existsQuery = `SELECT id FROM payments WHERE booking_id = $1`;
+    const existsResult = await queryDB(existsQuery, [booking.id]);
+
+    if (existsResult.rows.length > 0) {
+      continue;
+    }
+
+    let paymentStatusId;
+    let paymentDate;
+
+    // Assign payment status based on booking status
+    switch (booking.status) {
+      case 'Confirmed':
+      case 'RAC':
+        paymentStatusId = completedStatus?.id;
+        paymentDate = new Date(booking.booking_date);
+        paymentDate.setMinutes(paymentDate.getMinutes() + Math.floor(Math.random() * 30));
+        break;
+      case 'Cancelled':
+        // Some cancelled bookings have refunded payments
+        paymentStatusId = Math.random() > 0.5 ? refundedStatus?.id : completedStatus?.id;
+        paymentDate = new Date(booking.booking_date);
+        paymentDate.setHours(paymentDate.getHours() + Math.floor(Math.random() * 48));
+        break;
+      case 'Waiting':
+        // Waiting bookings might have pending or completed payments
+        paymentStatusId = Math.random() > 0.3 ? completedStatus?.id : pendingStatus?.id;
+        paymentDate = new Date(booking.booking_date);
+        paymentDate.setMinutes(paymentDate.getMinutes() + Math.floor(Math.random() * 60));
+        break;
+      default:
+        paymentStatusId = pendingStatus?.id;
+        paymentDate = new Date();
+    }
+
+    if (!paymentStatusId) continue;
+
+    const query = `
+      INSERT INTO payments (booking_id, amount, status_id, payment_date, created_at)
+      VALUES ($1, $2, $3, $4::date, NOW())
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        booking.id,
+        booking.total_amount,
+        paymentStatusId,
+        paymentDate.toISOString().split('T')[0] // Convert to YYYY-MM-DD format for date type
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Created payment for booking (${booking.status})`);
+      }
+    } catch (error) {
+      console.error(`  ✗ Error creating payment:`, error.message);
+    }
+  }
+};
+
+const seedRefunds = async () => {
+  console.log("Seeding refunds...");
+
+  const cancelledPaymentsResult = await queryDB(`
+    SELECT p.id as payment_id, p.booking_id, p.amount
+    FROM payments p
+    JOIN bookings b ON p.booking_id = b.id
+    JOIN booking_statuses bs ON b.status_id = bs.id
+    JOIN payment_statuses ps ON p.status_id = ps.id
+    WHERE bs.name = 'Cancelled' AND ps.name IN ('Completed', 'Refunded')
+  `);
+
+  const refundStatusesResult = await queryDB("SELECT id, name FROM refund_statuses");
+
+  if (cancelledPaymentsResult.rows.length === 0 || refundStatusesResult.rows.length === 0) {
+    console.log("  - Skipping refunds (no cancelled payments or refund statuses)");
+    return;
+  }
+
+  const requestedStatus = refundStatusesResult.rows.find(s => s.name === 'Requested');
+  const processingStatus = refundStatusesResult.rows.find(s => s.name === 'Processing');
+  const completedStatus = refundStatusesResult.rows.find(s => s.name === 'Completed');
+  const rejectedStatus = refundStatusesResult.rows.find(s => s.name === 'Rejected');
+
+  for (const payment of cancelledPaymentsResult.rows) {
+    // Check if refund already exists
+    const existsQuery = `SELECT id FROM refunds WHERE payment_id = $1`;
+    const existsResult = await queryDB(existsQuery, [payment.payment_id]);
+
+    if (existsResult.rows.length > 0) {
+      continue;
+    }
+
+    // Random refund status distribution
+    const rand = Math.random();
+    let refundStatusId, refundAmount;
+    
+    if (rand < 0.6) {
+      refundStatusId = completedStatus?.id;
+      refundAmount = payment.amount * 0.85; // 15% cancellation fee
+    } else if (rand < 0.8) {
+      refundStatusId = processingStatus?.id;
+      refundAmount = payment.amount * 0.85;
+    } else if (rand < 0.9) {
+      refundStatusId = requestedStatus?.id;
+      refundAmount = payment.amount * 0.85;
+    } else {
+      refundStatusId = rejectedStatus?.id;
+      refundAmount = 0;
+    }
+
+    if (!refundStatusId) continue;
+
+    const refundDate = new Date();
+    refundDate.setDate(refundDate.getDate() - Math.floor(Math.random() * 15));
+
+    const query = `
+      INSERT INTO refunds (payment_id, amount, status_id, refund_date, created_at)
+      VALUES ($1, $2, $3, $4::date, NOW())
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        payment.payment_id,
+        refundAmount,
+        refundStatusId,
+        refundDate.toISOString().split('T')[0] // Convert to YYYY-MM-DD format for date type
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Created refund for payment (Amount: ${refundAmount})`);
+      }
+    } catch (error) {
+      console.error(`  ✗ Error creating refund:`, error.message);
+    }
+  }
+};
+
+const seedAuditLogs = async () => {
+  console.log("Seeding audit logs...");
+
+  const usersResult = await queryDB("SELECT id, name, email FROM users");
+  const bookingsResult = await queryDB("SELECT id, pnr FROM bookings LIMIT 10");
+
+  if (usersResult.rows.length === 0) {
+    console.log("  - Skipping audit logs (no users found)");
+    return;
+  }
+
+  const auditEvents = [
+    // User authentication events
+    ...usersResult.rows.flatMap(user => [
+        {
+          user_id: user.id,
+          action: 'LOGIN',
+          timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user_id: user.id,
+          action: 'LOGOUT',
+          timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+        }
+    ]),
+    // Booking events
+    ...bookingsResult.rows.flatMap(booking => [
+        {
+          user_id: usersResult.rows[Math.floor(Math.random() * usersResult.rows.length)].id,
+          action: 'BOOKING_CREATED',
+          timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
+        },
+        {
+          user_id: usersResult.rows[Math.floor(Math.random() * usersResult.rows.length)].id,
+          action: 'BOOKING_UPDATED',
+          timestamp: new Date(Date.now() - Math.random() * 25 * 24 * 60 * 60 * 1000)
+        }
+    ]),
+    // System events
+    {
+      user_id: usersResult.rows.find(u => u.email === 'admin@railway.com')?.id,
+      action: 'SYSTEM_BACKUP',
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000)
+    }
+  ];
+
+  for (const event of auditEvents) {
+    if (!event.user_id) continue;
+
+    const query = `
+      INSERT INTO audit_logs (user_id, action, timestamp)
+      VALUES ($1, $2, $3::timestamp)
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        event.user_id,
+        event.action,
+        event.timestamp.toISOString()
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Created audit log: ${event.action}`);
+      }
+    } catch (error) {
+      console.error(`  ✗ Error creating audit log:`, error.message);
+    }
+  }
+};
+
+const seedExtendedSchedules = async () => {
+  console.log("Seeding extended schedules for next 30 days...");
+
+  const trainsResult = await queryDB("SELECT id, name, code FROM trains");
+  
+  if (trainsResult.rows.length === 0) {
+    console.log("  - Skipping extended schedules (no trains found)");
+    return;
+  }
+
+  const today = new Date();
+  const extendedSchedules = [];
+
+  // Generate schedules for next 30 days
+  for (let dayOffset = 1; dayOffset <= 30; dayOffset++) {
+    const scheduleDate = new Date(today);
+    scheduleDate.setDate(today.getDate() + dayOffset);
+    
+    // Each train runs every 2-3 days with some variation
+    for (let trainIndex = 0; trainIndex < trainsResult.rows.length; trainIndex++) {
+      const train = trainsResult.rows[trainIndex];
+      
+      // Different trains have different frequency patterns
+      const shouldRun = (dayOffset + trainIndex) % (2 + trainIndex % 2) === 0;
+      
+      if (shouldRun) {
+        const baseTimes = [
+          "05:30:00", "06:00:00", "14:45:00", "16:55:00", "18:30:00", 
+          "20:15:00", "22:30:00", "23:45:00"
+        ];
+        
+        const departureTime = baseTimes[trainIndex % baseTimes.length];
+        
+        extendedSchedules.push({
+          train_id: train.id,
+          departure_date: scheduleDate.toISOString().split('T')[0],
+          departure_time: departureTime
+        });
+      }
+    }
+  }
+
+  for (const schedule of extendedSchedules) {
+    // Check if schedule already exists
+    const existsQuery = `SELECT id FROM schedules WHERE train_id = $1 AND departure_date = $2 AND departure_time = $3`;
+    const existsResult = await queryDB(existsQuery, [
+      schedule.train_id,
+      schedule.departure_date,
+      schedule.departure_time
+    ]);
+
+    if (existsResult.rows.length > 0) {
+      continue;
+    }
+
+    const query = `
+      INSERT INTO schedules (train_id, departure_date, departure_time, created_at, updated_at)
+      VALUES ($1, $2, $3, NOW(), NOW())
+      RETURNING id;
+    `;
+
+    try {
+      const result = await queryDB(query, [
+        schedule.train_id,
+        schedule.departure_date,
+        schedule.departure_time
+      ]);
+
+      if (result.rows.length > 0) {
+        console.log(`  ✓ Added schedule for ${schedule.departure_date}`);
+      }
+    } catch (error) {
+      console.error(`  ✗ Error adding schedule:`, error.message);
+    }
+  }
+};
+
 export const seedDatabase = async () => {
   try {
     console.log("🌱 Starting database seeding...\n");
 
+    // Seed foundational data
     await seedTable("roles", seedData.roles);
     await seedTable("coach_types", seedData.coachTypes);
     await seedTable("seat_types", seedData.seatTypes, { hasTimestamps: false });
@@ -497,12 +1616,59 @@ export const seedDatabase = async () => {
     await seedTable("stations", seedData.stations, { checkColumn: "code" });
     await seedTable("trains", seedData.trains, { checkColumn: "code" });
 
+    // Seed station distances
+    await seedStationDistances();
+
+    // Seed fare rates and users
     await seedFareRates();
     await seedUsers();
+
+    // Seed schedules and schedule stops
     await seedSchedules();
     await seedScheduleStops();
 
+    // Seed coaches and seats
+    await seedCoaches();
+    await seedSeats();
+
+    // Seed passengers and sample bookings
+    await seedPassengers();
+    await seedBookings();
+
+    // Seed comprehensive demo data
+    console.log("\n🎯 Seeding comprehensive demo data...");
+    await seedExtendedSchedules();
+    await seedComprehensiveBookings();
+    await seedBookedPassengers();
+    await seedBookedSeats();
+    await seedPayments();
+    await seedRefunds();
+    await seedAuditLogs();
+
     console.log("\n✅ Database seeding completed successfully!");
+    console.log("\n📊 Summary of seeded data:");
+    console.log("   • User roles (admin, customer)");
+    console.log("   • Coach types and seat types");
+    console.log("   • 10 major railway stations across India");
+    console.log("   • 8 different trains with various classes");
+    console.log("   • Station distances for fare calculation");
+    console.log("   • 5 train schedules with realistic routes + 30 days extended");
+    console.log("   • Coaches and seats for first 5 trains");
+    console.log("   • 8+ demo users with varied profiles");
+    console.log("   • Passengers linked to all customers");
+    console.log("   • Comprehensive bookings (confirmed, waiting, cancelled, RAC)");
+    console.log("   • Complete passenger-seat assignments");
+    console.log("   • Payment records for all booking scenarios");
+    console.log("   • Refund workflows for cancelled bookings");
+    console.log("   • Audit logs for admin tracking");
+    console.log("\n🔐 Login credentials:");
+    console.log("   Admin: admin@railway.com / admin123");
+    console.log("   Customer: john.doe@example.com / password");
+    console.log("   Customer: jane.smith@example.com / password");
+    console.log("   Customer: raj.patel@example.com / password");
+    console.log("   Customer: priya.sharma@example.com / password");
+    console.log("   Customer: amit.kumar@example.com / password");
+    console.log("   (+ 3 more customers with same password)");
   } catch (error) {
     console.error("\n❌ Error during database seeding:", error);
     throw error;
