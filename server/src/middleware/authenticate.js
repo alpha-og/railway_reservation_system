@@ -28,7 +28,7 @@ const authenticate =
     }
 
     // extract user id from token
-    const { id: userId } = verifiedToken;
+    const { userId } = verifiedToken;
 
     // retrieve user's role
     const query =
