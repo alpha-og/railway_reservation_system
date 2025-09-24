@@ -2,6 +2,8 @@ import React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../store/useAuthStore";
 import Branding from "./branding.jsx";
+import { useRole } from "../hooks/useRole.js";
+import { useProfile } from "../hooks/useProfile.js";
 
 const publicNavItems = [
   { name: "Home", to: "/" },
@@ -24,12 +26,15 @@ const adminNavItems = [
 ];
 
 export default function Navigation() {
-  const { token, user, clearAuth } = useAuthStore();
+  const { token, roleId, clearAuth } = useAuthStore();
+  const role = useRole(roleId);
+  const { profile } = useProfile();
+  // const role = "customer";
   const navigate = useNavigate();
 
   let navItems;
   if (!token) navItems = publicNavItems;
-  else if (user?.roleId === 1) navItems = adminNavItems;
+  else if (role === "admin") navItems = adminNavItems;
   else navItems = userNavItems;
 
   const handleSignOut = () => {
@@ -43,7 +48,10 @@ export default function Navigation() {
       <ul className="flex space-x-4 items-center">
         {navItems.map((item) => (
           <li key={item.to}>
-            <Link className="btn btn-ghost hover:border hover:border-primary" to={item.to}>
+            <Link
+              className="btn btn-ghost hover:border hover:border-primary"
+              to={item.to}
+            >
               {item.name}
             </Link>
           </li>
@@ -52,20 +60,31 @@ export default function Navigation() {
 
       <ul className="flex space-x-4 items-center">
         <li className="ml-auto">
-          {token && user ? (
-            <div className="dropdown">
+          {token && profile ? (
+            <div className="dropdown dropdown-end dropdown-hover">
               <label tabIndex={0} className="btn btn-sm btn-primary m-1">
-                {user.name}
+                {profile.name}
               </label>
-              <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                <li><Link to="/profile">Profile</Link></li>
-                <li><button onClick={handleSignOut}>Sign Out</button></li>
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52"
+              >
+                <li>
+                  <Link to="/profile">Profile</Link>
+                </li>
+                <li>
+                  <button onClick={handleSignOut}>Sign Out</button>
+                </li>
               </ul>
             </div>
           ) : (
             <>
-              <Link to="/signin" className="btn btn-sm btn-outline mr-2">Sign In</Link>
-              <Link to="/signup" className="btn btn-sm btn-primary">Sign Up</Link>
+              <Link to="/signin" className="btn btn-sm btn-outline mr-2">
+                Sign In
+              </Link>
+              <Link to="/signup" className="btn btn-sm btn-primary">
+                Sign Up
+              </Link>
             </>
           )}
         </li>
