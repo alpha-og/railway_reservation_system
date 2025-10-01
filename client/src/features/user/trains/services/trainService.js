@@ -1,58 +1,17 @@
-// src/features/trains/services/trainService.js
+import client from "../../../../services/config/axiosClient.js";
 
-const mockTrains = [
-  {
-    code: "12345",
-    name: "Express A",
-    source: "Station X",
-    destination: "Station Y",
-    departureTime: "08:00",
-    arrivalTime: "12:00",
-    duration: "4h",
-    classes: ["Sleeper", "AC", "General"],
-  },
-  {
-    code: "67890",
-    name: "Express B",
-    source: "Station X",
-    destination: "Station Y",
-    departureTime: "14:00",
-    arrivalTime: "18:30",
-    duration: "4h 30m",
-    classes: ["AC", "General"],
-  },
-  {
-    code: "11111",
-    name: "Express C",
-    source: "Station M",
-    destination: "Station N",
-    departureTime: "10:00",
-    arrivalTime: "15:00",
-    duration: "5h",
-    classes: ["AC", "Sleeper"],
-  },
-];
+async function searchTrains(from, to, coachClass, date) {
+  const params = { from, to, date };
+  if (coachClass) params.class = coachClass;
 
-// Fetch trains by source and destination
-export const getTrainsByRoute = async (source, destination) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const filtered = mockTrains.filter(
-        (t) =>
-          t.source.toLowerCase() === source?.toLowerCase() &&
-          t.destination.toLowerCase() === destination?.toLowerCase()
-      );
-      resolve(filtered);
-    }, 200); // simulate network delay
-  });
-};
+  return (await client.get("/trains/search", { params })).data;
+}
 
-// Fetch train by train ID
-export const getTrainById = async (trainId) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const train = mockTrains.find((t) => t.code === trainId);
-      resolve(train);
-    }, 200); // simulate network delay
-  });
+async function getTrainOverview(trainId) {
+  return (await client.get(`/trains/${trainId}`)).data;
+}
+
+export default {
+  searchTrains,
+  getTrainOverview,
 };

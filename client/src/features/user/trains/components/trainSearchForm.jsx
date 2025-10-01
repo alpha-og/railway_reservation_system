@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "@tanstack/react-router";
 import { useStations } from "../hooks/useStations";
 import { useCoachTypes } from "../hooks/useCoachTypes";
+import { useTrainFilters } from "../hooks/useTrainFilters";
 
 const searchSchema = z.object({
   from: z.string().min(1, "From is required"),
@@ -17,16 +18,21 @@ export default function TrainSearchForm() {
 
   const { stations, isLoading: stationsLoading } = useStations();
   const { coachTypes, isLoading: coachTypesLoading } = useCoachTypes();
+  const { filters, updateFilters } = useTrainFilters();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(searchSchema) });
+  } = useForm({
+    resolver: zodResolver(searchSchema),
+    defaultValues: filters,
+  });
 
   const onSubmit = (data) => {
+    updateFilters(data);
     router.navigate({
-      to: `/trains/search`,
+      to: `/trains/`,
       search: {
         from: data.from,
         to: data.to,
@@ -37,13 +43,16 @@ export default function TrainSearchForm() {
   };
 
   return (
-    <div className="card w-full max-w-md shadow-2xl bg-base-100">
-      <div className="card-body">
+    <div className="card w-full h-full max-w-md flex-1 shadow-2xl bg-base-100">
+      <div className="card-body flex flex-col items-center justify-evenly">
         <h2 className="text-3xl font-bold text-center mb-6">Search Train</h2>
 
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="w-full flex flex-col justify-evenly space-y-4"
+          onSubmit={handleSubmit(onSubmit)}
+        >
           {/* From */}
-          <div>
+          <div className="space-y-2">
             <label className="label">
               <span className="label-text">From</span>
             </label>
@@ -54,7 +63,7 @@ export default function TrainSearchForm() {
             >
               <option value="">Select departure station</option>
               {stations?.map((station) => (
-                <option key={station.id} value={station.name}>
+                <option key={station.id} value={station.id}>
                   {station.name}
                 </option>
               ))}
@@ -65,7 +74,7 @@ export default function TrainSearchForm() {
           </div>
 
           {/* To */}
-          <div>
+          <div className="space-y-2">
             <label className="label">
               <span className="label-text">To</span>
             </label>
@@ -76,7 +85,7 @@ export default function TrainSearchForm() {
             >
               <option value="">Select destination station</option>
               {stations?.map((station) => (
-                <option key={station.id} value={station.name}>
+                <option key={station.id} value={station.id}>
                   {station.name}
                 </option>
               ))}
@@ -87,7 +96,7 @@ export default function TrainSearchForm() {
           </div>
 
           {/* Date */}
-          <div>
+          <div className="space-y-2">
             <label className="label">
               <span className="label-text">Date of Journey</span>
             </label>
@@ -102,7 +111,7 @@ export default function TrainSearchForm() {
           </div>
 
           {/* Class */}
-          <div>
+          <div className="space-y-2">
             <label className="label">
               <span className="label-text">Class (Optional)</span>
             </label>
@@ -113,7 +122,7 @@ export default function TrainSearchForm() {
             >
               <option value="">Any</option>
               {coachTypes?.map((coachType) => (
-                <option key={coachType.id} value={coachType.name}>
+                <option key={coachType.id} value={coachType.id}>
                   {coachType.name}
                 </option>
               ))}
@@ -122,8 +131,12 @@ export default function TrainSearchForm() {
 
           {/* Submit */}
           <div className="form-control mt-6">
-            <button type="submit" className="btn btn-primary w-full">
-              Search
+            <button
+              type="submit"
+              className={`btn btn-primary w-full ${stationsLoading || coachTypesLoading ? "loading" : ""}`}
+              disabled={stationsLoading || coachTypesLoading}
+            >
+              {stationsLoading || coachTypesLoading ? "Loading..." : "Search"}
             </button>
           </div>
         </form>
