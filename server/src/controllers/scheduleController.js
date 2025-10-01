@@ -1,4 +1,5 @@
-import { Schedule, ScheduleStops } from "../models/index.js";
+import { Schedule, ScheduleStops, Station, Train } from "../models/index.js";
+import ScheduleStopsModel from "../models/scheduleStopsModel.js";
 import { AppError, asyncErrorHandler } from "../utils/errors.js";
 import * as z from "zod";
 
@@ -65,6 +66,49 @@ const getById = asyncErrorHandler(async (req, res, next) => {
   res.success(schedule);
 });
 
+const getByScheduleStopId = asyncErrorHandler(async (req, res, next) => {
+  const paramSchema = z.object({
+    scheduleStopId: z.uuid(),
+  });
+  const { scheduleStopId } = await paramSchema.parseAsync(req.params);
+
+  const scheduleStop = (
+    await ScheduleStopsModel.find({ id: scheduleStopId })
+  )[0];
+  if (!scheduleStop) {
+    throw new AppError(400, "Could not find schedule stop");
+  }
+
+  const schedule = (await Schedule.find({ id: scheduleStop.schedule_id }))[0];
+  let scheduleStops = await ScheduleStops.find({
+    scheduleId: schedule.id,
+  });
+  
+  // Fix the async issue - properly await all station lookups
+  scheduleStops = await Promise.all(
+    scheduleStops.map(async (scheduleStop) => {
+      const station = await Station.findById(scheduleStop.station_id);
+      scheduleStop.station_id = undefined;
+      scheduleStop.station = station;
+      return scheduleStop;
+    })
+  );
+  
+  schedule.schedule_stops = scheduleStops;
+
+  const train = (await Train.find({ id: schedule.train_id }))[0];
+  const availableSeats = await Train.getAvailability(
+    train.id,
+    schedule.departure_date,
+  );
+
+  res.success({
+    train,
+    schedule,
+    availableSeats,
+  });
+});
+
 const create = asyncErrorHandler(async (req, res, next) => {
   const { trainId, departureDate, departureTime, scheduleStops } =
     await schema.parseAsync(req.body);
@@ -122,6 +166,7 @@ const remove = asyncErrorHandler(async (req, res, next) => {
 export default {
   get,
   getById,
+  getByScheduleStopId,
   create,
   update,
   remove,

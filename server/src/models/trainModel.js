@@ -19,6 +19,56 @@ class Train {
     return result.rows[0];
   }
 
+  static async find(filter, sort) {
+    let query = `SELECT * FROM ${this.TABLE}`;
+    const values = [];
+    const conditions = [];
+
+    if (filter) {
+      if (filter.id) {
+        conditions.push(`id = $${values.length + 1}`);
+        values.push(filter.id);
+      }
+      if (filter.name) {
+        conditions.push(`name LIKE $${values.length + 1}`);
+        values.push(`%${filter.name}%`);
+      }
+      if (filter.code) {
+        conditions.push(`code = $${values.length + 1}`);
+        values.push(filter.code);
+      }
+
+      if (conditions.length > 0) {
+        query += ` WHERE ${conditions.join(" AND ")}`;
+      }
+    }
+
+    if (sort) {
+      const sortableFields = ["name", "code"];
+      const sortOrders = ["ASC", "DESC"];
+
+      if (sort.sortBy && sortableFields.includes(sort.sortBy)) {
+        const sortOrder = sortOrders.includes(sort.sortOrder)
+          ? sort.sortOrder
+          : "ASC";
+        query += ` ORDER BY ${sort.sortBy} ${sortOrder}`;
+      }
+    }
+
+    if (filter.limit) {
+      query += ` LIMIT $${values.length + 1}`;
+      values.push(filter.limit);
+    }
+
+    if (filter.offset) {
+      query += ` OFFSET $${values.length + 1}`;
+      values.push(filter.offset);
+    }
+
+    const { rows } = await queryDB(query, values);
+    return rows;
+  }
+
   static async getTrainDetails(trainId) {
     const query = `
       SELECT 
@@ -140,7 +190,9 @@ class Train {
       }
 
       if (data.coaches) {
-        await client.query("DELETE FROM coaches WHERE train_id = $1", [trainId]);
+        await client.query("DELETE FROM coaches WHERE train_id = $1", [
+          trainId,
+        ]);
 
         for (const coach of data.coaches) {
           const coachInsertQuery = `
@@ -188,7 +240,7 @@ class Train {
   // User
   static async searchTrains(from, to, coachClass, date) {
     let query = `
-      SELECT DISTINCT t.id, t.name, t.code, s.departure_date
+      SELECT DISTINCT t.id, t.name, t.code, s.departure_date, ss_from.departure_time, ss_to.arrival_time, s.id AS schedule_id, ss_to.id AS schedule_stop_id
       FROM trains t
       JOIN schedules s ON s.train_id = t.id
       JOIN schedule_stops ss_from ON ss_from.schedule_id = s.id
@@ -235,6 +287,7 @@ class Train {
   }
 
   static async getAvailability(trainId, date) {
+    console.log(trainId, date);
     const query = `
       SELECT 
         c.id AS coach_id,

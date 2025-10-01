@@ -24,15 +24,15 @@ const searchTrains = asyncErrorHandler(async (req, res) => {
 
   return res.success(
     { from, to, coachClass, date, trains },
-    { count: trains.length }
+    { count: trains.length },
   );
 });
 
 const getSchedule = asyncErrorHandler(async (req, res) => {
-  const { trainId } = scheduleSchema.parse(req.params);
-  const schedule = await Train.getSchedule(trainId);
+  const { scheduleId } = scheduleSchema.parse(req.params);
+  const schedule = await Train.getSchedule(scheduleId);
 
-  return res.success({ trainId, schedule });
+  return res.success({ schedule });
 });
 
 const getAvailability = asyncErrorHandler(async (req, res) => {
@@ -44,6 +44,5 @@ const getAvailability = asyncErrorHandler(async (req, res) => {
   const availability = await Train.getAvailability(trainId, date);
   return res.success({ trainId, date, availability });
 });
-
 
 export default { searchTrains, getSchedule, getAvailability };

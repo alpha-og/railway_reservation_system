@@ -2,7 +2,7 @@ import { queryDB } from "../utils/db.js";
 
 class ScheduleStopsModel {
   static async find(filter, sort) {
-    const query = `SELECT * FROM schedule_stops`;
+    let query = `SELECT * FROM schedule_stops`;
     const values = [];
     const conditions = [];
 
