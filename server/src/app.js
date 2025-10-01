@@ -16,6 +16,7 @@ import {
   stationRoutesUser,
   coachTypeRoutesUser,
   roleRoutes,
+  scheduleRoutesUser,
 } from "./routes/index.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authenticate from "./middleware/authenticate.js";
@@ -46,9 +47,10 @@ export default function createApp(config) {
   });
 
   api.use("/trains", trainRoutesUser);
+  api.use("/schedules", scheduleRoutesUser);
   api.use("/roles", roleRoutes);
-  api.use("/stations", authenticate("customer"), stationRoutesUser);
-  api.use("/coach-types", authenticate("customer"), coachTypeRoutesUser);
+  api.use("/stations", stationRoutesUser);
+  api.use("/coach-types", coachTypeRoutesUser);
 
   api.use("/auth", authRoutes);
   api.use("/admin/trains", authenticate("admin"), trainRoutes);
