@@ -56,14 +56,51 @@ const seedData = {
   ],
 
   trains: [
+    // Premium Express Trains
     { name: "Rajdhani Express", code: "12301" },
+    { name: "New Delhi Rajdhani", code: "12951" },
+    { name: "Mumbai Rajdhani", code: "12953" },
+    
+    // Shatabdi Express Services
     { name: "Shatabdi Express", code: "12002" },
+    { name: "New Delhi Shatabdi", code: "12017" },
+    { name: "Habibganj Shatabdi", code: "12059" },
+    
+    // Duronto Express Services
     { name: "Duronto Express", code: "12259" },
+    { name: "Sealdah Duronto", code: "12273" },
+    { name: "Mumbai Duronto", code: "12267" },
+    
+    // Garib Rath Services
     { name: "Garib Rath", code: "12215" },
+    { name: "Poorva Garib Rath", code: "12553" },
+    { name: "Sampark Garib Rath", code: "12565" },
+    
+    // Jan Shatabdi Services
     { name: "Jan Shatabdi", code: "12023" },
+    { name: "Gomti Jan Shatabdi", code: "12055" },
+    { name: "Kerala Jan Shatabdi", code: "12081" },
+    
+    // Modern Express Trains
     { name: "Humsafar Express", code: "22405" },
     { name: "Tejas Express", code: "22119" },
     { name: "Vande Bharat Express", code: "22435" },
+    { name: "Gatiman Express", code: "12049" },
+    
+    // Superfast Express
+    { name: "Chennai Mail", code: "12615" },
+    { name: "Grand Trunk Express", code: "12615" },
+    { name: "Howrah Mail", code: "12809" },
+    { name: "Karnataka Express", code: "12627" },
+    { name: "Punjab Mail", code: "12137" },
+    { name: "Konkan Kanya Express", code: "10111" },
+    
+    // Additional Express Services
+    { name: "Intercity Express", code: "12015" },
+    { name: "Double Decker Express", code: "12273" },
+    { name: "Superfast Express", code: "12649" },
+    { name: "Mail Express", code: "11077" },
+    { name: "Passenger Express", code: "56473" },
   ],
 
   // Station distances in kilometers - realistic distances between major Indian cities
@@ -351,7 +388,7 @@ const seedUsers = async () => {
 };
 
 const seedSchedules = async () => {
-  console.log("Seeding schedules...");
+  console.log("Seeding schedules for next 30 days starting from today...");
 
   const trainsResult = await queryDB("SELECT id, name, code FROM trains");
 
@@ -360,37 +397,90 @@ const seedSchedules = async () => {
     return;
   }
 
-  const schedules = [
-    {
-      train_id: trainsResult.rows[0].id, // Rajdhani Express
-      departure_date: "2025-01-15",
-      departure_time: "16:55:00",
-    },
-    {
-      train_id: trainsResult.rows[1].id, // Shatabdi Express
-      departure_date: "2025-01-15",
-      departure_time: "06:00:00",
-    },
-    {
-      train_id: trainsResult.rows[2].id, // Duronto Express
-      departure_date: "2025-01-16",
-      departure_time: "22:30:00",
-    },
-    {
-      train_id: trainsResult.rows[3].id, // Garib Rath
-      departure_date: "2025-01-16",
-      departure_time: "23:45:00",
-    },
-    {
-      train_id: trainsResult.rows[4].id, // Jan Shatabdi
-      departure_date: "2025-01-17",
-      departure_time: "05:30:00",
-    },
-  ];
+  const today = new Date();
+  const schedules = [];
+
+  // Define train frequency patterns based on service type
+  const trainFrequencyPatterns = {
+    // Daily premium services
+    "12301": { frequency: 1, baseTimes: ["16:55:00"] }, // Rajdhani Express
+    "12951": { frequency: 1, baseTimes: ["17:30:00"] }, // New Delhi Rajdhani
+    "12002": { frequency: 1, baseTimes: ["06:00:00"] }, // Shatabdi Express
+    "12017": { frequency: 1, baseTimes: ["15:30:00"] }, // New Delhi Shatabdi
+    "22435": { frequency: 1, baseTimes: ["06:00:00"] }, // Vande Bharat Express
+    "12049": { frequency: 1, baseTimes: ["08:10:00"] }, // Gatiman Express
+    "22119": { frequency: 1, baseTimes: ["15:50:00"] }, // Tejas Express
+
+    // Bi-weekly premium services (every 2 days)
+    "12953": { frequency: 2, baseTimes: ["18:15:00"] }, // Mumbai Rajdhani
+    "22405": { frequency: 2, baseTimes: ["14:25:00"] }, // Humsafar Express
+    "12059": { frequency: 2, baseTimes: ["07:15:00"] }, // Habibganj Shatabdi
+
+    // Tri-weekly services (every 3 days)
+    "12259": { frequency: 3, baseTimes: ["22:30:00"] }, // Duronto Express
+    "12273": { frequency: 3, baseTimes: ["07:40:00"] }, // Sealdah Duronto
+    "12267": { frequency: 3, baseTimes: ["22:00:00"] }, // Mumbai Duronto
+    "12215": { frequency: 3, baseTimes: ["23:45:00"] }, // Garib Rath
+    "12553": { frequency: 3, baseTimes: ["21:15:00"] }, // Poorva Garib Rath
+    "12565": { frequency: 3, baseTimes: ["19:30:00"] }, // Sampark Garib Rath
+
+    // Weekly services (every 7 days)
+    "12023": { frequency: 7, baseTimes: ["05:30:00"] }, // Jan Shatabdi
+    "12055": { frequency: 7, baseTimes: ["06:15:00"] }, // Gomti Jan Shatabdi
+    "12081": { frequency: 7, baseTimes: ["14:45:00"] }, // Kerala Jan Shatabdi
+
+    // Express services (alternate days)
+    "12615": { frequency: 2, baseTimes: ["20:30:00"] }, // Chennai Mail
+    "12809": { frequency: 2, baseTimes: ["19:45:00"] }, // Howrah Mail
+    "12627": { frequency: 2, baseTimes: ["21:50:00"] }, // Karnataka Express
+    "12137": { frequency: 2, baseTimes: ["22:15:00"] }, // Punjab Mail
+
+    // Regular services (every 3 days)
+    "10111": { frequency: 3, baseTimes: ["16:20:00"] }, // Konkan Kanya Express
+    "12015": { frequency: 3, baseTimes: ["17:20:00"] }, // Intercity Express
+    "12649": { frequency: 3, baseTimes: ["18:40:00"] }, // Superfast Express
+
+    // Local services (daily but different times)
+    "11077": { frequency: 1, baseTimes: ["06:30:00", "14:15:00", "20:45:00"] }, // Mail Express
+    "56473": { frequency: 1, baseTimes: ["05:15:00", "11:30:00", "16:05:00", "21:20:00"] }, // Passenger Express
+  };
+
+  // Generate schedules for next 30 days starting from today
+  for (let dayOffset = 0; dayOffset < 30; dayOffset++) {
+    const scheduleDate = new Date(today);
+    scheduleDate.setDate(today.getDate() + dayOffset);
+    
+    for (const train of trainsResult.rows) {
+      const pattern = trainFrequencyPatterns[train.code];
+      if (!pattern) continue;
+
+      // Check if train should run on this day based on frequency
+      const shouldRun = dayOffset % pattern.frequency === (train.code.charCodeAt(0) % pattern.frequency);
+      
+      if (shouldRun) {
+        // Multiple departure times for some trains
+        for (const departureTime of pattern.baseTimes) {
+          schedules.push({
+            train_id: train.id,
+            departure_date: scheduleDate.toISOString().split('T')[0],
+            departure_time: departureTime
+          });
+        }
+      }
+    }
+  }
+
+  console.log(`  - Generated ${schedules.length} schedules to insert`);
 
   const insertedSchedules = [];
+  let insertedCount = 0;
 
   for (const schedule of schedules) {
+    if (!schedule.train_id) {
+      console.log(`  - Train not found for schedule, skipping`);
+      continue;
+    }
+
     // Check if schedule already exists
     const existsQuery = `SELECT id FROM schedules WHERE train_id = $1 AND departure_date = $2 AND departure_time = $3`;
     const existsResult = await queryDB(existsQuery, [
@@ -400,9 +490,6 @@ const seedSchedules = async () => {
     ]);
 
     if (existsResult.rows.length > 0) {
-      console.log(
-        `  - Schedule for train already exists for ${schedule.departure_date}`,
-      );
       insertedSchedules.push(existsResult.rows[0]);
       continue;
     }
@@ -421,7 +508,10 @@ const seedSchedules = async () => {
       ]);
 
       if (result.rows.length > 0) {
-        console.log(`  ✓ Inserted schedule for ${schedule.departure_date}`);
+        insertedCount++;
+        if (insertedCount % 50 === 0) {
+          console.log(`  ✓ Inserted ${insertedCount} schedules...`);
+        }
         insertedSchedules.push(result.rows[0]);
       }
     } catch (error) {
@@ -429,13 +519,18 @@ const seedSchedules = async () => {
     }
   }
 
+  console.log(`  ✓ Successfully inserted ${insertedCount} schedules for next 30 days`);
   return insertedSchedules;
 };
 
 const seedScheduleStops = async () => {
   console.log("Seeding schedule_stops...");
 
-  const schedulesResult = await queryDB("SELECT id, train_id FROM schedules");
+  const schedulesResult = await queryDB(`
+    SELECT s.id, s.train_id, t.code, t.name 
+    FROM schedules s 
+    JOIN trains t ON s.train_id = t.id
+  `);
   const stationsResult = await queryDB("SELECT id, name, code FROM stations");
 
   if (schedulesResult.rows.length === 0 || stationsResult.rows.length === 0) {
@@ -443,63 +538,170 @@ const seedScheduleStops = async () => {
     return;
   }
 
-  // Define route stops for different trains
-  const routeDefinitions = [
-    {
-      // Rajdhani Express: New Delhi -> Mumbai Central
+  // Enhanced route definitions with multiple trains serving similar routes
+  const routeDefinitions = {
+    // Delhi to Mumbai routes
+    "12301": { // Rajdhani Express
       stations: ["NDLS", "JP", "ADI", "BCT"],
       times: [
-        { arrival: "16:55:00", departure: "16:55:00" }, // Start station
-        { arrival: "21:30:00", departure: "21:40:00" }, // Jaipur
-        { arrival: "05:15:00", departure: "05:25:00" }, // Ahmedabad
-        { arrival: "12:30:00", departure: "12:30:00" }, // End station
+        { arrival: "16:55:00", departure: "16:55:00" },
+        { arrival: "21:30:00", departure: "21:40:00" },
+        { arrival: "05:15:00", departure: "05:25:00" },
+        { arrival: "12:30:00", departure: "12:30:00" },
       ],
     },
-    {
-      // Shatabdi Express: New Delhi -> Jaipur
+    "12951": { // New Delhi Rajdhani (alternate timing)
+      stations: ["NDLS", "JP", "ADI", "BCT"],
+      times: [
+        { arrival: "17:30:00", departure: "17:30:00" },
+        { arrival: "22:15:00", departure: "22:25:00" },
+        { arrival: "05:50:00", departure: "06:00:00" },
+        { arrival: "13:15:00", departure: "13:15:00" },
+      ],
+    },
+    "12259": { // Duronto Express (Delhi to Mumbai via different route)
+      stations: ["NDLS", "ADI", "PUNE", "BCT"],
+      times: [
+        { arrival: "22:30:00", departure: "22:30:00" },
+        { arrival: "08:15:00", departure: "08:25:00" },
+        { arrival: "16:20:00", departure: "16:30:00" },
+        { arrival: "19:45:00", departure: "19:45:00" },
+      ],
+    },
+
+    // Delhi to Jaipur routes  
+    "12002": { // Shatabdi Express
       stations: ["NDLS", "JP"],
       times: [
-        { arrival: "06:00:00", departure: "06:00:00" }, // Start station
-        { arrival: "10:45:00", departure: "10:45:00" }, // End station
+        { arrival: "06:00:00", departure: "06:00:00" },
+        { arrival: "10:45:00", departure: "10:45:00" },
       ],
     },
-    {
-      // Duronto Express: Mumbai Central -> Howrah
-      stations: ["BCT", "PUNE", "SC", "HWH"],
+    "12017": { // New Delhi Shatabdi (evening service)
+      stations: ["NDLS", "JP"],
       times: [
-        { arrival: "22:30:00", departure: "22:30:00" }, // Start station
-        { arrival: "01:15:00", departure: "01:25:00" }, // Pune
-        { arrival: "14:20:00", departure: "14:30:00" }, // Secunderabad
-        { arrival: "06:45:00", departure: "06:45:00" }, // End station
+        { arrival: "15:30:00", departure: "15:30:00" },
+        { arrival: "20:15:00", departure: "20:15:00" },
       ],
     },
-    {
-      // Garib Rath: New Delhi -> Chennai Central
+    "12049": { // Gatiman Express (fastest to Jaipur)
+      stations: ["NDLS", "JP"],
+      times: [
+        { arrival: "08:10:00", departure: "08:10:00" },
+        { arrival: "12:00:00", departure: "12:00:00" },
+      ],
+    },
+
+    // Delhi to Chennai routes
+    "12215": { // Garib Rath
       stations: ["NDLS", "SC", "MAS"],
       times: [
-        { arrival: "23:45:00", departure: "23:45:00" }, // Start station
-        { arrival: "20:30:00", departure: "20:40:00" }, // Secunderabad
-        { arrival: "06:15:00", departure: "06:15:00" }, // End station
+        { arrival: "23:45:00", departure: "23:45:00" },
+        { arrival: "20:30:00", departure: "20:40:00" },
+        { arrival: "06:15:00", departure: "06:15:00" },
       ],
     },
-    {
-      // Jan Shatabdi: New Delhi -> Lucknow
+    "12615": { // Chennai Mail
+      stations: ["NDLS", "SC", "MAS"],
+      times: [
+        { arrival: "20:30:00", departure: "20:30:00" },
+        { arrival: "18:15:00", departure: "18:25:00" },
+        { arrival: "04:30:00", departure: "04:30:00" },
+      ],
+    },
+
+    // Delhi to Lucknow routes
+    "12023": { // Jan Shatabdi
       stations: ["NDLS", "LKO"],
       times: [
-        { arrival: "05:30:00", departure: "05:30:00" }, // Start station
-        { arrival: "11:45:00", departure: "11:45:00" }, // End station
+        { arrival: "05:30:00", departure: "05:30:00" },
+        { arrival: "11:45:00", departure: "11:45:00" },
       ],
     },
-  ];
+    "12055": { // Gomti Jan Shatabdi
+      stations: ["NDLS", "LKO"],
+      times: [
+        { arrival: "06:15:00", departure: "06:15:00" },
+        { arrival: "12:30:00", departure: "12:30:00" },
+      ],
+    },
 
-  for (
-    let scheduleIndex = 0;
-    scheduleIndex <
-    Math.min(schedulesResult.rows.length, routeDefinitions.length);
-    scheduleIndex++
-  ) {
-    const schedule = schedulesResult.rows[scheduleIndex];
-    const route = routeDefinitions[scheduleIndex];
+    // Mumbai to Pune routes
+    "12273": { // Double Decker Express
+      stations: ["BCT", "PUNE"],
+      times: [
+        { arrival: "07:40:00", departure: "07:40:00" },
+        { arrival: "11:15:00", departure: "11:15:00" },
+      ],
+    },
+    "12015": { // Intercity Express
+      stations: ["BCT", "PUNE"],
+      times: [
+        { arrival: "17:20:00", departure: "17:20:00" },
+        { arrival: "20:55:00", departure: "20:55:00" },
+      ],
+    },
+
+    // Mumbai to Bangalore routes
+    "12627": { // Karnataka Express
+      stations: ["BCT", "PUNE", "SC", "SBC"],
+      times: [
+        { arrival: "21:50:00", departure: "21:50:00" },
+        { arrival: "01:35:00", departure: "01:45:00" },
+        { arrival: "14:20:00", departure: "14:30:00" },
+        { arrival: "21:15:00", departure: "21:15:00" },
+      ],
+    },
+    "22405": { // Humsafar Express
+      stations: ["BCT", "PUNE", "SBC"],
+      times: [
+        { arrival: "14:25:00", departure: "14:25:00" },
+        { arrival: "18:10:00", departure: "18:20:00" },
+        { arrival: "04:45:00", departure: "04:45:00" },
+      ],
+    },
+
+    // Mumbai to Kolkata routes
+    "12267": { // Mumbai Duronto
+      stations: ["BCT", "SC", "HWH"],
+      times: [
+        { arrival: "22:00:00", departure: "22:00:00" },
+        { arrival: "16:30:00", departure: "16:40:00" },
+        { arrival: "07:20:00", departure: "07:20:00" },
+      ],
+    },
+    "12809": { // Howrah Mail
+      stations: ["BCT", "SC", "HWH"],
+      times: [
+        { arrival: "19:45:00", departure: "19:45:00" },
+        { arrival: "14:15:00", departure: "14:25:00" },
+        { arrival: "05:05:00", departure: "05:05:00" },
+      ],
+    },
+
+    // Premium modern services
+    "22435": { // Vande Bharat Express (Delhi-Jaipur)
+      stations: ["NDLS", "JP"],
+      times: [
+        { arrival: "06:00:00", departure: "06:00:00" },
+        { arrival: "09:30:00", departure: "09:30:00" },
+      ],
+    },
+    "22119": { // Tejas Express (Mumbai-Pune)
+      stations: ["BCT", "PUNE"],
+      times: [
+        { arrival: "15:50:00", departure: "15:50:00" },
+        { arrival: "19:25:00", departure: "19:25:00" },
+      ],
+    },
+  };
+
+  for (const schedule of schedulesResult.rows) {
+    const route = routeDefinitions[schedule.code];
+    if (!route) {
+      console.log(`  - No route definition found for train ${schedule.code}, skipping`);
+      continue;
+    }
 
     for (let stopIndex = 0; stopIndex < route.stations.length; stopIndex++) {
       const stationCode = route.stations[stopIndex];
@@ -543,7 +745,7 @@ const seedScheduleStops = async () => {
 
         if (result.rows.length > 0) {
           console.log(
-            `  ✓ Inserted schedule stop ${stopIndex + 1} for ${station.name}`,
+            `  ✓ Inserted schedule stop ${stopIndex + 1} for ${station.name} (${schedule.name})`,
           );
         }
       } catch (error) {
@@ -615,38 +817,167 @@ const seedCoaches = async () => {
     return;
   }
 
-  // Define coach compositions for different train types
+  // Enhanced coach compositions for different train types
   const coachCompositions = {
-    "12301": [ // Rajdhani Express - Premium long-distance
+    // Premium Rajdhani services
+    "12301": [ // Rajdhani Express
       { type: "AC 1 Tier", count: 2, prefix: "H" },
       { type: "AC 2 Tier", count: 4, prefix: "A" },
       { type: "AC 3 Tier", count: 6, prefix: "B" },
     ],
-    "12002": [ // Shatabdi Express - Day train
-      { type: "AC Chair Car", count: 8, prefix: "CC" },
-      { type: "AC 1 Tier", count: 1, prefix: "EC" }, // Executive Chair
+    "12951": [ // New Delhi Rajdhani
+      { type: "AC 1 Tier", count: 3, prefix: "H" },
+      { type: "AC 2 Tier", count: 5, prefix: "A" },
+      { type: "AC 3 Tier", count: 8, prefix: "B" },
     ],
-    "12259": [ // Duronto Express - Non-stop premium
+    "12953": [ // Mumbai Rajdhani
+      { type: "AC 1 Tier", count: 2, prefix: "H" },
+      { type: "AC 2 Tier", count: 6, prefix: "A" },
+      { type: "AC 3 Tier", count: 4, prefix: "B" },
+    ],
+
+    // Shatabdi services
+    "12002": [ // Shatabdi Express
+      { type: "AC Chair Car", count: 8, prefix: "CC" },
+      { type: "AC 1 Tier", count: 1, prefix: "EC" },
+    ],
+    "12017": [ // New Delhi Shatabdi
+      { type: "AC Chair Car", count: 10, prefix: "CC" },
+      { type: "AC 1 Tier", count: 1, prefix: "EC" },
+    ],
+    "12059": [ // Habibganj Shatabdi
+      { type: "AC Chair Car", count: 6, prefix: "CC" },
+      { type: "AC 1 Tier", count: 1, prefix: "EC" },
+    ],
+
+    // Duronto services
+    "12259": [ // Duronto Express
       { type: "AC 2 Tier", count: 3, prefix: "A" },
       { type: "AC 3 Tier", count: 8, prefix: "B" },
       { type: "Sleeper Class", count: 4, prefix: "S" },
     ],
-    "12215": [ // Garib Rath - Economy premium
+    "12273": [ // Sealdah Duronto
+      { type: "AC 2 Tier", count: 4, prefix: "A" },
+      { type: "AC 3 Tier", count: 6, prefix: "B" },
+      { type: "Sleeper Class", count: 6, prefix: "S" },
+    ],
+    "12267": [ // Mumbai Duronto
+      { type: "AC 2 Tier", count: 5, prefix: "A" },
+      { type: "AC 3 Tier", count: 7, prefix: "B" },
+      { type: "Sleeper Class", count: 3, prefix: "S" },
+    ],
+
+    // Garib Rath services
+    "12215": [ // Garib Rath
       { type: "AC 3 Tier", count: 12, prefix: "B" },
     ],
-    "12023": [ // Jan Shatabdi - Semi-premium day train
+    "12553": [ // Poorva Garib Rath
+      { type: "AC 3 Tier", count: 10, prefix: "B" },
+    ],
+    "12565": [ // Sampark Garib Rath
+      { type: "AC 3 Tier", count: 14, prefix: "B" },
+    ],
+
+    // Jan Shatabdi services
+    "12023": [ // Jan Shatabdi
       { type: "AC Chair Car", count: 6, prefix: "CC" },
       { type: "AC 2 Tier", count: 2, prefix: "A" },
     ],
+    "12055": [ // Gomti Jan Shatabdi
+      { type: "AC Chair Car", count: 8, prefix: "CC" },
+      { type: "AC 2 Tier", count: 1, prefix: "A" },
+    ],
+    "12081": [ // Kerala Jan Shatabdi
+      { type: "AC Chair Car", count: 7, prefix: "CC" },
+      { type: "AC 2 Tier", count: 2, prefix: "A" },
+    ],
+
+    // Modern premium trains
+    "22405": [ // Humsafar Express
+      { type: "AC 3 Tier", count: 16, prefix: "B" },
+    ],
+    "22119": [ // Tejas Express
+      { type: "AC Chair Car", count: 10, prefix: "CC" },
+      { type: "AC 1 Tier", count: 2, prefix: "EC" },
+    ],
+    "22435": [ // Vande Bharat Express
+      { type: "AC Chair Car", count: 14, prefix: "CC" },
+      { type: "AC 1 Tier", count: 2, prefix: "EC" },
+    ],
+    "12049": [ // Gatiman Express
+      { type: "AC Chair Car", count: 10, prefix: "CC" },
+      { type: "AC 1 Tier", count: 1, prefix: "EC" },
+    ],
+
+    // Mail and Express trains
+    "12615": [ // Chennai Mail
+      { type: "AC 2 Tier", count: 2, prefix: "A" },
+      { type: "AC 3 Tier", count: 4, prefix: "B" },
+      { type: "Sleeper Class", count: 8, prefix: "S" },
+      { type: "General", count: 4, prefix: "GS" },
+    ],
+    "12809": [ // Howrah Mail
+      { type: "AC 2 Tier", count: 3, prefix: "A" },
+      { type: "AC 3 Tier", count: 3, prefix: "B" },
+      { type: "Sleeper Class", count: 10, prefix: "S" },
+      { type: "General", count: 3, prefix: "GS" },
+    ],
+    "12627": [ // Karnataka Express
+      { type: "AC 2 Tier", count: 2, prefix: "A" },
+      { type: "AC 3 Tier", count: 5, prefix: "B" },
+      { type: "Sleeper Class", count: 6, prefix: "S" },
+      { type: "General", count: 2, prefix: "GS" },
+    ],
+    "12137": [ // Punjab Mail
+      { type: "AC 2 Tier", count: 1, prefix: "A" },
+      { type: "AC 3 Tier", count: 3, prefix: "B" },
+      { type: "Sleeper Class", count: 12, prefix: "S" },
+      { type: "General", count: 6, prefix: "GS" },
+    ],
+
+    // Express and Intercity trains
+    "10111": [ // Konkan Kanya Express
+      { type: "AC 2 Tier", count: 1, prefix: "A" },
+      { type: "AC 3 Tier", count: 3, prefix: "B" },
+      { type: "Sleeper Class", count: 8, prefix: "S" },
+      { type: "General", count: 4, prefix: "GS" },
+    ],
+    "12015": [ // Intercity Express
+      { type: "AC Chair Car", count: 4, prefix: "CC" },
+      { type: "AC 2 Tier", count: 2, prefix: "A" },
+      { type: "Sleeper Class", count: 4, prefix: "S" },
+      { type: "General", count: 3, prefix: "GS" },
+    ],
+    "12649": [ // Superfast Express
+      { type: "AC 2 Tier", count: 2, prefix: "A" },
+      { type: "AC 3 Tier", count: 4, prefix: "B" },
+      { type: "Sleeper Class", count: 8, prefix: "S" },
+      { type: "General", count: 4, prefix: "GS" },
+    ],
+    "11077": [ // Mail Express
+      { type: "AC 3 Tier", count: 2, prefix: "B" },
+      { type: "Sleeper Class", count: 10, prefix: "S" },
+      { type: "General", count: 8, prefix: "GS" },
+    ],
+    "56473": [ // Passenger Express
+      { type: "Sleeper Class", count: 6, prefix: "S" },
+      { type: "General", count: 12, prefix: "GS" },
+    ],
   };
 
-  for (const train of trainsResult.rows.slice(0, 5)) { // First 5 trains
+  for (const train of trainsResult.rows) {
     const composition = coachCompositions[train.code];
-    if (!composition) continue;
+    if (!composition) {
+      console.log(`  - No coach composition found for train ${train.code}, skipping`);
+      continue;
+    }
 
     for (const coachSpec of composition) {
       const coachType = coachTypesResult.rows.find(ct => ct.name === coachSpec.type);
-      if (!coachType) continue;
+      if (!coachType) {
+        console.log(`  - Coach type ${coachSpec.type} not found, skipping`);
+        continue;
+      }
 
       for (let i = 1; i <= coachSpec.count; i++) {
         const coachCode = `${coachSpec.prefix}${i}`;
@@ -1538,35 +1869,79 @@ const seedExtendedSchedules = async () => {
   const today = new Date();
   const extendedSchedules = [];
 
+  // Different train frequency patterns based on type
+  const trainFrequencyPatterns = {
+    // Daily premium services
+    "12301": { frequency: 1, baseTimes: ["16:55:00"] }, // Rajdhani Express
+    "12951": { frequency: 1, baseTimes: ["17:30:00"] }, // New Delhi Rajdhani
+    "12002": { frequency: 1, baseTimes: ["06:00:00"] }, // Shatabdi Express
+    "12017": { frequency: 1, baseTimes: ["15:30:00"] }, // New Delhi Shatabdi
+    "22435": { frequency: 1, baseTimes: ["06:00:00"] }, // Vande Bharat Express
+    "12049": { frequency: 1, baseTimes: ["08:10:00"] }, // Gatiman Express
+    "22119": { frequency: 1, baseTimes: ["15:50:00"] }, // Tejas Express
+
+    // Bi-weekly premium services
+    "12953": { frequency: 2, baseTimes: ["18:15:00"] }, // Mumbai Rajdhani
+    "22405": { frequency: 2, baseTimes: ["14:25:00"] }, // Humsafar Express
+    "12059": { frequency: 2, baseTimes: ["07:15:00"] }, // Habibganj Shatabdi
+
+    // Tri-weekly services
+    "12259": { frequency: 3, baseTimes: ["22:30:00"] }, // Duronto Express
+    "12273": { frequency: 3, baseTimes: ["07:40:00"] }, // Sealdah Duronto
+    "12267": { frequency: 3, baseTimes: ["22:00:00"] }, // Mumbai Duronto
+    "12215": { frequency: 3, baseTimes: ["23:45:00"] }, // Garib Rath
+    "12553": { frequency: 3, baseTimes: ["21:15:00"] }, // Poorva Garib Rath
+    "12565": { frequency: 3, baseTimes: ["19:30:00"] }, // Sampark Garib Rath
+
+    // Weekly services
+    "12023": { frequency: 7, baseTimes: ["05:30:00"] }, // Jan Shatabdi
+    "12055": { frequency: 7, baseTimes: ["06:15:00"] }, // Gomti Jan Shatabdi
+    "12081": { frequency: 7, baseTimes: ["14:45:00"] }, // Kerala Jan Shatabdi
+
+    // Express services (alternate days)
+    "12615": { frequency: 2, baseTimes: ["20:30:00"] }, // Chennai Mail
+    "12809": { frequency: 2, baseTimes: ["19:45:00"] }, // Howrah Mail
+    "12627": { frequency: 2, baseTimes: ["21:50:00"] }, // Karnataka Express
+    "12137": { frequency: 2, baseTimes: ["22:15:00"] }, // Punjab Mail
+
+    // Regular services (every 3 days)
+    "10111": { frequency: 3, baseTimes: ["16:20:00"] }, // Konkan Kanya Express
+    "12015": { frequency: 3, baseTimes: ["17:20:00"] }, // Intercity Express
+    "12649": { frequency: 3, baseTimes: ["18:40:00"] }, // Superfast Express
+
+    // Local services (daily but different times)
+    "11077": { frequency: 1, baseTimes: ["06:30:00", "14:15:00", "20:45:00"] }, // Mail Express
+    "56473": { frequency: 1, baseTimes: ["05:15:00", "11:30:00", "16:05:00", "21:20:00"] }, // Passenger Express
+  };
+
   // Generate schedules for next 30 days
   for (let dayOffset = 1; dayOffset <= 30; dayOffset++) {
     const scheduleDate = new Date(today);
     scheduleDate.setDate(today.getDate() + dayOffset);
     
-    // Each train runs every 2-3 days with some variation
-    for (let trainIndex = 0; trainIndex < trainsResult.rows.length; trainIndex++) {
-      const train = trainsResult.rows[trainIndex];
-      
-      // Different trains have different frequency patterns
-      const shouldRun = (dayOffset + trainIndex) % (2 + trainIndex % 2) === 0;
+    for (const train of trainsResult.rows) {
+      const pattern = trainFrequencyPatterns[train.code];
+      if (!pattern) continue;
+
+      // Check if train should run on this day based on frequency
+      const shouldRun = dayOffset % pattern.frequency === (train.code.charCodeAt(0) % pattern.frequency);
       
       if (shouldRun) {
-        const baseTimes = [
-          "05:30:00", "06:00:00", "14:45:00", "16:55:00", "18:30:00", 
-          "20:15:00", "22:30:00", "23:45:00"
-        ];
-        
-        const departureTime = baseTimes[trainIndex % baseTimes.length];
-        
-        extendedSchedules.push({
-          train_id: train.id,
-          departure_date: scheduleDate.toISOString().split('T')[0],
-          departure_time: departureTime
-        });
+        // Multiple departure times for some trains
+        for (const departureTime of pattern.baseTimes) {
+          extendedSchedules.push({
+            train_id: train.id,
+            departure_date: scheduleDate.toISOString().split('T')[0],
+            departure_time: departureTime
+          });
+        }
       }
     }
   }
 
+  console.log(`  - Generated ${extendedSchedules.length} schedules to insert`);
+
+  let insertedCount = 0;
   for (const schedule of extendedSchedules) {
     // Check if schedule already exists
     const existsQuery = `SELECT id FROM schedules WHERE train_id = $1 AND departure_date = $2 AND departure_time = $3`;
@@ -1594,12 +1969,17 @@ const seedExtendedSchedules = async () => {
       ]);
 
       if (result.rows.length > 0) {
-        console.log(`  ✓ Added schedule for ${schedule.departure_date}`);
+        insertedCount++;
+        if (insertedCount % 50 === 0) {
+          console.log(`  ✓ Inserted ${insertedCount} extended schedules...`);
+        }
       }
     } catch (error) {
       console.error(`  ✗ Error adding schedule:`, error.message);
     }
   }
+
+  console.log(`  ✓ Successfully inserted ${insertedCount} extended schedules`);
 };
 
 export const seedDatabase = async () => {
@@ -1637,7 +2017,6 @@ export const seedDatabase = async () => {
 
     // Seed comprehensive demo data
     console.log("\n🎯 Seeding comprehensive demo data...");
-    await seedExtendedSchedules();
     await seedComprehensiveBookings();
     await seedBookedPassengers();
     await seedBookedSeats();
@@ -1650,10 +2029,12 @@ export const seedDatabase = async () => {
     console.log("   • User roles (admin, customer)");
     console.log("   • Coach types and seat types");
     console.log("   • 10 major railway stations across India");
-    console.log("   • 8 different trains with various classes");
+    console.log("   • 30+ different trains with comprehensive route coverage");
+    console.log("   • Multiple trains serving same station pairs for realistic options");
     console.log("   • Station distances for fare calculation");
-    console.log("   • 5 train schedules with realistic routes + 30 days extended");
-    console.log("   • Coaches and seats for first 5 trains");
+    console.log("   • Comprehensive 30-day schedule coverage starting from today");
+    console.log("   • Realistic train frequency patterns (daily, bi-weekly, tri-weekly services)");
+    console.log("   • Coaches and seats for all trains with varied compositions");
     console.log("   • 8+ demo users with varied profiles");
     console.log("   • Passengers linked to all customers");
     console.log("   • Comprehensive bookings (confirmed, waiting, cancelled, RAC)");
