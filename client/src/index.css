@@ -35,3 +35,9 @@
   --depth: 0;
   --noise: 0;
 }
+
+html,
+body,
+#root {
+  height: 100%;
+}
