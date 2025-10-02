@@ -188,14 +188,14 @@ const MobileMenu = ({
 );
 export default function Navigation() {
   const { token, roleId, clearAuth } = useAuthStore();
-  const role = useRole(roleId);
+  const { role } = useRole(roleId);
   const { profile } = useProfile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const navItems = useMemo(() => {
     if (!token) return NAV_ITEMS.public;
-    if (role === "admin") return NAV_ITEMS.admin;
+    if (role?.role === "admin" || role === "admin") return NAV_ITEMS.admin;
     return NAV_ITEMS.user;
   }, [token, role]);
 
