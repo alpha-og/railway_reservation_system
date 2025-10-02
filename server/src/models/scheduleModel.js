@@ -3,7 +3,7 @@ import { AppError } from "../utils/errors.js";
 
 class ScheduleModel {
   static async find(filter, sort) {
-    let query = `SELECT schedules.*, array_agg(schedule_stops.id) AS schedule_stops FROM schedules JOIN schedule_stops ON schedules.id = schedule_stops.schedule_id`;
+    let query = `SELECT schedules.id, schedules.train_id, TO_CHAR(schedules.departure_date, 'YYYY-MM-DD') AS departure_date, schedules.departure_time, schedules.created_at, schedules.updated_at, array_agg(schedule_stops.id) AS schedule_stops FROM schedules JOIN schedule_stops ON schedules.id = schedule_stops.schedule_id`;
     const values = [];
     const conditions = [];
 

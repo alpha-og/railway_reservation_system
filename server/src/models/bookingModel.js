@@ -31,7 +31,7 @@ class Booking {
         t.code as train_code,
         fs.name as source_station,
         ts.name as destination_station,
-        s.departure_date,
+        TO_CHAR(s.departure_date, 'YYYY-MM-DD') AS departure_date,
         s.departure_time,
         ss_from.departure_time as from_departure_time,
         ss_to.arrival_time as to_arrival_time

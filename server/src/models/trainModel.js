@@ -240,7 +240,7 @@ class Train {
   // User
   static async searchTrains(from, to, coachClass, date) {
     let query = `
-      SELECT DISTINCT t.id, t.name, t.code, s.departure_date, ss_from.departure_time, ss_to.arrival_time, s.id AS schedule_id, ss_to.id AS schedule_stop_id
+      SELECT DISTINCT t.id, t.name, t.code, TO_CHAR(s.departure_date, 'YYYY-MM-DD') AS departure_date, ss_from.departure_time, ss_to.arrival_time, s.id AS schedule_id, ss_to.id AS schedule_stop_id
       FROM trains t
       JOIN schedules s ON s.train_id = t.id
       JOIN schedule_stops ss_from ON ss_from.schedule_id = s.id
