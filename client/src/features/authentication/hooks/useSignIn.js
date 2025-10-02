@@ -11,7 +11,7 @@ export const useSignIn = () => {
     endpoint: authService,
     onSuccess: (responseBody) => {
       let { token } = responseBody.data;
-      let user = { id: null, name: null, roleId: null };
+      let user = { id: null, roleId: null };
 
       try {
         const payloadBase64 = token.split(".")[1];
@@ -22,7 +22,7 @@ export const useSignIn = () => {
         console.error("Failed to decode JWT:", err);
       }
 
-      setAuth(token, user);
+      setAuth(token, user.id, user.roleId);
 
       // redirect based on role
       if (user.roleId === "admin") {

@@ -17,7 +17,6 @@ export const useStations = () => {
   return useApiWithFallback({
     fallbackKey: "stations",
     endpoint: fetchStations,
-    fallbackData: demoStations,
   });
 };
 
@@ -32,6 +31,5 @@ export const useStationById = (stationId) => {
       if (!stationId) return fallbackStation || null;
       return fetchStation(stationId);
     },
-    fallbackData: fallbackStation || null,
   });
 };
