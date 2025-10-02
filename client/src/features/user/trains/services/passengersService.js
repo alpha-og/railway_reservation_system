@@ -34,7 +34,6 @@ export const useGetSavedPassengers = () => {
 
   return useApiWithFallback({
     endpoint,
-    fallbackData: fallbackPassengers,
   });
 };
 

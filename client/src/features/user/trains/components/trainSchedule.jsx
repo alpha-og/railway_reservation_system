@@ -2,7 +2,7 @@ import { safeGet, formatTime, formatDate, calculateScheduleDates } from "../../.
 import { LoadingSkeleton } from "../../../../components/LoadingSkeleton";
 import { XCircle, MapPin, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 
-export default function TrainSchedule({ schedule, isLoading, error }) {
+export default function TrainSchedule({ schedule, isLoading, error, selectedFrom, selectedTo }) {
   if (isLoading) {
     return (
       <div className="w-full max-w-4xl mx-auto">
@@ -36,6 +36,45 @@ export default function TrainSchedule({ schedule, isLoading, error }) {
   
   // Calculate dates for all stops
   const stopDates = calculateScheduleDates(departureDate, departureTime, scheduleStops);
+
+  // Helper function to determine if a station is selected
+  const getStationStatus = (stationId) => {
+    if (stationId === selectedFrom) return 'from';
+    if (stationId === selectedTo) return 'to';
+    return null;
+  };
+
+  // Helper function to get highlighting classes
+  const getHighlightClasses = (stationStatus, isFirst, isLast) => {
+    if (stationStatus === 'from') {
+      return {
+        dot: 'bg-gradient-to-r from-emerald-400 to-cyan-400 border-white ring-4 ring-emerald-300/50 scale-125 shadow-lg shadow-emerald-300/50',
+        badge: 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white border-none font-bold',
+        card: 'bg-gradient-to-br from-emerald-50 to-cyan-50 border-emerald-300 ring-2 ring-emerald-200 shadow-lg'
+      };
+    }
+    if (stationStatus === 'to') {
+      return {
+        dot: 'bg-gradient-to-r from-purple-400 to-pink-400 border-white ring-4 ring-purple-300/50 scale-125 shadow-lg shadow-purple-300/50',
+        badge: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white border-none font-bold',
+        card: 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-300 ring-2 ring-purple-200 shadow-lg'
+      };
+    }
+    // Default classes for non-selected stations
+    return {
+      dot: isFirst
+        ? 'bg-success border-success-content'
+        : isLast
+          ? 'bg-error border-error-content'
+          : 'bg-primary border-primary-content',
+      badge: isFirst ? 'badge-success' : isLast ? 'badge-error' : 'badge-primary',
+      card: isFirst
+        ? 'bg-success/5 border-success/20'
+        : isLast
+          ? 'bg-error/5 border-error/20'
+          : 'bg-primary/5 border-primary/20'
+    };
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -77,64 +116,56 @@ export default function TrainSchedule({ schedule, isLoading, error }) {
 
                   {/* Stations */}
                   <div className="flex justify-between items-center px-8">
-                    {scheduleStops.map((stop, idx) => {
-                      const isFirst = idx === 0;
-                      const isLast = idx === scheduleStops.length - 1;
-                      const stationName = safeGet(
-                        stop,
-                        "station.name",
-                        "Unknown Station",
-                      );
-                      const arrivalTime = formatTime(
-                        safeGet(stop, "arrival_time"),
-                      );
-                      const departureTime = formatTime(
-                        safeGet(stop, "departure_time"),
-                      );
-                      
-                      // Get calculated dates for this stop
-                      const stopDateInfo = stopDates[idx] || {};
-                      const arrivalDate = stopDateInfo.arrivalDate || departureDate;
-                      const departureStopDate = stopDateInfo.departureDate || departureDate;
+                     {scheduleStops.map((stop, idx) => {
+                       const isFirst = idx === 0;
+                       const isLast = idx === scheduleStops.length - 1;
+                       const stationId = safeGet(stop, "station.id");
+                       const stationName = safeGet(
+                         stop,
+                         "station.name",
+                         "Unknown Station",
+                       );
+                       const arrivalTime = formatTime(
+                         safeGet(stop, "arrival_time"),
+                       );
+                       const departureTime = formatTime(
+                         safeGet(stop, "departure_time"),
+                       );
+                       
+                       // Get calculated dates for this stop
+                       const stopDateInfo = stopDates[idx] || {};
+                       const arrivalDate = stopDateInfo.arrivalDate || departureDate;
+                       const departureStopDate = stopDateInfo.departureDate || departureDate;
 
-                      return (
-                        <div
-                          key={idx}
-                          className="h-32 flex flex-col items-center relative z-10"
-                        >
-                          {/* Badge */}
-                          <div
-                            className={`
-                            badge badge-sm mb-3 text-xs font-medium
-                            ${
-                              isFirst
-                                ? "badge-success"
-                                : isLast
-                                  ? "badge-error"
-                                  : "badge-primary"
-                            }
-                          `}
-                          >
-                            {isFirst
-                              ? "Origin"
-                              : isLast
-                                ? "Destination"
-                                : "Stop"}
-                          </div>
+                       // Get station status and highlighting classes
+                       const stationStatus = getStationStatus(stationId);
+                       const highlightClasses = getHighlightClasses(stationStatus, isFirst, isLast);
 
-                          {/* Station Dot with Tooltip */}
-                          <div
+                       return (
+                         <div
+                           key={idx}
+                           className="h-32 flex flex-col items-center relative z-10"
+                         >
+                           {/* Badge */}
+                           <div
+                             className={`
+                             badge badge-sm mb-3 text-xs font-medium transition-all duration-200
+                             ${highlightClasses.badge}
+                           `}
+                           >
+                             {stationStatus === 'from' ? "From" :
+                              stationStatus === 'to' ? "To" :
+                              isFirst ? "Origin" :
+                              isLast ? "Destination" : "Stop"}
+                           </div>
+
+                           {/* Station Dot with Tooltip */}
+                           <div
                             className={`
-                            w-6 h-6 rounded-full border-3 shadow-lg cursor-pointer tooltip tooltip-top
-                            transition-all duration-200 hover:scale-110 relative z-10
-                            ${
-                              isFirst
-                                ? "bg-success border-success-content"
-                                : isLast
-                                  ? "bg-error border-error-content"
-                                  : "bg-primary border-primary-content"
-                            }
-                          `}
+                              w-6 h-6 rounded-full border-3 shadow-lg cursor-pointer tooltip tooltip-top
+                              transition-all duration-300 hover:scale-110 relative z-10
+                              ${highlightClasses.dot}
+                            `}
                             data-tip={
                               isFirst
                                 ? `Departure: ${formatDate(departureStopDate)} ${departureTime}`
@@ -168,91 +199,97 @@ export default function TrainSchedule({ schedule, isLoading, error }) {
                   {/* Main timeline line */}
                   <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-gradient-to-b from-success via-primary to-error rounded-full"></div>
 
-                  <div className="space-y-4">
-                    {scheduleStops.map((stop, idx) => {
-                      const isFirst = idx === 0;
-                      const isLast = idx === scheduleStops.length - 1;
-                      const stationName = safeGet(
-                        stop,
-                        "station.name",
-                        "Unknown Station",
-                      );
-                      const arrivalTime = formatTime(
-                        safeGet(stop, "arrival_time"),
-                      );
-                      const departureTime = formatTime(
-                        safeGet(stop, "departure_time"),
-                      );
-                      
-                      // Get calculated dates for this stop
-                      const stopDateInfo = stopDates[idx] || {};
-                      const arrivalDate = stopDateInfo.arrivalDate || departureDate;
-                      const departureStopDate = stopDateInfo.departureDate || departureDate;
+                   <div className="space-y-4">
+                     {scheduleStops.map((stop, idx) => {
+                       const isFirst = idx === 0;
+                       const isLast = idx === scheduleStops.length - 1;
+                       const stationId = safeGet(stop, "station.id");
+                       const stationName = safeGet(
+                         stop,
+                         "station.name",
+                         "Unknown Station",
+                       );
+                       const arrivalTime = formatTime(
+                         safeGet(stop, "arrival_time"),
+                       );
+                       const departureTime = formatTime(
+                         safeGet(stop, "departure_time"),
+                       );
+                       
+                       // Get calculated dates for this stop
+                       const stopDateInfo = stopDates[idx] || {};
+                       const arrivalDate = stopDateInfo.arrivalDate || departureDate;
+                       const departureStopDate = stopDateInfo.departureDate || departureDate;
 
-                      return (
-                        <div key={idx} className="relative">
-                          {/* Timeline node */}
-                          <div
-                            className={`
-                              absolute -left-1.5 top-2 w-3 h-3 rounded-full border-2 bg-base-100 z-10
-                              shadow-md
-                              ${
-                                isFirst
-                                  ? "border-success bg-success"
-                                  : isLast
-                                    ? "border-error bg-error"
-                                    : "border-primary bg-primary"
-                              }
-                            `}
-                          ></div>
+                       // Get station status and highlighting classes
+                       const stationStatus = getStationStatus(stationId);
+                       const highlightClasses = getHighlightClasses(stationStatus, isFirst, isLast);
 
-                          {/* Station card */}
-                          <div
-                            className={`
-                              ml-3 p-3 rounded-lg border transition-all duration-200 
-                              max-w-full overflow-hidden
-                              ${
-                                isFirst
-                                  ? "bg-success/5 border-success/20"
-                                  : isLast
-                                    ? "bg-error/5 border-error/20"
-                                    : "bg-primary/5 border-primary/20"
-                              }
-                            `}
-                          >
+                       return (
+                         <div key={idx} className="relative">
+                            {/* Timeline node */}
+                            <div
+                              className={`
+                                absolute -left-1.5 top-2 w-4 h-4 rounded-full border-2 z-10
+                                shadow-md transition-all duration-300
+                                ${stationStatus === 'from' ? 
+                                  'bg-gradient-to-r from-emerald-400 to-cyan-400 border-white ring-2 ring-emerald-300/50 scale-110 shadow-lg shadow-emerald-300/50' :
+                                  stationStatus === 'to' ?
+                                  'bg-gradient-to-r from-purple-400 to-pink-400 border-white ring-2 ring-purple-300/50 scale-110 shadow-lg shadow-purple-300/50' :
+                                  isFirst ?
+                                  'bg-success border-success-content' :
+                                  isLast ?
+                                  'bg-error border-error-content' :
+                                  'bg-primary border-primary-content'
+                                }
+                              `}
+                            ></div>
+
+                           {/* Station card */}
+                           <div
+                             className={`
+                               ml-3 p-3 rounded-lg border transition-all duration-300 
+                               max-w-full overflow-hidden
+                               ${highlightClasses.card}
+                             `}
+                           >
                             {/* Header with badge and station name */}
                             <div className="flex items-start justify-between mb-2 gap-2">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-1 mb-1">
-                                  <div
-                                    className={`
-                                      badge badge-xs font-medium text-xs flex items-center gap-1
-                                      ${
-                                        isFirst
-                                          ? "badge-success"
-                                          : isLast
-                                            ? "badge-error"
-                                            : "badge-primary"
-                                      }
-                                    `}
-                                  >
-                                    {isFirst ? (
-                                      <>
-                                        <CheckCircle className="w-3 h-3" />
-                                        Start
-                                      </>
-                                    ) : isLast ? (
-                                      <>
-                                        <CheckCircle className="w-3 h-3" />
-                                        End
-                                      </>
-                                    ) : (
-                                      <>
-                                        <MapPin className="w-3 h-3" />
-                                        Stop {idx}
-                                      </>
-                                    )}
-                                  </div>
+                                   <div
+                                     className={`
+                                       badge badge-xs font-medium text-xs flex items-center gap-1
+                                       ${highlightClasses.badge}
+                                     `}
+                                   >
+                                     {stationStatus === 'from' ? (
+                                       <>
+                                         <CheckCircle className="w-3 h-3" />
+                                         From
+                                       </>
+                                     ) : stationStatus === 'to' ? (
+                                       <>
+                                         <CheckCircle className="w-3 h-3" />
+                                         To
+                                       </>
+                                     ) : isFirst ? (
+                                       <>
+                                         <CheckCircle className="w-3 h-3" />
+                                         Start
+                                       </>
+                                     ) : isLast ? (
+                                       <>
+                                         <CheckCircle className="w-3 h-3" />
+                                         End
+                                       </>
+                                     ) : (
+                                       <>
+                                         <MapPin className="w-3 h-3" />
+                                         Stop {idx}
+                                       </>
+                                     )}
+                                   </div>
                                 </div>
                                 <h3 className="font-bold text-base leading-tight text-base-content truncate">
                                   {stationName}

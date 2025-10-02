@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useApi } from "../../../../services/useApi";
 import scheduleService from "../services/schedule.service";
 
-export const useScheduleSummary = (scheduleStopId) => {
+export const useScheduleSummary = (scheduleId) => {
   const {
     data: scheduleSummary,
     error,
@@ -12,17 +12,23 @@ export const useScheduleSummary = (scheduleStopId) => {
     isFallback,
     resolve,
   } = useApi({
-    endpoint: scheduleService.getScheduleByScheduleStopId,
+    endpoint: scheduleService.getScheduleSummaryByScheduleId,
     onSuccess: (responseBody) => {
       return responseBody.data;
     },
   });
 
   useEffect(() => {
-    if (scheduleStopId) {
-      resolve(scheduleStopId);
+    if (scheduleId) {
+      resolve(scheduleId);
     }
-  }, [scheduleStopId, resolve]);
+  }, [scheduleId, resolve]);
+
+  useEffect(() => {
+    if (scheduleSummary) {
+      console.log(scheduleSummary);
+    }
+  }, [scheduleSummary]);
 
   return {
     scheduleSummary,

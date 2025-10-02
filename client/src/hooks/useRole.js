@@ -1,8 +1,11 @@
 import roleService from "../services/role.service.js";
 import { useApi } from "../services/useApi";
 import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore.js";
 
 export const useRole = (id) => {
+  const { token } = useAuthStore();
+  
   const handleSuccess = (responseBody) => {
     return responseBody.data;
   };
@@ -17,14 +20,22 @@ export const useRole = (id) => {
   } = useApi({
     endpoint: roleService.getRole,
     onSuccess: handleSuccess,
-    fallbackData: "customer",
   });
 
   useEffect(() => {
-    if (id) {
+    if (id && token) {
       resolve(id);
     }
-  }, [id, resolve]);
+  }, [id, token, resolve]);
 
-  return { role, isSuccess, isLoading, isError, isFallback };
+  // Don't return role data if not authenticated
+  const shouldShowRole = id && token;
+
+  return { 
+    role: shouldShowRole ? role : null, 
+    isSuccess: shouldShowRole ? isSuccess : false, 
+    isLoading: shouldShowRole ? isLoading : false, 
+    isError: shouldShowRole ? isError : false, 
+    isFallback: shouldShowRole ? isFallback : false 
+  };
 };

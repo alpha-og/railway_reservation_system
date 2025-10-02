@@ -1,18 +1,48 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useSearch, useNavigate } from "@tanstack/react-router";
-import { getSavedPassengers } from "../services/passengersService";
+import { ErrorBoundary } from "../../../../components";
+import { FormField, FormInput, FormSelect, Button } from "../../../../components/ui";
+import { BookingProgress } from "./index";
+import { CheckCircle, XCircle, Trash2, Plus, ArrowLeft, ArrowRight } from "lucide-react";
+import { useSavedPassengers, usePassengerForm } from "../hooks/usePassengers";
+import { useCoachTypes, useScheduleAvailability } from "../hooks/useCoachData";
+import coachTypeService from "../services/coachType.service";
 
 export default function PassengersPage() {
   const { trainId } = useParams({ from: "/(user)/trains/$trainId/book/passengers" });
   const search = useSearch({ from: "/(user)/trains/$trainId/book/passengers" });
   const navigate = useNavigate();
 
-  const savedPassengers = getSavedPassengers();
+  // Initialize passengers from search params
+  const initialPassengers = search.passengers 
+    ? JSON.parse(search.passengers) 
+    : [];
 
-  // Restore from search params OR start fresh
-  const [passengers, setPassengers] = useState(
-    search.passengers ? JSON.parse(search.passengers) : [{ name: "", age: "", gender: "Male" }]
+  // Custom hooks for data and state management
+  const { savedPassengers, isLoading: loadingPassengers } = useSavedPassengers();
+  const { isLoading: loadingCoachTypes, getCoachPrice, getCoachTypeName, getCoachTypeOptions } = useCoachTypes();
+  const { availabilityData } = useScheduleAvailability(search.scheduleId);
+
+  // Get available coach type options for this schedule
+  const availableCoachOptions = useMemo(() => 
+    getCoachTypeOptions(availabilityData), 
+    [getCoachTypeOptions, availabilityData]
   );
+
+  // Passenger form management
+  const {
+    passengers,
+    errors,
+    isSubmitting,
+    showSuccess,
+    addPassenger,
+    removePassenger,
+    updatePassenger,
+    autofillPassenger,
+    validateForm,
+    setSubmitting,
+    setSuccess,
+  } = usePassengerForm(initialPassengers, availableCoachOptions);
 
   // Sync passengers into search params
   useEffect(() => {
@@ -25,125 +55,275 @@ export default function PassengersPage() {
     });
   }, [passengers, navigate]);
 
-  // Actions
-  const addPassenger = () => setPassengers([...passengers, { name: "", age: "", gender: "Male" }]);
-  const removePassenger = (index) =>
-    setPassengers(passengers.filter((_, i) => i !== index));
-  const updatePassenger = (index, field, value) => {
-    const updated = [...passengers];
-    updated[index][field] = value;
-    setPassengers(updated);
-  };
-  const autofillPassenger = (index, passengerId) => {
+  // Handle passenger autofill
+  const handleAutofillPassenger = (index, passengerId) => {
+    if (!savedPassengers || !Array.isArray(savedPassengers)) return;
+    
     const selected = savedPassengers.find((p) => p.id === parseInt(passengerId));
     if (selected) {
-      updatePassenger(index, "name", selected.name);
-      updatePassenger(index, "age", selected.age);
-      updatePassenger(index, "gender", selected.gender);
+      autofillPassenger(index, selected);
     }
   };
-  // ✅ Passenger Form View
-  return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold mb-6">Add Passenger Details</h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Train ID: {trainId} | Coach: {search.coachType}
-      </p>
 
-      {passengers.map((p, index) => (
-        <div key={index} className="mb-6 border p-4 rounded-lg bg-hunter-900 text-cream relative">
-          {passengers.length > 1 && (
-            <button
-              type="button"
-              className="absolute top-2 right-2 btn btn-xs btn-error"
-              onClick={() => removePassenger(index)}
-            >
-              ✖
-            </button>
+  // Handle form submission
+  const handleSubmit = () => {
+    setSubmitting(true);
+    
+    if (!validateForm()) {
+      setSubmitting(false);
+      return;
+    }
+    
+    // Show success state briefly
+    setSuccess(true);
+    
+    setTimeout(() => {
+      navigate({
+        to: "/trains/$trainId/book/payment",
+        params: { trainId },
+        search: {
+          scheduleId: search.scheduleId,
+          from: search.from,
+          to: search.to,
+          passengers: JSON.stringify(passengers),
+          bookingId: `B${Date.now()}`,
+        },
+      });
+    }, 800);
+  };
+
+  return (
+    <ErrorBoundary>
+      <div className="min-h-screen bg-base-100">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+          {/* Page Header */}
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-base-content mb-2">
+              Passenger Details
+            </h1>
+            <p className="text-sm sm:text-base text-base-content/70 max-w-2xl mx-auto px-2">
+              Please provide details for all passengers traveling on this journey.
+            </p>
+          </div>
+
+          {/* Booking Progress */}
+          <div className="mb-6 sm:mb-8">
+            <BookingProgress currentStep={2} />
+          </div>
+
+          {/* Train Info */}
+          <div className="card bg-base-200 shadow-sm mb-6 sm:mb-8">
+            <div className="card-body py-3 sm:py-4 px-3 sm:px-6">
+              <div className="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
+                <span className="badge badge-outline">Train ID: {trainId}</span>
+                <span className="badge badge-outline">Schedule: {availabilityData?.data?.schedule?.id || search.scheduleId}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Success Message */}
+          {showSuccess && (
+            <div className="alert alert-success mb-6 animate-pulse">
+              <CheckCircle className="stroke-current shrink-0 h-6 w-6" />
+              <span className="text-sm sm:text-base">Passenger details validated successfully! Redirecting to payment...</span>
+            </div>
           )}
 
-          <div className="form-control mb-3">
-            <label className="label font-semibold">Select Saved Passenger</label>
-            <select
-              className="select select-bordered w-full"
-              onChange={(e) => autofillPassenger(index, e.target.value)}
-              defaultValue=""
+          {/* General Error */}
+          {errors.general && (
+            <div className="alert alert-error mb-6">
+              <XCircle className="stroke-current shrink-0 h-6 w-6" />
+              <span className="text-sm sm:text-base">{errors.general}</span>
+            </div>
+          )}
+
+          {/* Passenger Forms */}
+          <div className="space-y-4 sm:space-y-6">
+            {passengers.map((passenger, index) => (
+              <div key={index} className="card bg-base-100 shadow-xl">
+                <div className="card-body p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 mb-4">
+                    <h3 className="card-title text-lg sm:text-xl">
+                      Passenger {index + 1}
+                    </h3>
+                    {passengers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePassenger(index)}
+                        className="btn btn-error btn-sm"
+                        disabled={isSubmitting}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="ml-2">Remove</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Saved Passenger Selection */}
+                  {((savedPassengers && savedPassengers.length > 0) || loadingPassengers) && (
+                    <FormField label="Quick Fill from Saved Passengers" className="mb-4">
+                      <FormSelect
+                        options={savedPassengers?.map(sp => ({
+                          value: sp.id,
+                          label: `${sp.name} (${sp.age} years, ${sp.gender})`
+                        })) || []}
+                        placeholder={loadingPassengers ? "Loading saved passengers..." : "-- Choose a saved passenger --"}
+                        loading={loadingPassengers}
+                        onChange={(e) => handleAutofillPassenger(index, e.target.value)}
+                        disabled={isSubmitting}
+                      />
+                    </FormField>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Name Field */}
+                    <div className="sm:col-span-2">
+                      <FormInput
+                        label="Full Name" 
+                        error={errors[index]?.name}
+                        required
+                        type="text"
+                        className="text-sm sm:text-base"
+                        value={passenger.name}
+                        onChange={(e) => updatePassenger(index, "name", e.target.value)}
+                        placeholder="Enter full name"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    {/* Age Field */}
+                    <FormInput
+                      label="Age" 
+                      error={errors[index]?.age}
+                      required
+                      type="number"
+                      className="text-sm sm:text-base"
+                      value={passenger.age}
+                      onChange={(e) => updatePassenger(index, "age", e.target.value)}
+                      placeholder="Age"
+                      min="1"
+                      max="120"
+                      disabled={isSubmitting}
+                    />
+
+                    {/* Gender Field */}
+                    <FormSelect
+                      label="Gender" 
+                      error={errors[index]?.gender}
+                      required
+                      className="text-sm sm:text-base"
+                      value={passenger.gender}
+                      onChange={(e) => updatePassenger(index, "gender", e.target.value)}
+                      disabled={isSubmitting}
+                      placeholder="Select gender"
+                      options={[
+                        { value: "Male", label: "Male" },
+                        { value: "Female", label: "Female" },
+                        { value: "Other", label: "Other" }
+                      ]}
+                    />
+
+                    {/* Coach Type Field */}
+                    <div className="sm:col-span-2">
+                      <FormSelect
+                        label="Coach Type" 
+                        error={errors[index]?.coachType}
+                        required
+                        className="text-sm sm:text-base"
+                        value={passenger.coachType}
+                        onChange={(e) => updatePassenger(index, "coachType", e.target.value)}
+                        disabled={isSubmitting || loadingCoachTypes || availableCoachOptions.length === 0}
+                        placeholder={loadingCoachTypes ? "Loading coach types..." : availableCoachOptions.length === 0 ? "No available coach types" : "Select coach type"}
+                        loading={loadingCoachTypes}
+                        options={availableCoachOptions}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Add Passenger Button */}
+          <div className="text-center mt-6">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="w-full sm:w-auto" 
+              onClick={addPassenger}
+              disabled={isSubmitting}
             >
-              <option value="">-- Choose Saved Passenger --</option>
-              {savedPassengers.map((sp) => (
-                <option key={sp.id} value={sp.id}>
-                  {sp.name} ({sp.age}, {sp.gender})
-                </option>
-              ))}
-            </select>
+              <Plus className="h-5 w-5 mr-2" />
+              Add Another Passenger
+            </Button>
           </div>
 
-          <div className="form-control mb-3">
-            <label className="label font-semibold">Name</label>
-            <input
-              type="text"
-              className="input input-bordered w-full"
-              value={p.name}
-              onChange={(e) => updatePassenger(index, "name", e.target.value)}
-            />
-          </div>
+          {/* Booking Summary */}
+          {passengers.length > 0 && (
+            <div className="card bg-base-200 shadow-sm mt-6">
+              <div className="card-body py-4 px-6">
+                <h3 className="card-title text-lg mb-4">Booking Summary</h3>
+                <div className="space-y-2">
+                  {passengers.map((passenger, index) => (
+                    <div key={index} className="flex justify-between items-center text-sm">
+                      <span>{passenger.name || `Passenger ${index + 1}`} - {coachTypeService.normalizeCoachTypeName(getCoachTypeName(passenger.coachType))}</span>
+                      <span className="font-medium">₹{getCoachPrice(passenger.coachType)}</span>
+                    </div>
+                  ))}
+                  <div className="divider my-2"></div>
+                  <div className="flex justify-between items-center font-bold text-lg">
+                    <span>Total Cost</span>
+                    <span>₹{passengers.reduce((total, p) => total + getCoachPrice(p.coachType), 0)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-          <div className="form-control mb-3">
-            <label className="label font-semibold">Age</label>
-            <input
-              type="number"
-              className="input input-bordered w-full"
-              value={p.age}
-              onChange={(e) => updatePassenger(index, "age", e.target.value)}
-            />
-          </div>
-
-          <div className="form-control mb-3">
-            <label className="label font-semibold">Gender</label>
-            <select
-              className="select select-bordered w-full"
-              value={p.gender}
-              onChange={(e) => updatePassenger(index, "gender", e.target.value)}
+          {/* Navigation */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4 mt-6 sm:mt-8 px-2">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="order-2 sm:order-1"
+              onClick={() => {
+                navigate({
+                  to: "/trains/$trainId/book",
+                  params: { trainId },
+                  search: {
+                    scheduleId: search.scheduleId,
+                    from: search.from,
+                    to: search.to,
+                  }
+                });
+              }}
+              disabled={isSubmitting}
             >
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              <span className="hidden sm:inline">Back to Journey Details</span>
+              <span className="sm:hidden">Back</span>
+            </Button>
+           
+            <Button
+              variant="primary"
+              size="lg" 
+              className={`order-1 sm:order-2 ${isSubmitting ? 'loading' : ''}`}
+              onClick={handleSubmit}
+              disabled={isSubmitting || passengers.length === 0}
+            >
+              {isSubmitting ? (
+                'Validating...'
+              ) : (
+                <>
+                  <span className="hidden sm:inline">Continue to Payment</span>
+                  <span className="sm:hidden">Continue</span>
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </>
+              )}
+            </Button>
           </div>
         </div>
-      ))}
-
-      <button className="btn btn-secondary mb-4 w-full" onClick={addPassenger}>
-        ➕ Add Another Passenger
-      </button>
-
-      <div className="flex justify-end gap-4">
-        <button className="btn btn-outline"
-            onClick={() => {
-            navigate({
-              to: "/trains/$trainId/book/new"
-            });
-        }}
-        >
-          Back
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={() => {
-            navigate({
-              to: "/trains/$trainId/book/payment",
-              params: { trainId },
-              search: {
-                coachType: search.coachType,
-                passengers: JSON.stringify(passengers),
-                bookingId: "B1001",
-              },
-            });
-          }}
-        >
-          Go to Payment
-        </button>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

@@ -8,5 +8,4 @@ export { default as PaymentPage } from "./PaymentPage.jsx";
 export { default as TrainGallery } from "./trainGallery.jsx";
 export { default as TrainDetail } from "./trainDetail.jsx";
 export { default as BookingProgress } from "./BookingProgress.jsx";
-export { default as SeatSelection } from "./SeatSelection.jsx";
 export { default as StationSelector } from "./StationSelector.jsx";

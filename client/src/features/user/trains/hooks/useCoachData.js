@@ -10,7 +10,6 @@ export function useCoachTypes() {
     isFallback,
   } = useApiWithFallback({
     endpoint: coachTypeService.getCoachTypes,
-    fallbackData: coachTypeService.fallbackCoachTypes,
   });
 
   const getCoachPrice = useCallback((coachTypeNameOrId) => {
@@ -90,7 +89,6 @@ export function useScheduleAvailability(scheduleId) {
     isFallback,
   } = useApiWithFallback({
     endpoint,
-    fallbackData: null,
   });
 
   return {

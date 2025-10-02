@@ -73,15 +73,15 @@ export const TrainCard = ({ train, searchParams }) => {
           </div>
         </div>
         <div className="card-actions w-full pt-2">
-           <Link
-             to={`/trains/${train.id}/book`}
-             search={{
-               scheduleStopId: train.schedule_stop_id,
-               from: searchParams?.from,
-               to: searchParams?.to,
-             }}
-             className="btn btn-sm btn-primary w-full"
-           >
+          <Link
+            to={`/trains/${train.id}/book`}
+            search={{
+              scheduleId: train.schedule_id,
+              from: searchParams?.from,
+              to: searchParams?.to,
+            }}
+            className="btn btn-sm btn-primary w-full"
+          >
             Book Now
           </Link>
         </div>
@@ -89,4 +89,3 @@ export const TrainCard = ({ train, searchParams }) => {
     </div>
   );
 };
-

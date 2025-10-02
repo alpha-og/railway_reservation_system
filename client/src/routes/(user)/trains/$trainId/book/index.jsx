@@ -1,4 +1,10 @@
-import { createFileRoute, useSearch, Link, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useSearch,
+  Link,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
 import { ArrowRight, LogIn, UserPlus, XCircle } from "lucide-react";
 import {
   TrainDetail,
@@ -15,12 +21,12 @@ export const Route = createFileRoute("/(user)/trains/$trainId/book/")({
 });
 
 function RouteComponent() {
-  const { trainId } = useParams({ from: "/(user)/trains/$trainId/book/" });
+  const { trainId: _trainId } = useParams({ from: "/(user)/trains/$trainId/book/" });
   const search = useSearch({ from: "/(user)/trains/$trainId/book/" });
   const navigate = useNavigate();
   const { token } = useAuthStore();
   const { scheduleSummary, isLoading, error } = useScheduleSummary(
-    search.scheduleStopId,
+    search.scheduleId,
   );
 
   // Show loading state for the entire page
@@ -96,8 +102,7 @@ function RouteComponent() {
             <StationSelector
               currentFrom={search.from}
               currentTo={search.to}
-              trainId={trainId}
-              scheduleStopId={search.scheduleStopId}
+              schedule={scheduleSummary?.schedule}
             />
 
             {/* Schedule Section */}
@@ -106,6 +111,8 @@ function RouteComponent() {
                 schedule={scheduleSummary?.schedule}
                 isLoading={isLoading}
                 error={error}
+                selectedFrom={search.from}
+                selectedTo={search.to}
               />
             </section>
 
@@ -134,7 +141,7 @@ function RouteComponent() {
                                 scheduleId: scheduleSummary.schedule.id,
                                 from: search.from,
                                 to: search.to,
-                              }
+                              },
                             });
                           }}
                         >

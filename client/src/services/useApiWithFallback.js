@@ -1,14 +1,11 @@
 // src/services/useApiWithFallback.js
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-export function useApiWithFallback({ endpoint, fallbackData }) {
-  const [data, setData] = useState(fallbackData || null);
-  const [isLoading, setIsLoading] = useState(!fallbackData);
+export function useApiWithFallback({ endpoint }) {
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [isFallback, setIsFallback] = useState(!!fallbackData);
-
-  // Memoize fallback data to prevent unnecessary changes
-  const memoizedFallbackData = useMemo(() => fallbackData, [fallbackData]);
+  const [isFallback, setIsFallback] = useState(false);
 
   const resolve = useCallback(async () => {
     if (!endpoint) return;
@@ -18,22 +15,17 @@ export function useApiWithFallback({ endpoint, fallbackData }) {
 
     try {
       const result = await endpoint();
-      // If result matches fallbackData, mark as fallback
-      if (memoizedFallbackData && result === memoizedFallbackData) {
-        setIsFallback(true);
-      } else {
-        setIsFallback(false);
-      }
+      setIsFallback(false);
       setData(result);
     } catch (err) {
       console.error("API call failed:", err);
-      setData(memoizedFallbackData || null);
-      setIsFallback(!!memoizedFallbackData);
+      setData(null);
+      setIsFallback(false);
       setIsError(true);
     } finally {
       setIsLoading(false);
     }
-  }, [endpoint, memoizedFallbackData]);
+  }, [endpoint]);
 
   // Only call resolve once on mount unless resolve dependencies change
   useEffect(() => {
