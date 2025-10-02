@@ -18,6 +18,10 @@ const availabilitySchema = z.object({
   date: z.string().min(1, "date is required"),
 });
 
+const trainOverviewSchema = z.object({
+  trainId: z.string().min(1, "trainId is required"),
+});
+
 const searchTrains = asyncErrorHandler(async (req, res) => {
   const { from, to, class: coachClass, date } = searchSchema.parse(req.query);
   const trains = await Train.searchTrains(from, to, coachClass, date);
@@ -26,6 +30,13 @@ const searchTrains = asyncErrorHandler(async (req, res) => {
     { from, to, coachClass, date, trains },
     { count: trains.length },
   );
+});
+
+const getTrainOverview = asyncErrorHandler(async (req, res) => {
+  const { trainId } = trainOverviewSchema.parse(req.params);
+  const train = await Train.getTrainOverview(trainId);
+
+  return res.success({ train });
 });
 
 const getSchedule = asyncErrorHandler(async (req, res) => {
@@ -45,4 +56,4 @@ const getAvailability = asyncErrorHandler(async (req, res) => {
   return res.success({ trainId, date, availability });
 });
 
-export default { searchTrains, getSchedule, getAvailability };
+export default { searchTrains, getTrainOverview, getSchedule, getAvailability };

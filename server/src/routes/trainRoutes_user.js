@@ -5,6 +5,7 @@ import { trainControllerUser } from "../controllers/index.js";
 const router = express.Router();
 
 router.get("/search", trainControllerUser.searchTrains);
+router.get("/:trainId", trainControllerUser.getTrainOverview);
 router.get("/:trainId/schedule", trainControllerUser.getSchedule);
 router.get("/:trainId/availability", trainControllerUser.getAvailability);
 

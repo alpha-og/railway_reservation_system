@@ -320,6 +320,67 @@ class Train {
     const { rows } = await queryDB(query, [trainId, date]);
     return rows;
   }
+
+  static async getTrainOverview(trainId) {
+    const query = `
+      WITH train_route AS (
+        SELECT 
+          s.train_id,
+          s.id AS schedule_id,
+          s.departure_date,
+          MIN(ss.stop_number) AS first_stop,
+          MAX(ss.stop_number) AS last_stop
+        FROM schedules s
+        JOIN schedule_stops ss ON ss.schedule_id = s.id
+        WHERE s.train_id = $1
+        GROUP BY s.train_id, s.id, s.departure_date
+        ORDER BY s.departure_date DESC
+        LIMIT 1
+      ),
+      source_destination AS (
+        SELECT 
+          tr.train_id,
+          tr.schedule_id,
+          source_station.name AS source_station,
+          dest_station.name AS destination_station,
+          source_stop.departure_time,
+          dest_stop.arrival_time,
+          EXTRACT(EPOCH FROM (dest_stop.arrival_time - source_stop.departure_time))/3600 AS duration_hours
+        FROM train_route tr
+        JOIN schedule_stops source_stop ON source_stop.schedule_id = tr.schedule_id AND source_stop.stop_number = tr.first_stop
+        JOIN schedule_stops dest_stop ON dest_stop.schedule_id = tr.schedule_id AND dest_stop.stop_number = tr.last_stop
+        JOIN stations source_station ON source_station.id = source_stop.station_id
+        JOIN stations dest_station ON dest_station.id = dest_stop.station_id
+      )
+      SELECT 
+        t.id,
+        t.name,
+        t.code,
+        sd.source_station,
+        sd.destination_station,
+        sd.departure_time,
+        sd.arrival_time,
+        CASE 
+          WHEN sd.duration_hours >= 1 THEN 
+            CONCAT(
+              FLOOR(sd.duration_hours)::text, 'h ',
+              FLOOR((sd.duration_hours - FLOOR(sd.duration_hours)) * 60)::text, 'm'
+            )
+          ELSE 
+            CONCAT(FLOOR(sd.duration_hours * 60)::text, 'm')
+        END AS duration,
+        ARRAY_AGG(DISTINCT ct.name ORDER BY ct.name) AS classes
+      FROM trains t
+      LEFT JOIN source_destination sd ON sd.train_id = t.id
+      LEFT JOIN coaches c ON c.train_id = t.id
+      LEFT JOIN coach_types ct ON ct.id = c.coach_type_id
+      WHERE t.id = $1
+      GROUP BY t.id, t.name, t.code, sd.source_station, sd.destination_station, sd.departure_time, sd.arrival_time, sd.duration_hours;
+    `;
+
+    const result = await queryDB(query, [trainId]);
+    return result.rows[0] || null;
+  }
 }
 
 export default Train;
