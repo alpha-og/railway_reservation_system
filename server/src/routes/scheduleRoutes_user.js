@@ -3,7 +3,7 @@ import { scheduleController } from "../controllers/index.js";
 
 const router = Router();
 
-router.get("/:scheduleStopId", scheduleController.getByScheduleStopId);
+router.get("/:scheduleId", scheduleController.getScheduleSummaryByScheduleId);
 router.get(
   "/:scheduleId/availability",
   scheduleController.getAvailabilityByScheduleId,

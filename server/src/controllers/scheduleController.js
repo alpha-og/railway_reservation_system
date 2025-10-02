@@ -94,48 +94,43 @@ const getById = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-const getByScheduleStopId = asyncErrorHandler(async (req, res, next) => {
-  const paramSchema = z.object({
-    scheduleStopId: z.uuid(),
-  });
-  const { scheduleStopId } = await paramSchema.parseAsync(req.params);
+const getScheduleSummaryByScheduleId = asyncErrorHandler(
+  async (req, res, next) => {
+    const paramSchema = z.object({
+      scheduleId: z.uuid(),
+    });
+    const { scheduleId } = await paramSchema.parseAsync(req.params);
 
-  const scheduleStop = (
-    await ScheduleStopsModel.find({ id: scheduleStopId })
-  )[0];
-  if (!scheduleStop) {
-    throw new AppError(400, "Could not find schedule stop");
-  }
+    const schedule = (await Schedule.find({ id: scheduleId }))[0];
+    let scheduleStops = await ScheduleStops.find({
+      scheduleId: schedule.id,
+    });
 
-  const schedule = (await Schedule.find({ id: scheduleStop.schedule_id }))[0];
-  let scheduleStops = await ScheduleStops.find({
-    scheduleId: schedule.id,
-  });
+    // Fix the async issue - properly await all station lookups
+    scheduleStops = await Promise.all(
+      scheduleStops.map(async (scheduleStop) => {
+        const station = await Station.findById(scheduleStop.station_id);
+        scheduleStop.station_id = undefined;
+        scheduleStop.station = station;
+        return scheduleStop;
+      }),
+    );
 
-  // Fix the async issue - properly await all station lookups
-  scheduleStops = await Promise.all(
-    scheduleStops.map(async (scheduleStop) => {
-      const station = await Station.findById(scheduleStop.station_id);
-      scheduleStop.station_id = undefined;
-      scheduleStop.station = station;
-      return scheduleStop;
-    }),
-  );
+    schedule.schedule_stops = scheduleStops;
 
-  schedule.schedule_stops = scheduleStops;
+    const train = (await Train.find({ id: schedule.train_id }))[0];
+    const availableSeats = await Train.getAvailability(
+      train.id,
+      schedule.departure_date,
+    );
 
-  const train = (await Train.find({ id: schedule.train_id }))[0];
-  const availableSeats = await Train.getAvailability(
-    train.id,
-    schedule.departure_date,
-  );
-
-  res.success({
-    train,
-    schedule,
-    availableSeats,
-  });
-});
+    res.success({
+      train,
+      schedule,
+      availableSeats,
+    });
+  },
+);
 
 const getAvailabilityByScheduleId = asyncErrorHandler(
   async (req, res, next) => {
@@ -218,7 +213,7 @@ const remove = asyncErrorHandler(async (req, res, next) => {
 export default {
   get,
   getById,
-  getByScheduleStopId,
+  getScheduleSummaryByScheduleId,
   getAvailabilityByScheduleId,
   create,
   update,
