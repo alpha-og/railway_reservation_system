@@ -94,7 +94,11 @@ const Select = ({
     >
       <option value="">{loading ? "Loading..." : placeholder}</option>
       {!loading && options?.map((option) => (
-        <option key={option.id || option.value} value={option.id || option.value}>
+        <option 
+          key={option.id || option.value} 
+          value={option.id || option.value}
+          disabled={option.disabled}
+        >
           {option.name || option.label || option.text}
         </option>
       ))}
