@@ -8,7 +8,13 @@ async function getScheduleByScheduleStopId(scheduleStopId) {
   return (await client.get(`/schedules/${scheduleStopId}`)).data;
 }
 
+// Get schedule summary data (train, schedule, availability) by schedule ID
+async function getScheduleSummaryByScheduleId(scheduleId) {
+  return (await client.get(`/schedules/${scheduleId}`)).data;
+}
+
 export default {
   getSchedule,
   getScheduleByScheduleStopId,
+  getScheduleSummaryByScheduleId,
 };

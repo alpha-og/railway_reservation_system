@@ -22,6 +22,10 @@ export const validatePassenger = (passenger) => {
     errors.gender = 'Gender is required';
   }
   
+  if (!passenger.coachType) {
+    errors.coachType = 'Coach type is required';
+  }
+  
   return errors;
 };
 

@@ -63,7 +63,35 @@ const getById = asyncErrorHandler(async (req, res, next) => {
     throw new AppError(400, "Could not find schedule");
   }
 
-  res.success(schedule);
+  // Get schedule stops with station information
+  let scheduleStops = await ScheduleStops.find({
+    scheduleId: schedule.id,
+  });
+
+  // Fix the async issue - properly await all station lookups
+  scheduleStops = await Promise.all(
+    scheduleStops.map(async (scheduleStop) => {
+      const station = await Station.findById(scheduleStop.station_id);
+      scheduleStop.station_id = undefined;
+      scheduleStop.station = station;
+      return scheduleStop;
+    }),
+  );
+
+  schedule.schedule_stops = scheduleStops;
+
+  // Get train and availability data
+  const train = (await Train.find({ id: schedule.train_id }))[0];
+  const availableSeats = await Train.getAvailability(
+    train.id,
+    schedule.departure_date,
+  );
+
+  res.success({
+    train,
+    schedule,
+    availableSeats,
+  });
 });
 
 const getByScheduleStopId = asyncErrorHandler(async (req, res, next) => {
@@ -83,7 +111,7 @@ const getByScheduleStopId = asyncErrorHandler(async (req, res, next) => {
   let scheduleStops = await ScheduleStops.find({
     scheduleId: schedule.id,
   });
-  
+
   // Fix the async issue - properly await all station lookups
   scheduleStops = await Promise.all(
     scheduleStops.map(async (scheduleStop) => {
@@ -91,9 +119,9 @@ const getByScheduleStopId = asyncErrorHandler(async (req, res, next) => {
       scheduleStop.station_id = undefined;
       scheduleStop.station = station;
       return scheduleStop;
-    })
+    }),
   );
-  
+
   schedule.schedule_stops = scheduleStops;
 
   const train = (await Train.find({ id: schedule.train_id }))[0];
@@ -108,6 +136,30 @@ const getByScheduleStopId = asyncErrorHandler(async (req, res, next) => {
     availableSeats,
   });
 });
+
+const getAvailabilityByScheduleId = asyncErrorHandler(
+  async (req, res, next) => {
+    const paramSchema = z.object({
+      scheduleId: z.uuid(),
+    });
+    const { scheduleId } = await paramSchema.parseAsync(req.params);
+
+    const schedule = (await Schedule.find({ id: scheduleId }))[0];
+    if (!schedule) {
+      throw new AppError(400, "Could not find schedule");
+    }
+
+    const availableSeats = await Train.getAvailability(
+      schedule.train_id,
+      schedule.departure_date,
+    );
+
+    res.success({
+      schedule,
+      availableSeats,
+    });
+  },
+);
 
 const create = asyncErrorHandler(async (req, res, next) => {
   const { trainId, departureDate, departureTime, scheduleStops } =
@@ -167,6 +219,7 @@ export default {
   get,
   getById,
   getByScheduleStopId,
+  getAvailabilityByScheduleId,
   create,
   update,
   remove,

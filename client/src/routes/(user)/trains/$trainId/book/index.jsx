@@ -1,9 +1,10 @@
-import { createFileRoute, useSearch, Link } from "@tanstack/react-router";
+import { createFileRoute, useSearch, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowRight, LogIn, UserPlus, XCircle } from "lucide-react";
 import {
   TrainDetail,
   TrainSchedule,
   BookingProgress,
+  StationSelector,
 } from "../../../../../features/user/trains/components/";
 import { useScheduleSummary } from "../../../../../features/user/trains/hooks/useScheduleSummary";
 import { ErrorBoundary, PageLoadingSkeleton } from "../../../../../components/";
@@ -14,7 +15,9 @@ export const Route = createFileRoute("/(user)/trains/$trainId/book/")({
 });
 
 function RouteComponent() {
+  const { trainId } = useParams({ from: "/(user)/trains/$trainId/book/" });
   const search = useSearch({ from: "/(user)/trains/$trainId/book/" });
+  const navigate = useNavigate();
   const { token } = useAuthStore();
   const { scheduleSummary, isLoading, error } = useScheduleSummary(
     search.scheduleStopId,
@@ -89,6 +92,14 @@ function RouteComponent() {
               />
             </section>
 
+            {/* Station Selection Section */}
+            <StationSelector
+              currentFrom={search.from}
+              currentTo={search.to}
+              trainId={trainId}
+              scheduleStopId={search.scheduleStopId}
+            />
+
             {/* Schedule Section */}
             <section>
               <TrainSchedule
@@ -116,8 +127,15 @@ function RouteComponent() {
                         <button
                           className="btn btn-primary btn-lg w-full sm:w-auto"
                           onClick={() => {
-                            // Navigate to seat selection page
-                            window.location.href = `/trains/${scheduleSummary.train.id}/book/seats?scheduleStopId=${search.scheduleStopId}&coachType=AC&passengers=${JSON.stringify([{ name: "", age: "", gender: "Male" }])}`;
+                            navigate({
+                              to: "/trains/$trainId/book/passengers",
+                              params: { trainId: scheduleSummary.train.id },
+                              search: {
+                                scheduleId: scheduleSummary.schedule.id,
+                                from: search.from,
+                                to: search.to,
+                              }
+                            });
                           }}
                         >
                           <ArrowRight className="h-5 w-5 mr-2" />

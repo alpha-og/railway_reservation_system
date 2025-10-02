@@ -17,6 +17,7 @@ import {
   coachTypeRoutesUser,
   roleRoutes,
   scheduleRoutesUser,
+  fareRoutes,
 } from "./routes/index.js";
 import errorHandler from "./middleware/errorHandler.js";
 import authenticate from "./middleware/authenticate.js";
@@ -30,7 +31,7 @@ export default function createApp(config) {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: ["http://localhost:5173"],
+      origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"],
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -51,6 +52,7 @@ export default function createApp(config) {
   api.use("/roles", roleRoutes);
   api.use("/stations", stationRoutesUser);
   api.use("/coach-types", coachTypeRoutesUser);
+  api.use("/fares", fareRoutes);
 
   api.use("/auth", authRoutes);
   api.use("/admin/trains", authenticate("admin"), trainRoutes);

@@ -35,6 +35,7 @@ export default function TrainsGallery() {
   const stateProps = {
     error,
     trains,
+    searchParams: search,
   };
 
   return <StateComponent {...stateProps} />;
