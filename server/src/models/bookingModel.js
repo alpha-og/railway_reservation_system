@@ -23,7 +23,29 @@ class Booking {
   }
 
   static async findAllByUser(userId) {
-    const query = `SELECT * FROM ${this.TABLE} WHERE user_id = $1 ORDER BY booking_date DESC`;
+    const query = `
+      SELECT 
+        b.*,
+        bs.name as booking_status,
+        t.name as train_name,
+        t.code as train_code,
+        fs.name as source_station,
+        ts.name as destination_station,
+        s.departure_date,
+        s.departure_time,
+        ss_from.departure_time as from_departure_time,
+        ss_to.arrival_time as to_arrival_time
+      FROM ${this.TABLE} b
+      LEFT JOIN booking_statuses bs ON b.status_id = bs.id
+      LEFT JOIN schedules s ON b.schedule_id = s.id
+      LEFT JOIN trains t ON s.train_id = t.id
+      LEFT JOIN stations fs ON b.from_station_id = fs.id
+      LEFT JOIN stations ts ON b.to_station_id = ts.id
+      LEFT JOIN schedule_stops ss_from ON s.id = ss_from.schedule_id AND ss_from.station_id = b.from_station_id
+      LEFT JOIN schedule_stops ss_to ON s.id = ss_to.schedule_id AND ss_to.station_id = b.to_station_id
+      WHERE b.user_id = $1 
+      ORDER BY b.booking_date DESC
+    `;
     const result = await queryDB(query, [userId]);
     return result.rows;
   }
