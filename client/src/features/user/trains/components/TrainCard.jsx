@@ -1,6 +1,29 @@
-import { useSearch, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import { formatTime, formatDateTime } from "../../../../lib/dataUtils";
 
 export const TrainCard = ({ train }) => {
+  // Calculate departure and arrival dates
+  const departureDate = train.departure_date;
+  const departureTime = train.departure_time;
+  const arrivalTime = train.arrival_time;
+  
+  // For TrainCard, we have limited schedule info, so we need a simplified approach
+  // If arrival time is earlier than departure time, it's the next day
+  const isNextDayArrival = arrivalTime && departureTime && 
+    arrivalTime.localeCompare(departureTime) < 0;
+  
+  const arrivalDate = isNextDayArrival && departureDate ? 
+    new Date(new Date(departureDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
+    departureDate;
+  
+  const departureDateTime = departureDate && departureTime ? 
+    formatDateTime(departureDate, departureTime) : 
+    formatTime(departureTime);
+    
+  const arrivalDateTime = arrivalDate && arrivalTime ? 
+    formatDateTime(arrivalDate, arrivalTime) : 
+    formatTime(arrivalTime);
+
   return (
     <div className="card h-56 w-full bg-base-200 flex flex-col">
       <div className="card-body flex flex-col justify-between h-full p-4">
@@ -15,11 +38,11 @@ export const TrainCard = ({ train }) => {
           <div className="space-y-1">
             <p className="w-full flex justify-between items-center text-sm">
               <span className="font-medium">Departure:</span>
-              <span className="font-mono">{train.departure_time}</span>
+              <span className="font-mono text-xs">{departureDateTime}</span>
             </p>
             <p className="w-full flex justify-between items-center text-sm">
               <span className="font-medium">Arrival:</span>
-              <span className="font-mono">{train.arrival_time}</span>
+              <span className="font-mono text-xs">{arrivalDateTime}</span>
             </p>
           </div>
         </div>
