@@ -4,7 +4,39 @@ import { AppError, asyncErrorHandler } from "../utils/errors.js";
 
 const getAllBookings = asyncErrorHandler(async (req, res) => {
   const bookings = await Booking.findAllByUser(req.userId);
-  return res.success({ bookings }, { count: bookings.length });
+  
+  // Format bookings for frontend consumption
+  const formattedBookings = await Promise.all(
+    bookings.map(async (booking) => {
+      // Get passengers for this booking
+      const passengers = await Booking.getBookedPassengers(booking.id);
+      
+      return {
+        bookingId: booking.id,
+        pnr: booking.pnr,
+        train: {
+          name: booking.train_name || "Unknown Train",
+          code: booking.train_code || "N/A"
+        },
+        source: booking.source_station || "Unknown",
+        destination: booking.destination_station || "Unknown",
+        departureDate: booking.departure_date || booking.booking_date?.split('T')[0],
+        departureTime: booking.from_departure_time || booking.departure_time,
+        arrivalTime: booking.to_arrival_time,
+        status: booking.booking_status || "PENDING",
+        totalAmount: parseFloat(booking.total_amount) || 0,
+        bookingDate: booking.booking_date,
+        passengers: passengers.map(p => ({
+          name: p.name,
+          age: p.age,
+          gender: p.gender,
+          seat: p.seat_number || "Not assigned"
+        }))
+      };
+    })
+  );
+  
+  return res.success({ bookings: formattedBookings }, { count: formattedBookings.length });
 });
 
 const getBookingById = asyncErrorHandler(async (req, res) => {
