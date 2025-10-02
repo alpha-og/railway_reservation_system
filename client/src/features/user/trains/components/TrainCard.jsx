@@ -12,9 +12,22 @@ export const TrainCard = ({ train }) => {
   const isNextDayArrival = arrivalTime && departureTime && 
     arrivalTime.localeCompare(departureTime) < 0;
   
-  const arrivalDate = isNextDayArrival && departureDate ? 
-    new Date(new Date(departureDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] :
-    departureDate;
+  // Calculate arrival date without timezone issues
+  let arrivalDate = departureDate;
+  if (isNextDayArrival && departureDate) {
+    // Parse the date components to avoid timezone issues
+    if (typeof departureDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(departureDate)) {
+      const [year, month, day] = departureDate.split('-').map(Number);
+      const nextDay = new Date(year, month - 1, day + 1);
+      const nextYear = nextDay.getFullYear();
+      const nextMonth = String(nextDay.getMonth() + 1).padStart(2, '0');
+      const nextDayNum = String(nextDay.getDate()).padStart(2, '0');
+      arrivalDate = `${nextYear}-${nextMonth}-${nextDayNum}`;
+    } else {
+      // Fallback for other date formats
+      arrivalDate = new Date(new Date(departureDate).getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    }
+  }
   
   const departureDateTime = departureDate && departureTime ? 
     formatDateTime(departureDate, departureTime) : 

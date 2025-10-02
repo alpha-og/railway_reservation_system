@@ -2,6 +2,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignIn } from "../hooks/useSignIn";
+import { Button, Card, FormInput } from "../../../components/ui";
 
 const signinSchema = z.object({
   email: z.email(),
@@ -21,42 +22,30 @@ export default function SigninForm() {
   };
 
   return (
-    <div className="card w-full max-w-md shadow-2xl bg-base-100">
-      <div className="card-body">
-        <h2 className="text-3xl font-bold text-center mb-6">Sign In</h2>
+    <Card className="w-full max-w-md shadow-2xl">
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-center">Sign In</h2>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          {/* Email */}
-          <div>
-            <label className="label">
-              <span className="label-text">Email</span>
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              className="input input-bordered w-full"
-              disabled={signIn.isLoading}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="label-text-alt text-error">Email is invalid</p>
-            )}
-          </div>
+          <FormInput
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="you@example.com"
+            register={register}
+            error={errors.email}
+            disabled={signIn.isLoading}
+          />
 
-          {/* Password */}
           <div>
-            <label className="label">
-              <span className="label-text">Password</span>
-            </label>
-            <input
+            <FormInput
+              name="password"
               type="password"
+              label="Password"
               placeholder="********"
-              className="input input-bordered w-full"
+              register={register}
+              error={errors.password}
               disabled={signIn.isLoading}
-              {...register("password")}
             />
-            {errors.password && (
-              <p className="label-text-alt text-error">Password is invalid</p>
-            )}
             <label className="label">
               <a
                 href="/forgot-password"
@@ -66,29 +55,32 @@ export default function SigninForm() {
               </a>
             </label>
           </div>
+
           {signIn.isError && (
             <p className="label-text-alt text-error">{signIn.error.title}</p>
           )}
 
-          {/* Submit Button */}
           <div className="form-control mt-6">
-            <button
+            <Button
               type="submit"
-              className="btn btn-primary w-full"
+              variant="primary"
+              size="md"
+              className="w-full"
               disabled={signIn.isLoading}
+              loading={signIn.isLoading}
             >
               Sign In
-            </button>
+            </Button>
           </div>
         </form>
 
-        <p className="text-center text-sm mt-4">
-          Don’t have an account?{" "}
+        <p className="text-center text-sm">
+          Don't have an account?{" "}
           <a href="/signup" className="link link-primary">
             Sign up
           </a>
         </p>
       </div>
-    </div>
+    </Card>
   );
 }

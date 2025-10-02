@@ -2,6 +2,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignUp } from "../hooks/useSignUp";
+import { Button, Card, FormInput } from "../../../components/ui";
 
 const signupSchema = z.object({
   name: z.string().min(3),
@@ -22,73 +23,65 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="card w-full max-w-md shadow-2xl bg-base-100">
-      <div className="card-body">
-        <h2 className="text-3xl font-bold text-center mb-6">Create Account</h2>
+    <Card className="w-full max-w-md shadow-2xl">
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-center">Create Account</h2>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          {/* Full Name */}
-          <div className="flex flex-col space-y-1">
-            <label className="label">
-              <span className="label-text">Full Name</span>
-            </label>
-            <input
-              type="text"
-              placeholder="John Doe"
-              className="input input-bordered w-full"
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="label-text-alt text-error">Name is invalid</p>
-            )}
-          </div>
+          <FormInput
+            name="name"
+            type="text"
+            label="Full Name"
+            placeholder="John Doe"
+            register={register}
+            error={errors.name}
+            disabled={signUp.isLoading}
+          />
 
-          {/* Email */}
-          <div className="flex flex-col space-y-1">
-            <label className="label">
-              <span className="label-text">Email</span>
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              className="input input-bordered w-full"
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="label-text-alt text-error">Email is invalid</p>
-            )}
-          </div>
+          <FormInput
+            name="email"
+            type="email"
+            label="Email"
+            placeholder="you@example.com"
+            register={register}
+            error={errors.email}
+            disabled={signUp.isLoading}
+          />
 
-          {/* Password */}
-          <div className="flex flex-col space-y-1">
-            <label className="label">
-              <span className="label-text">Password</span>
-            </label>
-            <input
-              type="password"
-              placeholder="********"
-              className="input input-bordered w-full"
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="label-text-alt text-error">Password is invalid</p>
-            )}
-          </div>
+          <FormInput
+            name="password"
+            type="password"
+            label="Password"
+            placeholder="********"
+            register={register}
+            error={errors.password}
+            disabled={signUp.isLoading}
+          />
 
-          {/* Submit Button */}
+          {signUp.isError && (
+            <p className="label-text-alt text-error">{signUp.error.title}</p>
+          )}
+
           <div className="form-control mt-6">
-            <button type="submit" className="btn btn-primary w-full">
+            <Button
+              type="submit"
+              variant="primary"
+              size="md"
+              className="w-full"
+              disabled={signUp.isLoading}
+              loading={signUp.isLoading}
+            >
               Sign Up
-            </button>
+            </Button>
           </div>
         </form>
 
-        <p className="text-center text-sm mt-4">
+        <p className="text-center text-sm">
           Already have an account?{" "}
           <a href="/signin" className="link link-primary">
             Sign in
           </a>
         </p>
       </div>
-    </div>
+    </Card>
   );
 }

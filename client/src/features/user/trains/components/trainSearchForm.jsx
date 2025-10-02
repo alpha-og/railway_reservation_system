@@ -7,6 +7,7 @@ import { useCoachTypes } from "../hooks/useCoachTypes";
 import { useTrainFilters } from "../hooks/useTrainFilters";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "../../../../components/LoadingSkeleton";
+import { Button, Card, FormInput, FormSelect } from "../../../../components/ui";
 
 // ---------------------------
 // Schema
@@ -102,49 +103,45 @@ export default function TrainSearchForm() {
   // Render
   // ---------------------------
   return (
-    <div className="card w-full h-full flex-1 shadow-2xl bg-base-100">
-      <div className="card-body flex flex-col items-center justify-evenly">
-        <h2 className="text-3xl font-bold text-center mb-6">Search Train</h2>
+    <Card className="w-full h-full flex-1 shadow-2xl">
+      <div className="flex flex-col items-center justify-evenly space-y-6">
+        <h2 className="text-3xl font-bold text-center">Search Train</h2>
 
         <form
           className="w-full flex flex-col justify-evenly space-y-4"
           onSubmit={handleSubmit(onSubmit)}
         >
-          {/* From */}
           <FormSelect
             label="From"
             name="from"
             register={register}
             options={stations}
             loading={stationsLoading}
-            error={errors.from?.message}
+            error={errors.from}
             placeholder="Select departure station"
             disabled={isSubmitting}
           />
 
-          {/* To */}
           <FormSelect
             label="To"
             name="to"
             register={register}
             options={stations}
             loading={stationsLoading}
-            error={errors.to?.message}
+            error={errors.to}
             placeholder="Select destination station"
             disabled={isSubmitting}
           />
 
-          {/* Date */}
           <FormInput
             label="Date of Journey"
             type="date"
             name="date"
             register={register}
-            error={errors.date?.message}
+            error={errors.date}
             disabled={isSubmitting}
           />
 
-          {/* Class */}
           <FormSelect
             label="Class (Optional)"
             name="class"
@@ -155,69 +152,20 @@ export default function TrainSearchForm() {
             disabled={isSubmitting}
           />
 
-          {/* Submit */}
           <div className="form-control mt-6">
-            <button
+            <Button
               type="submit"
-              className={`btn btn-primary w-full ${
-                isSubmitting ? "animate-pulse opacity-70" : ""
-              }`}
+              variant="primary"
+              size="md"
+              className="w-full"
               disabled={isSubmitting}
+              loading={isSubmitting}
             >
-              {isSubmitting ? "Searching..." : "Search"}
-            </button>
+              Search
+            </Button>
           </div>
         </form>
       </div>
-    </div>
-  );
-}
-
-function FormSelect({
-  label,
-  name,
-  register,
-  options,
-  loading,
-  error,
-  placeholder,
-  disabled,
-}) {
-  return (
-    <div className="space-y-2">
-      <label className="label">
-        <span className="label-text">{label}</span>
-      </label>
-      <select
-        className="select select-bordered w-full"
-        {...register(name)}
-        disabled={loading || disabled}
-      >
-        <option value="">{loading ? "Loading..." : placeholder}</option>
-        {!loading && options?.map((opt) => (
-          <option key={opt.id} value={opt.id}>
-            {opt.name}
-          </option>
-        ))}
-      </select>
-      {error && <p className="label-text-alt text-error">{error}</p>}
-    </div>
-  );
-}
-
-function FormInput({ label, type, name, register, error, disabled }) {
-  return (
-    <div className="space-y-2">
-      <label className="label">
-        <span className="label-text">{label}</span>
-      </label>
-      <input
-        type={type}
-        className="input input-bordered w-full"
-        {...register(name)}
-        disabled={disabled}
-      />
-      {error && <p className="label-text-alt text-error">{error}</p>}
-    </div>
+    </Card>
   );
 }

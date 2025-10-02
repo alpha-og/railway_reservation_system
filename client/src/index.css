@@ -36,6 +36,63 @@
   --noise: 0;
 }
 
+/* Premium Gradient Animations */
+@keyframes gradient-x {
+  0%, 100% {
+    transform: translateX(0%);
+    background-size: 400% 400%;
+  }
+  50% {
+    transform: translateX(-100%);
+    background-size: 400% 400%;
+  }
+}
+
+@keyframes gradient-y {
+  0%, 100% {
+    transform: translateY(0%);
+    background-size: 400% 400%;
+  }
+  50% {
+    transform: translateY(-100%);
+    background-size: 400% 400%;
+  }
+}
+
+@keyframes gradient-xy {
+  0%, 100% {
+    transform: translate(0%, 0%);
+    background-size: 400% 400%;
+  }
+  25% {
+    transform: translate(-100%, 0%);
+    background-size: 400% 400%;
+  }
+  50% {
+    transform: translate(-100%, -100%);
+    background-size: 400% 400%;
+  }
+  75% {
+    transform: translate(0%, -100%);
+    background-size: 400% 400%;
+  }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 8s ease infinite;
+  background-size: 400% 400%;
+}
+
+.animate-gradient-y {
+  animation: gradient-y 12s ease infinite;
+  background-size: 400% 400%;
+}
+
+.animate-gradient-xy {
+  animation: gradient-xy 15s ease infinite;
+  background-size: 400% 400%;
+}
+
 html,
 body,
 #root {
