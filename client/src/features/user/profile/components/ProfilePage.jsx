@@ -3,7 +3,7 @@ import { useGetProfile, useUpdateProfile } from "../services/profileServices";
 import Badge from "../../../badge/component/Badge";
 
 export default function ProfilePage() {
-  const { data: profile, isLoading, isFallback } = useGetProfile();
+  const { data: profile, isLoading } = useGetProfile();
   const updateProfile = useUpdateProfile();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -85,9 +85,6 @@ export default function ProfilePage() {
     <div className="p-8 max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-extrabold text-center mb-8 flex-1">👤 My Profile</h1>
-        {isFallback && (
-          <span className="badge bg-yellow-200 text-black self-start">Demo Data</span>
-        )}
       </div>
 
       {!isEditing ? (
@@ -99,8 +96,7 @@ export default function ProfilePage() {
             <span className="font-semibold">Email:</span> {profile.email}
           </p>
           <p>
-            <span className="font-semibold">Role:</span>{" "}
-            {isFallback ? "DEMO DATA" : profile.role}
+            <span className="font-semibold">Role:</span> {profile.role}
           </p>
           <p>
             <span className="font-semibold">Password:</span> ********

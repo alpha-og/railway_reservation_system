@@ -4,15 +4,6 @@ import { useAuthStore } from "../../../../store/useAuthStore.js";
 import { useApiWithFallback } from "../../../../services/useApiWithFallback.js";
 import { useUserId } from "../../../../hooks/useUserId.js";
 
-// --- Demo / fallback profile ---
-const demoProfile = {
-  id: "user_002",
-  name: "Jil Varghese Palliyan",
-  email: "j@e.com",
-  role: "Passenger",
-  roleId: 2,
-};
-
 // Helper: attach token header
 const createAuthHeaders = (token) =>
   token ? { Authorization: `Bearer ${token}` } : {};
@@ -23,18 +14,18 @@ export const useGetProfile = () => {
   const userId = useUserId();
 
   return useApiWithFallback({
-    fallbackKey: `profileByUser_${userId || "fallback"}`,
+    fallbackKey: `profileByUser_${userId || "no_user"}`,
     endpoint: async () => {
-      // Return demo profile if no userId
-      if (!userId) return { ...demoProfile, isFallback: true };
+      if (!userId) {
+        throw new Error("No user ID available");
+      }
 
       const res = await axiosClient.get(`/users/${userId}`, {
         headers: createAuthHeaders(token),
       });
 
-      return { ...res.data, isFallback: false };
+      return res.data;
     },
-    fallbackData: { ...demoProfile, isFallback: true },
   });
 };
 
@@ -44,15 +35,14 @@ export const useUpdateProfile = () => {
   const userId = useUserId();
 
   return async (data) => {
-    // If no userId, update demo profile locally
     if (!userId) {
-      return { ...demoProfile, ...data, isFallback: true };
+      throw new Error("No user ID available for profile update");
     }
 
     const res = await axiosClient.put(`/users/${userId}`, data, {
       headers: createAuthHeaders(token),
     });
 
-    return { ...res.data, isFallback: false };
+    return res.data;
   };
 };
