@@ -31,7 +31,7 @@ export default function createApp(config) {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"],
+      origin: ["http://localhost:5173"],
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -67,7 +67,7 @@ export default function createApp(config) {
   api.use("/admin/schedules", authenticate("admin"), scheduleRoutes);
   api.use("/admin/seat-types", authenticate("admin"), seatTypeRoutes);
 
-  api.use("/profile", authenticate("customer"), profileRoutes);
+  api.use("/profile", authenticate(["customer", "admin"]), profileRoutes);
   api.use("/bookings", authenticate("customer"), bookingRoutes);
 
   api.get("/", (req, res) => {
