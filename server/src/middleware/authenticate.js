@@ -3,13 +3,19 @@ import { verifyToken } from "../utils/jwt.js";
 import { AppError } from "../utils/errors.js";
 import { queryDB } from "../utils/db.js";
 
-const authenticate =
-  (role = "customer") =>
-  async (req, res, next) => {
+function authenticate(authorizedRoles = null) {
+  authorizedRoles = authorizedRoles
+    ? Array.isArray(authorizedRoles)
+      ? authorizedRoles
+      : [authorizedRoles]
+    : [];
+
+  return async (req, res, next) => {
     // validate authorization header
     const schema = z.object({
       authorization: z.string().startsWith("Bearer ").optional(),
     });
+
     const { authorization } = schema.parse(req.headers);
     if (!authorization) {
       throw new AppError(401, "Authorization header missing");
@@ -40,12 +46,14 @@ const authenticate =
       throw new AppError(401, "User not found");
     }
 
-    if (rows[0].name !== role) {
+    const isAuthorized = authorizedRoles.includes(rows[0].name);
+    if (authorizedRoles.length > 0 && !isAuthorized) {
       throw new AppError(401, "User not authorized");
     }
 
     req.userId = userId;
     next();
   };
+}
 
 export default authenticate;
