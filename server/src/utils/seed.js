@@ -22,6 +22,7 @@ const seedData = {
   ],
 
   bookingStatuses: [
+    { name: "Pending" },
     { name: "Confirmed" },
     { name: "Waiting" },
     { name: "RAC" },
@@ -60,33 +61,33 @@ const seedData = {
     { name: "Rajdhani Express", code: "12301" },
     { name: "New Delhi Rajdhani", code: "12951" },
     { name: "Mumbai Rajdhani", code: "12953" },
-    
+
     // Shatabdi Express Services
     { name: "Shatabdi Express", code: "12002" },
     { name: "New Delhi Shatabdi", code: "12017" },
     { name: "Habibganj Shatabdi", code: "12059" },
-    
+
     // Duronto Express Services
     { name: "Duronto Express", code: "12259" },
     { name: "Sealdah Duronto", code: "12273" },
     { name: "Mumbai Duronto", code: "12267" },
-    
+
     // Garib Rath Services
     { name: "Garib Rath", code: "12215" },
     { name: "Poorva Garib Rath", code: "12553" },
     { name: "Sampark Garib Rath", code: "12565" },
-    
+
     // Jan Shatabdi Services
     { name: "Jan Shatabdi", code: "12023" },
     { name: "Gomti Jan Shatabdi", code: "12055" },
     { name: "Kerala Jan Shatabdi", code: "12081" },
-    
+
     // Modern Express Trains
     { name: "Humsafar Express", code: "22405" },
     { name: "Tejas Express", code: "22119" },
     { name: "Vande Bharat Express", code: "22435" },
     { name: "Gatiman Express", code: "12049" },
-    
+
     // Superfast Express
     { name: "Chennai Mail", code: "12615" },
     { name: "Grand Trunk Express", code: "12615" },
@@ -94,7 +95,7 @@ const seedData = {
     { name: "Karnataka Express", code: "12627" },
     { name: "Punjab Mail", code: "12137" },
     { name: "Konkan Kanya Express", code: "10111" },
-    
+
     // Additional Express Services
     { name: "Intercity Express", code: "12015" },
     { name: "Double Decker Express", code: "12273" },
@@ -106,31 +107,31 @@ const seedData = {
   // Station distances in kilometers - realistic distances between major Indian cities
   stationDistances: [
     // Delhi routes
-    { from: "NDLS", to: "JP", distance: 308 },      // Delhi to Jaipur
-    { from: "NDLS", to: "LKO", distance: 556 },     // Delhi to Lucknow
-    { from: "NDLS", to: "ADI", distance: 934 },     // Delhi to Ahmedabad
-    { from: "NDLS", to: "BCT", distance: 1384 },    // Delhi to Mumbai
-    { from: "NDLS", to: "SC", distance: 1579 },     // Delhi to Hyderabad
-    { from: "NDLS", to: "MAS", distance: 2180 },    // Delhi to Chennai
-    { from: "NDLS", to: "SBC", distance: 2444 },    // Delhi to Bangalore
-    { from: "NDLS", to: "HWH", distance: 1441 },    // Delhi to Kolkata
-    
+    { from: "NDLS", to: "JP", distance: 308 }, // Delhi to Jaipur
+    { from: "NDLS", to: "LKO", distance: 556 }, // Delhi to Lucknow
+    { from: "NDLS", to: "ADI", distance: 934 }, // Delhi to Ahmedabad
+    { from: "NDLS", to: "BCT", distance: 1384 }, // Delhi to Mumbai
+    { from: "NDLS", to: "SC", distance: 1579 }, // Delhi to Hyderabad
+    { from: "NDLS", to: "MAS", distance: 2180 }, // Delhi to Chennai
+    { from: "NDLS", to: "SBC", distance: 2444 }, // Delhi to Bangalore
+    { from: "NDLS", to: "HWH", distance: 1441 }, // Delhi to Kolkata
+
     // Mumbai routes
-    { from: "BCT", to: "PUNE", distance: 192 },     // Mumbai to Pune
-    { from: "BCT", to: "ADI", distance: 545 },      // Mumbai to Ahmedabad
-    { from: "BCT", to: "SC", distance: 713 },       // Mumbai to Hyderabad
-    { from: "BCT", to: "SBC", distance: 1279 },     // Mumbai to Bangalore
-    { from: "BCT", to: "MAS", distance: 1279 },     // Mumbai to Chennai
-    { from: "BCT", to: "HWH", distance: 1968 },     // Mumbai to Kolkata
-    
+    { from: "BCT", to: "PUNE", distance: 192 }, // Mumbai to Pune
+    { from: "BCT", to: "ADI", distance: 545 }, // Mumbai to Ahmedabad
+    { from: "BCT", to: "SC", distance: 713 }, // Mumbai to Hyderabad
+    { from: "BCT", to: "SBC", distance: 1279 }, // Mumbai to Bangalore
+    { from: "BCT", to: "MAS", distance: 1279 }, // Mumbai to Chennai
+    { from: "BCT", to: "HWH", distance: 1968 }, // Mumbai to Kolkata
+
     // Other major routes
-    { from: "JP", to: "ADI", distance: 626 },       // Jaipur to Ahmedabad
-    { from: "PUNE", to: "SBC", distance: 840 },     // Pune to Bangalore
-    { from: "SC", to: "SBC", distance: 612 },       // Hyderabad to Bangalore
-    { from: "SC", to: "MAS", distance: 625 },       // Hyderabad to Chennai
-    { from: "SBC", to: "MAS", distance: 362 },      // Bangalore to Chennai
-    { from: "HWH", to: "MAS", distance: 1663 },     // Kolkata to Chennai
-    { from: "LKO", to: "HWH", distance: 585 },      // Lucknow to Kolkata
+    { from: "JP", to: "ADI", distance: 626 }, // Jaipur to Ahmedabad
+    { from: "PUNE", to: "SBC", distance: 840 }, // Pune to Bangalore
+    { from: "SC", to: "SBC", distance: 612 }, // Hyderabad to Bangalore
+    { from: "SC", to: "MAS", distance: 625 }, // Hyderabad to Chennai
+    { from: "SBC", to: "MAS", distance: 362 }, // Bangalore to Chennai
+    { from: "HWH", to: "MAS", distance: 1663 }, // Kolkata to Chennai
+    { from: "LKO", to: "HWH", distance: 585 }, // Lucknow to Kolkata
   ],
 };
 
@@ -403,67 +404,72 @@ const seedSchedules = async () => {
   // Define train frequency patterns based on service type
   const trainFrequencyPatterns = {
     // Daily premium services
-    "12301": { frequency: 1, baseTimes: ["16:55:00"] }, // Rajdhani Express
-    "12951": { frequency: 1, baseTimes: ["17:30:00"] }, // New Delhi Rajdhani
-    "12002": { frequency: 1, baseTimes: ["06:00:00"] }, // Shatabdi Express
-    "12017": { frequency: 1, baseTimes: ["15:30:00"] }, // New Delhi Shatabdi
-    "22435": { frequency: 1, baseTimes: ["06:00:00"] }, // Vande Bharat Express
-    "12049": { frequency: 1, baseTimes: ["08:10:00"] }, // Gatiman Express
-    "22119": { frequency: 1, baseTimes: ["15:50:00"] }, // Tejas Express
+    12301: { frequency: 1, baseTimes: ["16:55:00"] }, // Rajdhani Express
+    12951: { frequency: 1, baseTimes: ["17:30:00"] }, // New Delhi Rajdhani
+    12002: { frequency: 1, baseTimes: ["06:00:00"] }, // Shatabdi Express
+    12017: { frequency: 1, baseTimes: ["15:30:00"] }, // New Delhi Shatabdi
+    22435: { frequency: 1, baseTimes: ["06:00:00"] }, // Vande Bharat Express
+    12049: { frequency: 1, baseTimes: ["08:10:00"] }, // Gatiman Express
+    22119: { frequency: 1, baseTimes: ["15:50:00"] }, // Tejas Express
 
     // Bi-weekly premium services (every 2 days)
-    "12953": { frequency: 2, baseTimes: ["18:15:00"] }, // Mumbai Rajdhani
-    "22405": { frequency: 2, baseTimes: ["14:25:00"] }, // Humsafar Express
-    "12059": { frequency: 2, baseTimes: ["07:15:00"] }, // Habibganj Shatabdi
+    12953: { frequency: 2, baseTimes: ["18:15:00"] }, // Mumbai Rajdhani
+    22405: { frequency: 2, baseTimes: ["14:25:00"] }, // Humsafar Express
+    12059: { frequency: 2, baseTimes: ["07:15:00"] }, // Habibganj Shatabdi
 
     // Tri-weekly services (every 3 days)
-    "12259": { frequency: 3, baseTimes: ["22:30:00"] }, // Duronto Express
-    "12273": { frequency: 3, baseTimes: ["07:40:00"] }, // Sealdah Duronto
-    "12267": { frequency: 3, baseTimes: ["22:00:00"] }, // Mumbai Duronto
-    "12215": { frequency: 3, baseTimes: ["23:45:00"] }, // Garib Rath
-    "12553": { frequency: 3, baseTimes: ["21:15:00"] }, // Poorva Garib Rath
-    "12565": { frequency: 3, baseTimes: ["19:30:00"] }, // Sampark Garib Rath
+    12259: { frequency: 3, baseTimes: ["22:30:00"] }, // Duronto Express
+    12273: { frequency: 3, baseTimes: ["07:40:00"] }, // Sealdah Duronto
+    12267: { frequency: 3, baseTimes: ["22:00:00"] }, // Mumbai Duronto
+    12215: { frequency: 3, baseTimes: ["23:45:00"] }, // Garib Rath
+    12553: { frequency: 3, baseTimes: ["21:15:00"] }, // Poorva Garib Rath
+    12565: { frequency: 3, baseTimes: ["19:30:00"] }, // Sampark Garib Rath
 
     // Weekly services (every 7 days)
-    "12023": { frequency: 7, baseTimes: ["05:30:00"] }, // Jan Shatabdi
-    "12055": { frequency: 7, baseTimes: ["06:15:00"] }, // Gomti Jan Shatabdi
-    "12081": { frequency: 7, baseTimes: ["14:45:00"] }, // Kerala Jan Shatabdi
+    12023: { frequency: 7, baseTimes: ["05:30:00"] }, // Jan Shatabdi
+    12055: { frequency: 7, baseTimes: ["06:15:00"] }, // Gomti Jan Shatabdi
+    12081: { frequency: 7, baseTimes: ["14:45:00"] }, // Kerala Jan Shatabdi
 
     // Express services (alternate days)
-    "12615": { frequency: 2, baseTimes: ["20:30:00"] }, // Chennai Mail
-    "12809": { frequency: 2, baseTimes: ["19:45:00"] }, // Howrah Mail
-    "12627": { frequency: 2, baseTimes: ["21:50:00"] }, // Karnataka Express
-    "12137": { frequency: 2, baseTimes: ["22:15:00"] }, // Punjab Mail
+    12615: { frequency: 2, baseTimes: ["20:30:00"] }, // Chennai Mail
+    12809: { frequency: 2, baseTimes: ["19:45:00"] }, // Howrah Mail
+    12627: { frequency: 2, baseTimes: ["21:50:00"] }, // Karnataka Express
+    12137: { frequency: 2, baseTimes: ["22:15:00"] }, // Punjab Mail
 
     // Regular services (every 3 days)
-    "10111": { frequency: 3, baseTimes: ["16:20:00"] }, // Konkan Kanya Express
-    "12015": { frequency: 3, baseTimes: ["17:20:00"] }, // Intercity Express
-    "12649": { frequency: 3, baseTimes: ["18:40:00"] }, // Superfast Express
+    10111: { frequency: 3, baseTimes: ["16:20:00"] }, // Konkan Kanya Express
+    12015: { frequency: 3, baseTimes: ["17:20:00"] }, // Intercity Express
+    12649: { frequency: 3, baseTimes: ["18:40:00"] }, // Superfast Express
 
     // Local services (daily but different times)
-    "11077": { frequency: 1, baseTimes: ["06:30:00", "14:15:00", "20:45:00"] }, // Mail Express
-    "56473": { frequency: 1, baseTimes: ["05:15:00", "11:30:00", "16:05:00", "21:20:00"] }, // Passenger Express
+    11077: { frequency: 1, baseTimes: ["06:30:00", "14:15:00", "20:45:00"] }, // Mail Express
+    56473: {
+      frequency: 1,
+      baseTimes: ["05:15:00", "11:30:00", "16:05:00", "21:20:00"],
+    }, // Passenger Express
   };
 
   // Generate schedules for next 30 days starting from today
   for (let dayOffset = 0; dayOffset < 30; dayOffset++) {
     const scheduleDate = new Date(today);
     scheduleDate.setDate(today.getDate() + dayOffset);
-    
+
     for (const train of trainsResult.rows) {
       const pattern = trainFrequencyPatterns[train.code];
       if (!pattern) continue;
 
       // Check if train should run on this day based on frequency
-      const shouldRun = dayOffset % pattern.frequency === (train.code.charCodeAt(0) % pattern.frequency);
-      
+      const shouldRun =
+        dayOffset % pattern.frequency ===
+        train.code.charCodeAt(0) % pattern.frequency;
+
       if (shouldRun) {
         // Multiple departure times for some trains
         for (const departureTime of pattern.baseTimes) {
           schedules.push({
             train_id: train.id,
-            departure_date: scheduleDate.toISOString().split('T')[0],
-            departure_time: departureTime
+            departure_date: scheduleDate.toISOString().split("T")[0],
+            departure_time: departureTime,
           });
         }
       }
@@ -519,7 +525,9 @@ const seedSchedules = async () => {
     }
   }
 
-  console.log(`  ✓ Successfully inserted ${insertedCount} schedules for next 30 days`);
+  console.log(
+    `  ✓ Successfully inserted ${insertedCount} schedules for next 30 days`,
+  );
   return insertedSchedules;
 };
 
@@ -541,7 +549,8 @@ const seedScheduleStops = async () => {
   // Enhanced route definitions with multiple trains serving similar routes
   const routeDefinitions = {
     // Delhi to Mumbai routes
-    "12301": { // Rajdhani Express
+    12301: {
+      // Rajdhani Express
       stations: ["NDLS", "JP", "ADI", "BCT"],
       times: [
         { arrival: "16:55:00", departure: "16:55:00" },
@@ -550,7 +559,8 @@ const seedScheduleStops = async () => {
         { arrival: "12:30:00", departure: "12:30:00" },
       ],
     },
-    "12951": { // New Delhi Rajdhani (alternate timing)
+    12951: {
+      // New Delhi Rajdhani (alternate timing)
       stations: ["NDLS", "JP", "ADI", "BCT"],
       times: [
         { arrival: "17:30:00", departure: "17:30:00" },
@@ -559,7 +569,8 @@ const seedScheduleStops = async () => {
         { arrival: "13:15:00", departure: "13:15:00" },
       ],
     },
-    "12259": { // Duronto Express (Delhi to Mumbai via different route)
+    12259: {
+      // Duronto Express (Delhi to Mumbai via different route)
       stations: ["NDLS", "ADI", "PUNE", "BCT"],
       times: [
         { arrival: "22:30:00", departure: "22:30:00" },
@@ -569,22 +580,25 @@ const seedScheduleStops = async () => {
       ],
     },
 
-    // Delhi to Jaipur routes  
-    "12002": { // Shatabdi Express
+    // Delhi to Jaipur routes
+    12002: {
+      // Shatabdi Express
       stations: ["NDLS", "JP"],
       times: [
         { arrival: "06:00:00", departure: "06:00:00" },
         { arrival: "10:45:00", departure: "10:45:00" },
       ],
     },
-    "12017": { // New Delhi Shatabdi (evening service)
+    12017: {
+      // New Delhi Shatabdi (evening service)
       stations: ["NDLS", "JP"],
       times: [
         { arrival: "15:30:00", departure: "15:30:00" },
         { arrival: "20:15:00", departure: "20:15:00" },
       ],
     },
-    "12049": { // Gatiman Express (fastest to Jaipur)
+    12049: {
+      // Gatiman Express (fastest to Jaipur)
       stations: ["NDLS", "JP"],
       times: [
         { arrival: "08:10:00", departure: "08:10:00" },
@@ -593,7 +607,8 @@ const seedScheduleStops = async () => {
     },
 
     // Delhi to Chennai routes
-    "12215": { // Garib Rath
+    12215: {
+      // Garib Rath
       stations: ["NDLS", "SC", "MAS"],
       times: [
         { arrival: "23:45:00", departure: "23:45:00" },
@@ -601,7 +616,8 @@ const seedScheduleStops = async () => {
         { arrival: "06:15:00", departure: "06:15:00" },
       ],
     },
-    "12615": { // Chennai Mail
+    12615: {
+      // Chennai Mail
       stations: ["NDLS", "SC", "MAS"],
       times: [
         { arrival: "20:30:00", departure: "20:30:00" },
@@ -611,14 +627,16 @@ const seedScheduleStops = async () => {
     },
 
     // Delhi to Lucknow routes
-    "12023": { // Jan Shatabdi
+    12023: {
+      // Jan Shatabdi
       stations: ["NDLS", "LKO"],
       times: [
         { arrival: "05:30:00", departure: "05:30:00" },
         { arrival: "11:45:00", departure: "11:45:00" },
       ],
     },
-    "12055": { // Gomti Jan Shatabdi
+    12055: {
+      // Gomti Jan Shatabdi
       stations: ["NDLS", "LKO"],
       times: [
         { arrival: "06:15:00", departure: "06:15:00" },
@@ -627,14 +645,16 @@ const seedScheduleStops = async () => {
     },
 
     // Mumbai to Pune routes
-    "12273": { // Double Decker Express
+    12273: {
+      // Double Decker Express
       stations: ["BCT", "PUNE"],
       times: [
         { arrival: "07:40:00", departure: "07:40:00" },
         { arrival: "11:15:00", departure: "11:15:00" },
       ],
     },
-    "12015": { // Intercity Express
+    12015: {
+      // Intercity Express
       stations: ["BCT", "PUNE"],
       times: [
         { arrival: "17:20:00", departure: "17:20:00" },
@@ -643,7 +663,8 @@ const seedScheduleStops = async () => {
     },
 
     // Mumbai to Bangalore routes
-    "12627": { // Karnataka Express
+    12627: {
+      // Karnataka Express
       stations: ["BCT", "PUNE", "SC", "SBC"],
       times: [
         { arrival: "21:50:00", departure: "21:50:00" },
@@ -652,7 +673,8 @@ const seedScheduleStops = async () => {
         { arrival: "21:15:00", departure: "21:15:00" },
       ],
     },
-    "22405": { // Humsafar Express
+    22405: {
+      // Humsafar Express
       stations: ["BCT", "PUNE", "SBC"],
       times: [
         { arrival: "14:25:00", departure: "14:25:00" },
@@ -662,7 +684,8 @@ const seedScheduleStops = async () => {
     },
 
     // Mumbai to Kolkata routes
-    "12267": { // Mumbai Duronto
+    12267: {
+      // Mumbai Duronto
       stations: ["BCT", "SC", "HWH"],
       times: [
         { arrival: "22:00:00", departure: "22:00:00" },
@@ -670,7 +693,8 @@ const seedScheduleStops = async () => {
         { arrival: "07:20:00", departure: "07:20:00" },
       ],
     },
-    "12809": { // Howrah Mail
+    12809: {
+      // Howrah Mail
       stations: ["BCT", "SC", "HWH"],
       times: [
         { arrival: "19:45:00", departure: "19:45:00" },
@@ -680,14 +704,16 @@ const seedScheduleStops = async () => {
     },
 
     // Premium modern services
-    "22435": { // Vande Bharat Express (Delhi-Jaipur)
+    22435: {
+      // Vande Bharat Express (Delhi-Jaipur)
       stations: ["NDLS", "JP"],
       times: [
         { arrival: "06:00:00", departure: "06:00:00" },
         { arrival: "09:30:00", departure: "09:30:00" },
       ],
     },
-    "22119": { // Tejas Express (Mumbai-Pune)
+    22119: {
+      // Tejas Express (Mumbai-Pune)
       stations: ["BCT", "PUNE"],
       times: [
         { arrival: "15:50:00", departure: "15:50:00" },
@@ -699,7 +725,9 @@ const seedScheduleStops = async () => {
   for (const schedule of schedulesResult.rows) {
     const route = routeDefinitions[schedule.code];
     if (!route) {
-      console.log(`  - No route definition found for train ${schedule.code}, skipping`);
+      console.log(
+        `  - No route definition found for train ${schedule.code}, skipping`,
+      );
       continue;
     }
 
@@ -768,11 +796,17 @@ const seedStationDistances = async () => {
   }
 
   for (const distanceData of seedData.stationDistances) {
-    const fromStation = stationsResult.rows.find(s => s.code === distanceData.from);
-    const toStation = stationsResult.rows.find(s => s.code === distanceData.to);
+    const fromStation = stationsResult.rows.find(
+      (s) => s.code === distanceData.from,
+    );
+    const toStation = stationsResult.rows.find(
+      (s) => s.code === distanceData.to,
+    );
 
     if (!fromStation || !toStation) {
-      console.log(`  - Stations ${distanceData.from} or ${distanceData.to} not found, skipping`);
+      console.log(
+        `  - Stations ${distanceData.from} or ${distanceData.to} not found, skipping`,
+      );
       continue;
     }
 
@@ -782,10 +816,15 @@ const seedStationDistances = async () => {
       WHERE (from_station_id = $1 AND to_station_id = $2) 
          OR (from_station_id = $2 AND to_station_id = $1)
     `;
-    const existsResult = await queryDB(existsQuery, [fromStation.id, toStation.id]);
+    const existsResult = await queryDB(existsQuery, [
+      fromStation.id,
+      toStation.id,
+    ]);
 
     if (existsResult.rows.length > 0) {
-      console.log(`  - Distance between ${distanceData.from} and ${distanceData.to} already exists`);
+      console.log(
+        `  - Distance between ${distanceData.from} and ${distanceData.to} already exists`,
+      );
       continue;
     }
 
@@ -796,12 +835,21 @@ const seedStationDistances = async () => {
     `;
 
     try {
-      const result = await queryDB(query, [fromStation.id, toStation.id, distanceData.distance]);
+      const result = await queryDB(query, [
+        fromStation.id,
+        toStation.id,
+        distanceData.distance,
+      ]);
       if (result.rows.length > 0) {
-        console.log(`  ✓ Inserted distance ${distanceData.from} -> ${distanceData.to}: ${distanceData.distance}km`);
+        console.log(
+          `  ✓ Inserted distance ${distanceData.from} -> ${distanceData.to}: ${distanceData.distance}km`,
+        );
       }
     } catch (error) {
-      console.error(`  ✗ Error inserting distance ${distanceData.from} -> ${distanceData.to}:`, error.message);
+      console.error(
+        `  ✗ Error inserting distance ${distanceData.from} -> ${distanceData.to}:`,
+        error.message,
+      );
     }
   }
 };
@@ -820,115 +868,138 @@ const seedCoaches = async () => {
   // Enhanced coach compositions for different train types
   const coachCompositions = {
     // Premium Rajdhani services
-    "12301": [ // Rajdhani Express
+    12301: [
+      // Rajdhani Express
       { type: "AC 1 Tier", count: 2, prefix: "H" },
       { type: "AC 2 Tier", count: 4, prefix: "A" },
       { type: "AC 3 Tier", count: 6, prefix: "B" },
     ],
-    "12951": [ // New Delhi Rajdhani
+    12951: [
+      // New Delhi Rajdhani
       { type: "AC 1 Tier", count: 3, prefix: "H" },
       { type: "AC 2 Tier", count: 5, prefix: "A" },
       { type: "AC 3 Tier", count: 8, prefix: "B" },
     ],
-    "12953": [ // Mumbai Rajdhani
+    12953: [
+      // Mumbai Rajdhani
       { type: "AC 1 Tier", count: 2, prefix: "H" },
       { type: "AC 2 Tier", count: 6, prefix: "A" },
       { type: "AC 3 Tier", count: 4, prefix: "B" },
     ],
 
     // Shatabdi services
-    "12002": [ // Shatabdi Express
+    12002: [
+      // Shatabdi Express
       { type: "AC Chair Car", count: 8, prefix: "CC" },
       { type: "AC 1 Tier", count: 1, prefix: "EC" },
     ],
-    "12017": [ // New Delhi Shatabdi
+    12017: [
+      // New Delhi Shatabdi
       { type: "AC Chair Car", count: 10, prefix: "CC" },
       { type: "AC 1 Tier", count: 1, prefix: "EC" },
     ],
-    "12059": [ // Habibganj Shatabdi
+    12059: [
+      // Habibganj Shatabdi
       { type: "AC Chair Car", count: 6, prefix: "CC" },
       { type: "AC 1 Tier", count: 1, prefix: "EC" },
     ],
 
     // Duronto services
-    "12259": [ // Duronto Express
+    12259: [
+      // Duronto Express
       { type: "AC 2 Tier", count: 3, prefix: "A" },
       { type: "AC 3 Tier", count: 8, prefix: "B" },
       { type: "Sleeper Class", count: 4, prefix: "S" },
     ],
-    "12273": [ // Sealdah Duronto
+    12273: [
+      // Sealdah Duronto
       { type: "AC 2 Tier", count: 4, prefix: "A" },
       { type: "AC 3 Tier", count: 6, prefix: "B" },
       { type: "Sleeper Class", count: 6, prefix: "S" },
     ],
-    "12267": [ // Mumbai Duronto
+    12267: [
+      // Mumbai Duronto
       { type: "AC 2 Tier", count: 5, prefix: "A" },
       { type: "AC 3 Tier", count: 7, prefix: "B" },
       { type: "Sleeper Class", count: 3, prefix: "S" },
     ],
 
     // Garib Rath services
-    "12215": [ // Garib Rath
+    12215: [
+      // Garib Rath
       { type: "AC 3 Tier", count: 12, prefix: "B" },
     ],
-    "12553": [ // Poorva Garib Rath
+    12553: [
+      // Poorva Garib Rath
       { type: "AC 3 Tier", count: 10, prefix: "B" },
     ],
-    "12565": [ // Sampark Garib Rath
+    12565: [
+      // Sampark Garib Rath
       { type: "AC 3 Tier", count: 14, prefix: "B" },
     ],
 
     // Jan Shatabdi services
-    "12023": [ // Jan Shatabdi
+    12023: [
+      // Jan Shatabdi
       { type: "AC Chair Car", count: 6, prefix: "CC" },
       { type: "AC 2 Tier", count: 2, prefix: "A" },
     ],
-    "12055": [ // Gomti Jan Shatabdi
+    12055: [
+      // Gomti Jan Shatabdi
       { type: "AC Chair Car", count: 8, prefix: "CC" },
       { type: "AC 2 Tier", count: 1, prefix: "A" },
     ],
-    "12081": [ // Kerala Jan Shatabdi
+    12081: [
+      // Kerala Jan Shatabdi
       { type: "AC Chair Car", count: 7, prefix: "CC" },
       { type: "AC 2 Tier", count: 2, prefix: "A" },
     ],
 
     // Modern premium trains
-    "22405": [ // Humsafar Express
+    22405: [
+      // Humsafar Express
       { type: "AC 3 Tier", count: 16, prefix: "B" },
     ],
-    "22119": [ // Tejas Express
+    22119: [
+      // Tejas Express
       { type: "AC Chair Car", count: 10, prefix: "CC" },
       { type: "AC 1 Tier", count: 2, prefix: "EC" },
     ],
-    "22435": [ // Vande Bharat Express
+    22435: [
+      // Vande Bharat Express
       { type: "AC Chair Car", count: 14, prefix: "CC" },
       { type: "AC 1 Tier", count: 2, prefix: "EC" },
     ],
-    "12049": [ // Gatiman Express
+    12049: [
+      // Gatiman Express
       { type: "AC Chair Car", count: 10, prefix: "CC" },
       { type: "AC 1 Tier", count: 1, prefix: "EC" },
     ],
 
     // Mail and Express trains
-    "12615": [ // Chennai Mail
+    12615: [
+      // Chennai Mail
       { type: "AC 2 Tier", count: 2, prefix: "A" },
       { type: "AC 3 Tier", count: 4, prefix: "B" },
       { type: "Sleeper Class", count: 8, prefix: "S" },
       { type: "General", count: 4, prefix: "GS" },
     ],
-    "12809": [ // Howrah Mail
+    12809: [
+      // Howrah Mail
       { type: "AC 2 Tier", count: 3, prefix: "A" },
       { type: "AC 3 Tier", count: 3, prefix: "B" },
       { type: "Sleeper Class", count: 10, prefix: "S" },
       { type: "General", count: 3, prefix: "GS" },
     ],
-    "12627": [ // Karnataka Express
+    12627: [
+      // Karnataka Express
       { type: "AC 2 Tier", count: 2, prefix: "A" },
       { type: "AC 3 Tier", count: 5, prefix: "B" },
       { type: "Sleeper Class", count: 6, prefix: "S" },
       { type: "General", count: 2, prefix: "GS" },
     ],
-    "12137": [ // Punjab Mail
+    12137: [
+      // Punjab Mail
       { type: "AC 2 Tier", count: 1, prefix: "A" },
       { type: "AC 3 Tier", count: 3, prefix: "B" },
       { type: "Sleeper Class", count: 12, prefix: "S" },
@@ -936,30 +1007,35 @@ const seedCoaches = async () => {
     ],
 
     // Express and Intercity trains
-    "10111": [ // Konkan Kanya Express
+    10111: [
+      // Konkan Kanya Express
       { type: "AC 2 Tier", count: 1, prefix: "A" },
       { type: "AC 3 Tier", count: 3, prefix: "B" },
       { type: "Sleeper Class", count: 8, prefix: "S" },
       { type: "General", count: 4, prefix: "GS" },
     ],
-    "12015": [ // Intercity Express
+    12015: [
+      // Intercity Express
       { type: "AC Chair Car", count: 4, prefix: "CC" },
       { type: "AC 2 Tier", count: 2, prefix: "A" },
       { type: "Sleeper Class", count: 4, prefix: "S" },
       { type: "General", count: 3, prefix: "GS" },
     ],
-    "12649": [ // Superfast Express
+    12649: [
+      // Superfast Express
       { type: "AC 2 Tier", count: 2, prefix: "A" },
       { type: "AC 3 Tier", count: 4, prefix: "B" },
       { type: "Sleeper Class", count: 8, prefix: "S" },
       { type: "General", count: 4, prefix: "GS" },
     ],
-    "11077": [ // Mail Express
+    11077: [
+      // Mail Express
       { type: "AC 3 Tier", count: 2, prefix: "B" },
       { type: "Sleeper Class", count: 10, prefix: "S" },
       { type: "General", count: 8, prefix: "GS" },
     ],
-    "56473": [ // Passenger Express
+    56473: [
+      // Passenger Express
       { type: "Sleeper Class", count: 6, prefix: "S" },
       { type: "General", count: 12, prefix: "GS" },
     ],
@@ -968,12 +1044,16 @@ const seedCoaches = async () => {
   for (const train of trainsResult.rows) {
     const composition = coachCompositions[train.code];
     if (!composition) {
-      console.log(`  - No coach composition found for train ${train.code}, skipping`);
+      console.log(
+        `  - No coach composition found for train ${train.code}, skipping`,
+      );
       continue;
     }
 
     for (const coachSpec of composition) {
-      const coachType = coachTypesResult.rows.find(ct => ct.name === coachSpec.type);
+      const coachType = coachTypesResult.rows.find(
+        (ct) => ct.name === coachSpec.type,
+      );
       if (!coachType) {
         console.log(`  - Coach type ${coachSpec.type} not found, skipping`);
         continue;
@@ -987,7 +1067,9 @@ const seedCoaches = async () => {
         const existsResult = await queryDB(existsQuery, [train.id, coachCode]);
 
         if (existsResult.rows.length > 0) {
-          console.log(`  - Coach ${coachCode} already exists for train ${train.code}`);
+          console.log(
+            `  - Coach ${coachCode} already exists for train ${train.code}`,
+          );
           continue;
         }
 
@@ -998,12 +1080,21 @@ const seedCoaches = async () => {
         `;
 
         try {
-          const result = await queryDB(query, [train.id, coachCode, coachType.id]);
+          const result = await queryDB(query, [
+            train.id,
+            coachCode,
+            coachType.id,
+          ]);
           if (result.rows.length > 0) {
-            console.log(`  ✓ Inserted coach ${coachCode} for train ${train.code}`);
+            console.log(
+              `  ✓ Inserted coach ${coachCode} for train ${train.code}`,
+            );
           }
         } catch (error) {
-          console.error(`  ✗ Error inserting coach ${coachCode}:`, error.message);
+          console.error(
+            `  ✗ Error inserting coach ${coachCode}:`,
+            error.message,
+          );
         }
       }
     }
@@ -1033,8 +1124,8 @@ const seedSeats = async () => {
         { name: "Lower Berth", count: 6 },
         { name: "Upper Berth", count: 6 },
         { name: "Side Lower", count: 3 },
-        { name: "Side Upper", count: 3 }
-      ]
+        { name: "Side Upper", count: 3 },
+      ],
     },
     "AC 2 Tier": {
       total: 46,
@@ -1042,8 +1133,8 @@ const seedSeats = async () => {
         { name: "Lower Berth", count: 16 },
         { name: "Upper Berth", count: 16 },
         { name: "Side Lower", count: 7 },
-        { name: "Side Upper", count: 7 }
-      ]
+        { name: "Side Upper", count: 7 },
+      ],
     },
     "AC 3 Tier": {
       total: 64,
@@ -1052,29 +1143,25 @@ const seedSeats = async () => {
         { name: "Middle Berth", count: 18 },
         { name: "Upper Berth", count: 18 },
         { name: "Side Lower", count: 5 },
-        { name: "Side Upper", count: 5 }
-      ]
+        { name: "Side Upper", count: 5 },
+      ],
     },
     "Sleeper Class": {
       total: 72,
       types: [
         { name: "Lower Berth", count: 24 },
         { name: "Middle Berth", count: 24 },
-        { name: "Upper Berth", count: 24 }
-      ]
+        { name: "Upper Berth", count: 24 },
+      ],
     },
     "AC Chair Car": {
       total: 78,
-      types: [
-        { name: "Chair", count: 78 }
-      ]
+      types: [{ name: "Chair", count: 78 }],
     },
-    "General": {
+    General: {
       total: 108,
-      types: [
-        { name: "Chair", count: 108 }
-      ]
-    }
+      types: [{ name: "Chair", count: 108 }],
+    },
   };
 
   for (const coach of coachesResult.rows) {
@@ -1083,7 +1170,9 @@ const seedSeats = async () => {
 
     let seatNumber = 1;
     for (const seatTypeConfig of config.types) {
-      const seatType = seatTypesResult.rows.find(st => st.name === seatTypeConfig.name);
+      const seatType = seatTypesResult.rows.find(
+        (st) => st.name === seatTypeConfig.name,
+      );
       if (!seatType) continue;
 
       for (let i = 0; i < seatTypeConfig.count; i++) {
@@ -1103,12 +1192,21 @@ const seedSeats = async () => {
         `;
 
         try {
-          const result = await queryDB(query, [coach.id, seatNumber, seatType.id]);
+          const result = await queryDB(query, [
+            coach.id,
+            seatNumber,
+            seatType.id,
+          ]);
           if (result.rows.length > 0) {
-            console.log(`  ✓ Inserted seat ${seatNumber} in coach ${coach.code}`);
+            console.log(
+              `  ✓ Inserted seat ${seatNumber} in coach ${coach.code}`,
+            );
           }
         } catch (error) {
-          console.error(`  ✗ Error inserting seat ${seatNumber}:`, error.message);
+          console.error(
+            `  ✗ Error inserting seat ${seatNumber}:`,
+            error.message,
+          );
         }
 
         seatNumber++;
@@ -1151,9 +1249,7 @@ const seedPassengers = async () => {
       { name: "Kavya Patel", email: "kavya.patel@example.com", age: 12 },
     ],
     // For Priya Sharma user
-    [
-      { name: "Priya Sharma", email: "priya.sharma@example.com", age: 26 },
-    ],
+    [{ name: "Priya Sharma", email: "priya.sharma@example.com", age: 26 }],
     // For Amit Kumar user
     [
       { name: "Amit Kumar", email: "amit.kumar@example.com", age: 33 },
@@ -1172,38 +1268,64 @@ const seedPassengers = async () => {
       { name: "Karan Singh", email: "karan.singh@example.com", age: 18 },
     ],
     // For Anita Desai user
-    [
-      { name: "Anita Desai", email: "anita.desai@example.com", age: 29 },
-    ]
+    [{ name: "Anita Desai", email: "anita.desai@example.com", age: 29 }],
   ];
 
-  for (let userIndex = 0; userIndex < Math.min(customersResult.rows.length, samplePassengers.length); userIndex++) {
+  for (
+    let userIndex = 0;
+    userIndex < Math.min(customersResult.rows.length, samplePassengers.length);
+    userIndex++
+  ) {
     const user = customersResult.rows[userIndex];
     const passengers = samplePassengers[userIndex];
 
     for (const passengerData of passengers) {
       // Check if passenger already exists
       const existsQuery = `SELECT id FROM passengers WHERE user_id = $1 AND email = $2`;
-      const existsResult = await queryDB(existsQuery, [user.id, passengerData.email]);
+      const existsResult = await queryDB(existsQuery, [
+        user.id,
+        passengerData.email,
+      ]);
 
       if (existsResult.rows.length > 0) {
         console.log(`  - Passenger ${passengerData.email} already exists`);
         continue;
       }
 
+      // Determine gender based on name patterns
+      const gender =
+        passengerData.name.includes("Priya") ||
+        passengerData.name.includes("Sneha") ||
+        passengerData.name.includes("Anita") ||
+        passengerData.name.includes("Meera") ||
+        passengerData.name.includes("Kavya") ||
+        passengerData.name.includes("Sunita") ||
+        passengerData.name.includes("Deepika")
+          ? "Female"
+          : "Male";
+
       const query = `
-        INSERT INTO passengers (user_id, name, email, age, created_at)
-        VALUES ($1, $2, $3, $4, NOW())
+        INSERT INTO passengers (user_id, name, email, age, gender, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
         RETURNING id;
       `;
 
       try {
-        const result = await queryDB(query, [user.id, passengerData.name, passengerData.email, passengerData.age]);
+        const result = await queryDB(query, [
+          user.id,
+          passengerData.name,
+          passengerData.email,
+          passengerData.age,
+          gender,
+        ]);
         if (result.rows.length > 0) {
           console.log(`  ✓ Inserted passenger ${passengerData.name}`);
         }
       } catch (error) {
-        console.error(`  ✗ Error inserting passenger ${passengerData.name}:`, error.message);
+        console.error(
+          `  ✗ Error inserting passenger ${passengerData.name}:`,
+          error.message,
+        );
       }
     }
   }
@@ -1217,34 +1339,42 @@ const seedBookings = async () => {
     JOIN roles r ON u.role_id = r.id 
     WHERE r.name = 'customer'
   `);
-  const schedulesResult = await queryDB("SELECT id, train_id FROM schedules LIMIT 3");
+  const schedulesResult = await queryDB(
+    "SELECT id, train_id FROM schedules LIMIT 3",
+  );
   const stationsResult = await queryDB("SELECT id, code FROM stations");
-  const bookingStatusesResult = await queryDB("SELECT id, name FROM booking_statuses");
+  const bookingStatusesResult = await queryDB(
+    "SELECT id, name FROM booking_statuses",
+  );
 
   if (customersResult.rows.length === 0 || schedulesResult.rows.length === 0) {
     console.log("  - Skipping bookings (missing customers or schedules)");
     return;
   }
 
-  const confirmedStatus = bookingStatusesResult.rows.find(s => s.name === 'Confirmed');
-  const waitingStatus = bookingStatusesResult.rows.find(s => s.name === 'Waiting');
+  const confirmedStatus = bookingStatusesResult.rows.find(
+    (s) => s.name === "Confirmed",
+  );
+  const waitingStatus = bookingStatusesResult.rows.find(
+    (s) => s.name === "Waiting",
+  );
 
   const sampleBookings = [
     {
       userId: customersResult.rows[0]?.id,
       scheduleId: schedulesResult.rows[0]?.id,
       fromStation: "NDLS", // Delhi
-      toStation: "BCT",   // Mumbai
+      toStation: "BCT", // Mumbai
       statusId: confirmedStatus?.id,
-      totalAmount: 2500.00
+      totalAmount: 2500.0,
     },
     {
       userId: customersResult.rows[1]?.id,
       scheduleId: schedulesResult.rows[1]?.id,
       fromStation: "NDLS", // Delhi
-      toStation: "JP",    // Jaipur
+      toStation: "JP", // Jaipur
       statusId: waitingStatus?.id,
-      totalAmount: 1200.00
+      totalAmount: 1200.0,
     },
     {
       userId: customersResult.rows[0]?.id,
@@ -1252,15 +1382,20 @@ const seedBookings = async () => {
       fromStation: "BCT", // Mumbai
       toStation: "PUNE", // Pune
       statusId: confirmedStatus?.id,
-      totalAmount: 800.00
-    }
+      totalAmount: 800.0,
+    },
   ];
 
   for (const bookingData of sampleBookings) {
-    if (!bookingData.userId || !bookingData.scheduleId || !bookingData.statusId) continue;
+    if (!bookingData.userId || !bookingData.scheduleId || !bookingData.statusId)
+      continue;
 
-    const fromStation = stationsResult.rows.find(s => s.code === bookingData.fromStation);
-    const toStation = stationsResult.rows.find(s => s.code === bookingData.toStation);
+    const fromStation = stationsResult.rows.find(
+      (s) => s.code === bookingData.fromStation,
+    );
+    const toStation = stationsResult.rows.find(
+      (s) => s.code === bookingData.toStation,
+    );
 
     if (!fromStation || !toStation) continue;
 
@@ -1270,7 +1405,10 @@ const seedBookings = async () => {
       WHERE user_id = $1 AND schedule_id = $2 AND from_station_id = $3 AND to_station_id = $4
     `;
     const existsResult = await queryDB(existsQuery, [
-      bookingData.userId, bookingData.scheduleId, fromStation.id, toStation.id
+      bookingData.userId,
+      bookingData.scheduleId,
+      fromStation.id,
+      toStation.id,
     ]);
 
     if (existsResult.rows.length > 0) {
@@ -1293,20 +1431,28 @@ const seedBookings = async () => {
         toStation.id,
         bookingData.statusId,
         bookingData.totalAmount,
-        pnr
+        pnr,
       ]);
 
       if (result.rows.length > 0) {
-        console.log(`  ✓ Inserted booking ${pnr} from ${bookingData.fromStation} to ${bookingData.toStation}`);
-        
+        console.log(
+          `  ✓ Inserted booking ${pnr} from ${bookingData.fromStation} to ${bookingData.toStation}`,
+        );
+
         // Create corresponding payment for confirmed bookings
         if (bookingData.statusId === confirmedStatus?.id) {
-          const completedPaymentStatus = await queryDB("SELECT id FROM payment_statuses WHERE name = 'Completed' LIMIT 1");
+          const completedPaymentStatus = await queryDB(
+            "SELECT id FROM payment_statuses WHERE name = 'Completed' LIMIT 1",
+          );
           if (completedPaymentStatus.rows.length > 0) {
             await queryDB(
               `INSERT INTO payments (booking_id, amount, status_id, payment_date, created_at) 
                VALUES ($1, $2, $3, CURRENT_DATE, NOW())`,
-              [result.rows[0].id, bookingData.totalAmount, completedPaymentStatus.rows[0].id]
+              [
+                result.rows[0].id,
+                bookingData.totalAmount,
+                completedPaymentStatus.rows[0].id,
+              ],
             );
             console.log(`  ✓ Created payment for booking ${pnr}`);
           }
@@ -1327,19 +1473,31 @@ const seedComprehensiveBookings = async () => {
     JOIN roles r ON u.role_id = r.id 
     WHERE r.name = 'customer'
   `);
-  const schedulesResult = await queryDB("SELECT id, train_id, departure_date FROM schedules");
+  const schedulesResult = await queryDB(
+    "SELECT id, train_id, departure_date FROM schedules",
+  );
   const stationsResult = await queryDB("SELECT id, code FROM stations");
-  const bookingStatusesResult = await queryDB("SELECT id, name FROM booking_statuses");
+  const bookingStatusesResult = await queryDB(
+    "SELECT id, name FROM booking_statuses",
+  );
 
   if (customersResult.rows.length === 0 || schedulesResult.rows.length === 0) {
-    console.log("  - Skipping comprehensive bookings (missing customers or schedules)");
+    console.log(
+      "  - Skipping comprehensive bookings (missing customers or schedules)",
+    );
     return;
   }
 
-  const confirmedStatus = bookingStatusesResult.rows.find(s => s.name === 'Confirmed');
-  const waitingStatus = bookingStatusesResult.rows.find(s => s.name === 'Waiting');
-  const racStatus = bookingStatusesResult.rows.find(s => s.name === 'RAC');
-  const cancelledStatus = bookingStatusesResult.rows.find(s => s.name === 'Cancelled');
+  const confirmedStatus = bookingStatusesResult.rows.find(
+    (s) => s.name === "Confirmed",
+  );
+  const waitingStatus = bookingStatusesResult.rows.find(
+    (s) => s.name === "Waiting",
+  );
+  const racStatus = bookingStatusesResult.rows.find((s) => s.name === "RAC");
+  const cancelledStatus = bookingStatusesResult.rows.find(
+    (s) => s.name === "Cancelled",
+  );
 
   // Generate realistic booking scenarios across different dates
   const comprehensiveBookings = [
@@ -1347,80 +1505,93 @@ const seedComprehensiveBookings = async () => {
     {
       userId: customersResult.rows[2]?.id, // Raj Patel (family of 4)
       scheduleId: schedulesResult.rows[0]?.id,
-      fromStation: "NDLS", toStation: "BCT",
+      fromStation: "NDLS",
+      toStation: "BCT",
       statusId: confirmedStatus?.id,
-      totalAmount: 8500.00,
-      passengerCount: 4
+      totalAmount: 8500.0,
+      passengerCount: 4,
     },
     {
       userId: customersResult.rows[4]?.id, // Amit Kumar (family of 3)
       scheduleId: schedulesResult.rows[1]?.id,
-      fromStation: "NDLS", toStation: "JP",
+      fromStation: "NDLS",
+      toStation: "JP",
       statusId: confirmedStatus?.id,
-      totalAmount: 3600.00,
-      passengerCount: 3
+      totalAmount: 3600.0,
+      passengerCount: 3,
     },
     // Business trips (single passenger)
     {
       userId: customersResult.rows[3]?.id, // Priya Sharma
       scheduleId: schedulesResult.rows[2]?.id,
-      fromStation: "BCT", toStation: "PUNE",
+      fromStation: "BCT",
+      toStation: "PUNE",
       statusId: confirmedStatus?.id,
-      totalAmount: 1200.00,
-      passengerCount: 1
+      totalAmount: 1200.0,
+      passengerCount: 1,
     },
     {
       userId: customersResult.rows[7]?.id, // Anita Desai
       scheduleId: schedulesResult.rows[3]?.id,
-      fromStation: "NDLS", toStation: "MAS",
+      fromStation: "NDLS",
+      toStation: "MAS",
       statusId: waitingStatus?.id,
-      totalAmount: 4500.00,
-      passengerCount: 1
+      totalAmount: 4500.0,
+      passengerCount: 1,
     },
     // Couple trips
     {
       userId: customersResult.rows[1]?.id, // Jane Smith
       scheduleId: schedulesResult.rows[4]?.id,
-      fromStation: "NDLS", toStation: "LKO",
+      fromStation: "NDLS",
+      toStation: "LKO",
       statusId: confirmedStatus?.id,
-      totalAmount: 2400.00,
-      passengerCount: 2
+      totalAmount: 2400.0,
+      passengerCount: 2,
     },
     {
       userId: customersResult.rows[5]?.id, // Sneha Gupta
       scheduleId: schedulesResult.rows[0]?.id,
-      fromStation: "JP", toStation: "ADI",
+      fromStation: "JP",
+      toStation: "ADI",
       statusId: racStatus?.id,
-      totalAmount: 3200.00,
-      passengerCount: 2
+      totalAmount: 3200.0,
+      passengerCount: 2,
     },
     // Cancelled booking scenarios
     {
       userId: customersResult.rows[6]?.id, // Vikram Singh
       scheduleId: schedulesResult.rows[1]?.id,
-      fromStation: "NDLS", toStation: "JP",
+      fromStation: "NDLS",
+      toStation: "JP",
       statusId: cancelledStatus?.id,
-      totalAmount: 5400.00,
-      passengerCount: 3
+      totalAmount: 5400.0,
+      passengerCount: 3,
     },
     // Waiting list scenarios
     {
       userId: customersResult.rows[0]?.id, // John Doe
       scheduleId: schedulesResult.rows[2]?.id,
-      fromStation: "BCT", toStation: "SC",
+      fromStation: "BCT",
+      toStation: "SC",
       statusId: waitingStatus?.id,
-      totalAmount: 6800.00,
-      passengerCount: 3
-    }
+      totalAmount: 6800.0,
+      passengerCount: 3,
+    },
   ];
 
   const createdBookings = [];
 
   for (const bookingData of comprehensiveBookings) {
-    if (!bookingData.userId || !bookingData.scheduleId || !bookingData.statusId) continue;
+    if (!bookingData.userId || !bookingData.scheduleId || !bookingData.statusId)
+      continue;
 
-    const fromStation = stationsResult.rows.find(s => s.code === bookingData.fromStation);
-    const toStation = stationsResult.rows.find(s => s.code === bookingData.toStation);
+    const fromStation = stationsResult.rows.find(
+      (s) => s.code === bookingData.fromStation,
+    );
+    const toStation = stationsResult.rows.find(
+      (s) => s.code === bookingData.toStation,
+    );
 
     if (!fromStation || !toStation) continue;
 
@@ -1430,7 +1601,10 @@ const seedComprehensiveBookings = async () => {
       WHERE user_id = $1 AND schedule_id = $2 AND from_station_id = $3 AND to_station_id = $4
     `;
     const existsResult = await queryDB(existsQuery, [
-      bookingData.userId, bookingData.scheduleId, fromStation.id, toStation.id
+      bookingData.userId,
+      bookingData.scheduleId,
+      fromStation.id,
+      toStation.id,
     ]);
 
     if (existsResult.rows.length > 0) {
@@ -1454,11 +1628,13 @@ const seedComprehensiveBookings = async () => {
         toStation.id,
         bookingData.statusId,
         bookingData.totalAmount,
-        pnr
+        pnr,
       ]);
 
       if (result.rows.length > 0) {
-        console.log(`  ✓ Inserted booking ${pnr} from ${bookingData.fromStation} to ${bookingData.toStation}`);
+        console.log(
+          `  ✓ Inserted booking ${pnr} from ${bookingData.fromStation} to ${bookingData.toStation}`,
+        );
         createdBookings.push({ id: result.rows[0].id, ...bookingData });
       }
     } catch (error) {
@@ -1472,50 +1648,92 @@ const seedComprehensiveBookings = async () => {
 const seedBookedPassengers = async () => {
   console.log("Seeding booked passengers...");
 
+  console.log("Executing bookings query...");
   const bookingsResult = await queryDB(`
-    SELECT b.id as booking_id, b.user_id, bs.name as status 
-    FROM bookings b 
-    JOIN booking_statuses bs ON b.status_id = bs.id
+    SELECT b.id as booking_id, b.user_id
+    FROM bookings b
+    ORDER BY b.booking_date
   `);
-  
-  const passengersResult = await queryDB("SELECT id, user_id, name, email, age FROM passengers");
+
+  console.log("Executing passengers query...");
+  const passengersResult = await queryDB(
+    "SELECT id, name, age, gender, user_id FROM passengers",
+  );
+  console.log("Executing coach types query...");
+  const coachTypesResult = await queryDB("SELECT id, name FROM coach_types");
 
   if (bookingsResult.rows.length === 0 || passengersResult.rows.length === 0) {
-    console.log("  - Skipping booked passengers (missing bookings or passengers)");
+    console.log(
+      "  - Skipping booked passengers (missing bookings or passengers)",
+    );
     return;
   }
 
-  const genders = ['Male', 'Female', 'Other'];
   const createdBookedPassengers = [];
 
   for (const booking of bookingsResult.rows) {
-    // Get passengers for this user
-    const userPassengers = passengersResult.rows.filter(p => p.user_id === booking.user_id);
-    
-    if (userPassengers.length === 0) continue;
+    const userPassengers = passengersResult.rows.filter(
+      (p) => p.user_id === booking.user_id,
+    );
 
-    // Create booked passenger entries for each passenger in the booking
-    for (let i = 0; i < Math.min(userPassengers.length, 4); i++) {
-      const passenger = userPassengers[i];
-      
+    if (userPassengers.length === 0) {
+      console.log(
+        `  - No passengers found for booking user ${booking.user_id}`,
+      );
+      continue;
+    }
+
+    const passengersToBook = userPassengers.slice(
+      0,
+      Math.min(3, userPassengers.length),
+    ); // Limit to max 3 passengers per booking
+
+    for (const passenger of passengersToBook) {
       // Check if booked passenger already exists
       const existsQuery = `SELECT id FROM booked_passengers WHERE booking_id = $1 AND passenger_id = $2`;
-      const existsResult = await queryDB(existsQuery, [booking.booking_id, passenger.id]);
+      const existsResult = await queryDB(existsQuery, [
+        booking.booking_id,
+        passenger.id,
+      ]);
 
       if (existsResult.rows.length > 0) {
-        createdBookedPassengers.push({ id: existsResult.rows[0].id, booking_id: booking.booking_id, passenger_id: passenger.id });
+        console.log(
+          `  - Booked passenger already exists for booking/passenger combination`,
+        );
         continue;
       }
 
-      const gender = passenger.name.includes('Jane') || passenger.name.includes('Emily') || 
-                    passenger.name.includes('Priya') || passenger.name.includes('Sneha') ||
-                    passenger.name.includes('Anita') || passenger.name.includes('Meera') ||
-                    passenger.name.includes('Kavya') || passenger.name.includes('Sunita') ||
-                    passenger.name.includes('Deepika') ? 'Female' : 'Male';
+      // Use gender from passengers table (if available), otherwise determine from name
+      let gender = passenger.gender;
+      if (!gender) {
+        gender =
+          passenger.name.includes("Priya") ||
+          passenger.name.includes("Sneha") ||
+          passenger.name.includes("Anita") ||
+          passenger.name.includes("Meera") ||
+          passenger.name.includes("Kavya") ||
+          passenger.name.includes("Sunita") ||
+          passenger.name.includes("Deepika")
+            ? "Female"
+            : "Male";
+      }
+
+      // Select a random coach type (if coach types are available)
+      let selectedCoachType = null;
+      let randomCoachTypeName = "No coach type";
+
+      if (coachTypesResult.rows.length > 0) {
+        // Use actual coach types from database instead of hardcoded list
+        const randomIndex = Math.floor(
+          Math.random() * coachTypesResult.rows.length,
+        );
+        selectedCoachType = coachTypesResult.rows[randomIndex];
+        randomCoachTypeName = selectedCoachType.name;
+      }
 
       const query = `
-        INSERT INTO booked_passengers (booking_id, passenger_id, name, gender, age)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO booked_passengers (booking_id, passenger_id, name, gender, age, coach_type_id)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING id;
       `;
 
@@ -1525,23 +1743,32 @@ const seedBookedPassengers = async () => {
           passenger.id,
           passenger.name,
           gender,
-          passenger.age
+          passenger.age,
+          selectedCoachType?.id,
         ]);
 
         if (result.rows.length > 0) {
-          console.log(`  ✓ Linked passenger ${passenger.name} to booking`);
-          createdBookedPassengers.push({ 
-            id: result.rows[0].id, 
-            booking_id: booking.booking_id, 
-            passenger_id: passenger.id 
+          console.log(
+            `  ✓ Linked passenger ${passenger.name} to booking with ${randomCoachTypeName}`,
+          );
+          createdBookedPassengers.push({
+            id: result.rows[0].id,
+            booking_id: booking.booking_id,
+            passenger_id: passenger.id,
           });
         }
       } catch (error) {
-        console.error(`  ✗ Error linking passenger ${passenger.name}:`, error.message);
+        console.error(
+          `  ✗ Error linking passenger ${passenger.name}:`,
+          error.message,
+        );
       }
     }
   }
 
+  console.log(
+    `✅ Created ${createdBookedPassengers.length} booked passenger entries\n`,
+  );
   return createdBookedPassengers;
 };
 
@@ -1566,8 +1793,13 @@ const seedBookedSeats = async () => {
     ORDER BY s.coach_id, s.seat_number
   `);
 
-  if (bookedPassengersResult.rows.length === 0 || seatsResult.rows.length === 0) {
-    console.log("  - Skipping booked seats (missing booked passengers or seats)");
+  if (
+    bookedPassengersResult.rows.length === 0 ||
+    seatsResult.rows.length === 0
+  ) {
+    console.log(
+      "  - Skipping booked seats (missing booked passengers or seats)",
+    );
     return;
   }
 
@@ -1575,25 +1807,28 @@ const seedBookedSeats = async () => {
 
   for (const bookedPassenger of bookedPassengersResult.rows) {
     // Only assign seats to confirmed and RAC bookings
-    if (!['Confirmed', 'RAC'].includes(bookedPassenger.booking_status)) continue;
+    if (!["Confirmed", "RAC"].includes(bookedPassenger.booking_status))
+      continue;
 
     // Find available seats for this schedule
-    const availableSeats = seatsResult.rows.filter(s => 
-      s.schedule_id === bookedPassenger.schedule_id && 
-      !usedSeats.has(`${s.id}-${bookedPassenger.schedule_id}`)
+    const availableSeats = seatsResult.rows.filter(
+      (s) =>
+        s.schedule_id === bookedPassenger.schedule_id &&
+        !usedSeats.has(`${s.id}-${bookedPassenger.schedule_id}`),
     );
 
     if (availableSeats.length === 0) continue;
 
     // Pick a random available seat
-    const randomSeat = availableSeats[Math.floor(Math.random() * availableSeats.length)];
+    const randomSeat =
+      availableSeats[Math.floor(Math.random() * availableSeats.length)];
     const seatKey = `${randomSeat.id}-${bookedPassenger.schedule_id}`;
 
     // Check if seat assignment already exists
     const existsQuery = `SELECT id FROM booked_seats WHERE booking_id = $1 AND booked_passenger_id = $2`;
     const existsResult = await queryDB(existsQuery, [
-      bookedPassenger.booking_id, 
-      bookedPassenger.booked_passenger_id
+      bookedPassenger.booking_id,
+      bookedPassenger.booked_passenger_id,
     ]);
 
     if (existsResult.rows.length > 0) {
@@ -1610,11 +1845,13 @@ const seedBookedSeats = async () => {
       const result = await queryDB(query, [
         bookedPassenger.booking_id,
         bookedPassenger.booked_passenger_id,
-        randomSeat.id
+        randomSeat.id,
       ]);
 
       if (result.rows.length > 0) {
-        console.log(`  ✓ Assigned seat ${randomSeat.seat_number} in coach ${randomSeat.coach_code}`);
+        console.log(
+          `  ✓ Assigned seat ${randomSeat.seat_number} in coach ${randomSeat.coach_code}`,
+        );
         usedSeats.add(seatKey);
       }
     } catch (error) {
@@ -1632,17 +1869,30 @@ const seedPayments = async () => {
     JOIN booking_statuses bs ON b.status_id = bs.id
   `);
 
-  const paymentStatusesResult = await queryDB("SELECT id, name FROM payment_statuses");
+  const paymentStatusesResult = await queryDB(
+    "SELECT id, name FROM payment_statuses",
+  );
 
-  if (bookingsResult.rows.length === 0 || paymentStatusesResult.rows.length === 0) {
+  if (
+    bookingsResult.rows.length === 0 ||
+    paymentStatusesResult.rows.length === 0
+  ) {
     console.log("  - Skipping payments (missing bookings or payment statuses)");
     return;
   }
 
-  const completedStatus = paymentStatusesResult.rows.find(s => s.name === 'Completed');
-  const pendingStatus = paymentStatusesResult.rows.find(s => s.name === 'Pending');
-  const failedStatus = paymentStatusesResult.rows.find(s => s.name === 'Failed');
-  const refundedStatus = paymentStatusesResult.rows.find(s => s.name === 'Refunded');
+  const completedStatus = paymentStatusesResult.rows.find(
+    (s) => s.name === "Completed",
+  );
+  const pendingStatus = paymentStatusesResult.rows.find(
+    (s) => s.name === "Pending",
+  );
+  const failedStatus = paymentStatusesResult.rows.find(
+    (s) => s.name === "Failed",
+  );
+  const refundedStatus = paymentStatusesResult.rows.find(
+    (s) => s.name === "Refunded",
+  );
 
   for (const booking of bookingsResult.rows) {
     // Check if payment already exists
@@ -1658,23 +1908,31 @@ const seedPayments = async () => {
 
     // Assign payment status based on booking status
     switch (booking.status) {
-      case 'Confirmed':
-      case 'RAC':
+      case "Confirmed":
+      case "RAC":
         paymentStatusId = completedStatus?.id;
         paymentDate = new Date(booking.booking_date);
-        paymentDate.setMinutes(paymentDate.getMinutes() + Math.floor(Math.random() * 30));
+        paymentDate.setMinutes(
+          paymentDate.getMinutes() + Math.floor(Math.random() * 30),
+        );
         break;
-      case 'Cancelled':
+      case "Cancelled":
         // Some cancelled bookings have refunded payments
-        paymentStatusId = Math.random() > 0.5 ? refundedStatus?.id : completedStatus?.id;
+        paymentStatusId =
+          Math.random() > 0.5 ? refundedStatus?.id : completedStatus?.id;
         paymentDate = new Date(booking.booking_date);
-        paymentDate.setHours(paymentDate.getHours() + Math.floor(Math.random() * 48));
+        paymentDate.setHours(
+          paymentDate.getHours() + Math.floor(Math.random() * 48),
+        );
         break;
-      case 'Waiting':
+      case "Waiting":
         // Waiting bookings might have pending or completed payments
-        paymentStatusId = Math.random() > 0.3 ? completedStatus?.id : pendingStatus?.id;
+        paymentStatusId =
+          Math.random() > 0.3 ? completedStatus?.id : pendingStatus?.id;
         paymentDate = new Date(booking.booking_date);
-        paymentDate.setMinutes(paymentDate.getMinutes() + Math.floor(Math.random() * 60));
+        paymentDate.setMinutes(
+          paymentDate.getMinutes() + Math.floor(Math.random() * 60),
+        );
         break;
       default:
         paymentStatusId = pendingStatus?.id;
@@ -1694,7 +1952,7 @@ const seedPayments = async () => {
         booking.id,
         booking.total_amount,
         paymentStatusId,
-        paymentDate.toISOString().split('T')[0] // Convert to YYYY-MM-DD format for date type
+        paymentDate.toISOString().split("T")[0], // Convert to YYYY-MM-DD format for date type
       ]);
 
       if (result.rows.length > 0) {
@@ -1718,17 +1976,32 @@ const seedRefunds = async () => {
     WHERE bs.name = 'Cancelled' AND ps.name IN ('Completed', 'Refunded')
   `);
 
-  const refundStatusesResult = await queryDB("SELECT id, name FROM refund_statuses");
+  const refundStatusesResult = await queryDB(
+    "SELECT id, name FROM refund_statuses",
+  );
 
-  if (cancelledPaymentsResult.rows.length === 0 || refundStatusesResult.rows.length === 0) {
-    console.log("  - Skipping refunds (no cancelled payments or refund statuses)");
+  if (
+    cancelledPaymentsResult.rows.length === 0 ||
+    refundStatusesResult.rows.length === 0
+  ) {
+    console.log(
+      "  - Skipping refunds (no cancelled payments or refund statuses)",
+    );
     return;
   }
 
-  const requestedStatus = refundStatusesResult.rows.find(s => s.name === 'Requested');
-  const processingStatus = refundStatusesResult.rows.find(s => s.name === 'Processing');
-  const completedStatus = refundStatusesResult.rows.find(s => s.name === 'Completed');
-  const rejectedStatus = refundStatusesResult.rows.find(s => s.name === 'Rejected');
+  const requestedStatus = refundStatusesResult.rows.find(
+    (s) => s.name === "Requested",
+  );
+  const processingStatus = refundStatusesResult.rows.find(
+    (s) => s.name === "Processing",
+  );
+  const completedStatus = refundStatusesResult.rows.find(
+    (s) => s.name === "Completed",
+  );
+  const rejectedStatus = refundStatusesResult.rows.find(
+    (s) => s.name === "Rejected",
+  );
 
   for (const payment of cancelledPaymentsResult.rows) {
     // Check if refund already exists
@@ -1742,7 +2015,7 @@ const seedRefunds = async () => {
     // Random refund status distribution
     const rand = Math.random();
     let refundStatusId, refundAmount;
-    
+
     if (rand < 0.6) {
       refundStatusId = completedStatus?.id;
       refundAmount = payment.amount * 0.85; // 15% cancellation fee
@@ -1773,7 +2046,7 @@ const seedRefunds = async () => {
         payment.payment_id,
         refundAmount,
         refundStatusId,
-        refundDate.toISOString().split('T')[0] // Convert to YYYY-MM-DD format for date type
+        refundDate.toISOString().split("T")[0], // Convert to YYYY-MM-DD format for date type
       ]);
 
       if (result.rows.length > 0) {
@@ -1798,37 +2071,50 @@ const seedAuditLogs = async () => {
 
   const auditEvents = [
     // User authentication events
-    ...usersResult.rows.flatMap(user => [
-        {
-          user_id: user.id,
-          action: 'LOGIN',
-          timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
-        },
-        {
-          user_id: user.id,
-          action: 'LOGOUT',
-          timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
-        }
+    ...usersResult.rows.flatMap((user) => [
+      {
+        user_id: user.id,
+        action: "LOGIN",
+        timestamp: new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+        ),
+      },
+      {
+        user_id: user.id,
+        action: "LOGOUT",
+        timestamp: new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+        ),
+      },
     ]),
     // Booking events
-    ...bookingsResult.rows.flatMap(booking => [
-        {
-          user_id: usersResult.rows[Math.floor(Math.random() * usersResult.rows.length)].id,
-          action: 'BOOKING_CREATED',
-          timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
-        },
-        {
-          user_id: usersResult.rows[Math.floor(Math.random() * usersResult.rows.length)].id,
-          action: 'BOOKING_UPDATED',
-          timestamp: new Date(Date.now() - Math.random() * 25 * 24 * 60 * 60 * 1000)
-        }
+    ...bookingsResult.rows.flatMap((booking) => [
+      {
+        user_id:
+          usersResult.rows[Math.floor(Math.random() * usersResult.rows.length)]
+            .id,
+        action: "BOOKING_CREATED",
+        timestamp: new Date(
+          Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        ),
+      },
+      {
+        user_id:
+          usersResult.rows[Math.floor(Math.random() * usersResult.rows.length)]
+            .id,
+        action: "BOOKING_UPDATED",
+        timestamp: new Date(
+          Date.now() - Math.random() * 25 * 24 * 60 * 60 * 1000,
+        ),
+      },
     ]),
     // System events
     {
-      user_id: usersResult.rows.find(u => u.email === 'admin@railway.com')?.id,
-      action: 'SYSTEM_BACKUP',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000)
-    }
+      user_id: usersResult.rows.find((u) => u.email === "admin@railway.com")
+        ?.id,
+      action: "SYSTEM_BACKUP",
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
+    },
   ];
 
   for (const event of auditEvents) {
@@ -1844,7 +2130,7 @@ const seedAuditLogs = async () => {
       const result = await queryDB(query, [
         event.user_id,
         event.action,
-        event.timestamp.toISOString()
+        event.timestamp.toISOString(),
       ]);
 
       if (result.rows.length > 0) {
@@ -1860,7 +2146,7 @@ const seedExtendedSchedules = async () => {
   console.log("Seeding extended schedules for next 30 days...");
 
   const trainsResult = await queryDB("SELECT id, name, code FROM trains");
-  
+
   if (trainsResult.rows.length === 0) {
     console.log("  - Skipping extended schedules (no trains found)");
     return;
@@ -1872,67 +2158,72 @@ const seedExtendedSchedules = async () => {
   // Different train frequency patterns based on type
   const trainFrequencyPatterns = {
     // Daily premium services
-    "12301": { frequency: 1, baseTimes: ["16:55:00"] }, // Rajdhani Express
-    "12951": { frequency: 1, baseTimes: ["17:30:00"] }, // New Delhi Rajdhani
-    "12002": { frequency: 1, baseTimes: ["06:00:00"] }, // Shatabdi Express
-    "12017": { frequency: 1, baseTimes: ["15:30:00"] }, // New Delhi Shatabdi
-    "22435": { frequency: 1, baseTimes: ["06:00:00"] }, // Vande Bharat Express
-    "12049": { frequency: 1, baseTimes: ["08:10:00"] }, // Gatiman Express
-    "22119": { frequency: 1, baseTimes: ["15:50:00"] }, // Tejas Express
+    12301: { frequency: 1, baseTimes: ["16:55:00"] }, // Rajdhani Express
+    12951: { frequency: 1, baseTimes: ["17:30:00"] }, // New Delhi Rajdhani
+    12002: { frequency: 1, baseTimes: ["06:00:00"] }, // Shatabdi Express
+    12017: { frequency: 1, baseTimes: ["15:30:00"] }, // New Delhi Shatabdi
+    22435: { frequency: 1, baseTimes: ["06:00:00"] }, // Vande Bharat Express
+    12049: { frequency: 1, baseTimes: ["08:10:00"] }, // Gatiman Express
+    22119: { frequency: 1, baseTimes: ["15:50:00"] }, // Tejas Express
 
     // Bi-weekly premium services
-    "12953": { frequency: 2, baseTimes: ["18:15:00"] }, // Mumbai Rajdhani
-    "22405": { frequency: 2, baseTimes: ["14:25:00"] }, // Humsafar Express
-    "12059": { frequency: 2, baseTimes: ["07:15:00"] }, // Habibganj Shatabdi
+    12953: { frequency: 2, baseTimes: ["18:15:00"] }, // Mumbai Rajdhani
+    22405: { frequency: 2, baseTimes: ["14:25:00"] }, // Humsafar Express
+    12059: { frequency: 2, baseTimes: ["07:15:00"] }, // Habibganj Shatabdi
 
     // Tri-weekly services
-    "12259": { frequency: 3, baseTimes: ["22:30:00"] }, // Duronto Express
-    "12273": { frequency: 3, baseTimes: ["07:40:00"] }, // Sealdah Duronto
-    "12267": { frequency: 3, baseTimes: ["22:00:00"] }, // Mumbai Duronto
-    "12215": { frequency: 3, baseTimes: ["23:45:00"] }, // Garib Rath
-    "12553": { frequency: 3, baseTimes: ["21:15:00"] }, // Poorva Garib Rath
-    "12565": { frequency: 3, baseTimes: ["19:30:00"] }, // Sampark Garib Rath
+    12259: { frequency: 3, baseTimes: ["22:30:00"] }, // Duronto Express
+    12273: { frequency: 3, baseTimes: ["07:40:00"] }, // Sealdah Duronto
+    12267: { frequency: 3, baseTimes: ["22:00:00"] }, // Mumbai Duronto
+    12215: { frequency: 3, baseTimes: ["23:45:00"] }, // Garib Rath
+    12553: { frequency: 3, baseTimes: ["21:15:00"] }, // Poorva Garib Rath
+    12565: { frequency: 3, baseTimes: ["19:30:00"] }, // Sampark Garib Rath
 
     // Weekly services
-    "12023": { frequency: 7, baseTimes: ["05:30:00"] }, // Jan Shatabdi
-    "12055": { frequency: 7, baseTimes: ["06:15:00"] }, // Gomti Jan Shatabdi
-    "12081": { frequency: 7, baseTimes: ["14:45:00"] }, // Kerala Jan Shatabdi
+    12023: { frequency: 7, baseTimes: ["05:30:00"] }, // Jan Shatabdi
+    12055: { frequency: 7, baseTimes: ["06:15:00"] }, // Gomti Jan Shatabdi
+    12081: { frequency: 7, baseTimes: ["14:45:00"] }, // Kerala Jan Shatabdi
 
     // Express services (alternate days)
-    "12615": { frequency: 2, baseTimes: ["20:30:00"] }, // Chennai Mail
-    "12809": { frequency: 2, baseTimes: ["19:45:00"] }, // Howrah Mail
-    "12627": { frequency: 2, baseTimes: ["21:50:00"] }, // Karnataka Express
-    "12137": { frequency: 2, baseTimes: ["22:15:00"] }, // Punjab Mail
+    12615: { frequency: 2, baseTimes: ["20:30:00"] }, // Chennai Mail
+    12809: { frequency: 2, baseTimes: ["19:45:00"] }, // Howrah Mail
+    12627: { frequency: 2, baseTimes: ["21:50:00"] }, // Karnataka Express
+    12137: { frequency: 2, baseTimes: ["22:15:00"] }, // Punjab Mail
 
     // Regular services (every 3 days)
-    "10111": { frequency: 3, baseTimes: ["16:20:00"] }, // Konkan Kanya Express
-    "12015": { frequency: 3, baseTimes: ["17:20:00"] }, // Intercity Express
-    "12649": { frequency: 3, baseTimes: ["18:40:00"] }, // Superfast Express
+    10111: { frequency: 3, baseTimes: ["16:20:00"] }, // Konkan Kanya Express
+    12015: { frequency: 3, baseTimes: ["17:20:00"] }, // Intercity Express
+    12649: { frequency: 3, baseTimes: ["18:40:00"] }, // Superfast Express
 
     // Local services (daily but different times)
-    "11077": { frequency: 1, baseTimes: ["06:30:00", "14:15:00", "20:45:00"] }, // Mail Express
-    "56473": { frequency: 1, baseTimes: ["05:15:00", "11:30:00", "16:05:00", "21:20:00"] }, // Passenger Express
+    11077: { frequency: 1, baseTimes: ["06:30:00", "14:15:00", "20:45:00"] }, // Mail Express
+    56473: {
+      frequency: 1,
+      baseTimes: ["05:15:00", "11:30:00", "16:05:00", "21:20:00"],
+    }, // Passenger Express
   };
 
   // Generate schedules for next 30 days
   for (let dayOffset = 1; dayOffset <= 30; dayOffset++) {
     const scheduleDate = new Date(today);
     scheduleDate.setDate(today.getDate() + dayOffset);
-    
+
     for (const train of trainsResult.rows) {
       const pattern = trainFrequencyPatterns[train.code];
       if (!pattern) continue;
 
       // Check if train should run on this day based on frequency
-      const shouldRun = dayOffset % pattern.frequency === (train.code.charCodeAt(0) % pattern.frequency);
-      
+      const shouldRun =
+        dayOffset % pattern.frequency ===
+        train.code.charCodeAt(0) % pattern.frequency;
+
       if (shouldRun) {
         // Multiple departure times for some trains
         for (const departureTime of pattern.baseTimes) {
           extendedSchedules.push({
             train_id: train.id,
-            departure_date: scheduleDate.toISOString().split('T')[0],
-            departure_time: departureTime
+            departure_date: scheduleDate.toISOString().split("T")[0],
+            departure_time: departureTime,
           });
         }
       }
@@ -1948,7 +2239,7 @@ const seedExtendedSchedules = async () => {
     const existsResult = await queryDB(existsQuery, [
       schedule.train_id,
       schedule.departure_date,
-      schedule.departure_time
+      schedule.departure_time,
     ]);
 
     if (existsResult.rows.length > 0) {
@@ -1965,7 +2256,7 @@ const seedExtendedSchedules = async () => {
       const result = await queryDB(query, [
         schedule.train_id,
         schedule.departure_date,
-        schedule.departure_time
+        schedule.departure_time,
       ]);
 
       if (result.rows.length > 0) {
@@ -2030,14 +2321,24 @@ export const seedDatabase = async () => {
     console.log("   • Coach types and seat types");
     console.log("   • 10 major railway stations across India");
     console.log("   • 30+ different trains with comprehensive route coverage");
-    console.log("   • Multiple trains serving same station pairs for realistic options");
+    console.log(
+      "   • Multiple trains serving same station pairs for realistic options",
+    );
     console.log("   • Station distances for fare calculation");
-    console.log("   • Comprehensive 30-day schedule coverage starting from today");
-    console.log("   • Realistic train frequency patterns (daily, bi-weekly, tri-weekly services)");
-    console.log("   • Coaches and seats for all trains with varied compositions");
+    console.log(
+      "   • Comprehensive 30-day schedule coverage starting from today",
+    );
+    console.log(
+      "   • Realistic train frequency patterns (daily, bi-weekly, tri-weekly services)",
+    );
+    console.log(
+      "   • Coaches and seats for all trains with varied compositions",
+    );
     console.log("   • 8+ demo users with varied profiles");
     console.log("   • Passengers linked to all customers");
-    console.log("   • Comprehensive bookings (confirmed, waiting, cancelled, RAC)");
+    console.log(
+      "   • Comprehensive bookings (confirmed, waiting, cancelled, RAC)",
+    );
     console.log("   • Complete passenger-seat assignments");
     console.log("   • Payment records for all booking scenarios");
     console.log("   • Refund workflows for cancelled bookings");
