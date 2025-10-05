@@ -1,74 +1,97 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import trainService from '../services/trainService';
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import trainAdminService from "../services/trainAdmin.service";
 
-const TrainList = () => {
+export default function TrainList() {
   const [trains, setTrains] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchTrains = async () => {
-      const response = await trainService.getAllTrains();
-      setTrains(response.data);
-    };
+    async function fetchTrains() {
+      setLoading(true);
+      setError("");
+      try {
+        const response = await trainAdminService.getTrains();
+        setTrains(response);
+      } catch {
+        setError("Failed to load trains.");
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchTrains();
   }, []);
 
-  const handleDelete = async (id) => {
-    await trainService.deleteTrain(id);
-    setTrains(trains.filter(train => train.id !== id));
+  const handleDelete = async (trainId) => {
+    if (!window.confirm("Are you sure you want to delete this train?")) return;
+    setLoading(true);
+    setError("");
+    try {
+      await trainAdminService.deleteTrain(trainId);
+      setTrains((prev) => prev.filter((t) => t.id !== trainId));
+    } catch{
+      setError("Failed to delete train.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Train Management</h2>
-      <Link to="/admin/trains/new">
-        <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4">
-          Add New Train
+    <div className="p-6 max-w-3xl mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Trains</h2>
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/admin/trains/create")}
+        >
+          + Create Train
         </button>
-      </Link>
-      <table className="min-w-full bg-white border border-gray-200 rounded shadow">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="py-2 px-4 border-b text-left">Name</th>
-            <th className="py-2 px-4 border-b text-left">Coaches</th>
-            <th className="py-2 px-4 border-b text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {trains.map(train => (
-            <tr key={train.id} className="hover:bg-gray-50">
-              <td className="py-2 px-4 border-b">{train.name}</td>
-              <td className="py-2 px-4 border-b">
-                {train.coaches && train.coaches.length > 0
-                  ? train.coaches.join(', ')
-                  : 'No coaches'}
-              </td>
-              <td className="py-2 px-4 border-b space-x-2">
-                <Link
-                  className="text-blue-600 hover:underline"
-                  to={`/admin/trains/${train.id}`}
-                >
-                  View
-                </Link>
-                <Link
-                  className="text-yellow-600 hover:underline"
-                  to={`/admin/trains/${train.id}/edit`}
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => handleDelete(train.id)}
-                  className="text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </td>
+      </div>
+      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <table className="table w-full rounded-lg overflow-hidden shadow-lg">
+          <thead className="bg-gray-900 text-yellow-300">
+            <tr>
+              <th className="py-2 px-4">Train Name</th>
+              <th className="py-2 px-4">Train Code</th>
+              <th className="py-2 px-4">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-gray-950 text-yellow-100">
+            {trains.map((train) => (
+              <tr key={train.id} className="border-b border-gray-800 hover:bg-gray-900 transition">
+                <td className="py-2 px-4">{train.name}</td>
+                <td className="py-2 px-4">{train.code}</td>
+                <td className="py-2 px-4 flex gap-2">
+                  <button
+                    className="btn btn-xs btn-info"
+                    onClick={() => navigate(`/admin/trains/${train.id}/details`)}
+                  >
+                    Details
+                  </button>
+                  <button
+                    className="btn btn-xs btn-error"
+                    onClick={() => handleDelete(train.id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {trains.length === 0 && (
+              <tr>
+                <td colSpan={3} className="text-center py-4">
+                  No trains found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
-};
-
-export default TrainList;
+}
