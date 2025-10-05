@@ -3,7 +3,7 @@ import { queryDB } from "../utils/db.js";
 class Passenger {
   static async listPassengers(userId) {
     const { rows } = await queryDB(
-      `SELECT id, name, email, age, created_at
+      `SELECT id, name, email, age, gender, created_at
        FROM passengers
        WHERE user_id = $1
        ORDER BY created_at DESC`,
@@ -12,17 +12,17 @@ class Passenger {
     return rows;
   }
 
-  static async addPassenger(userId, { name, email, age }) {
+  static async addPassenger(userId, { name, email, age, gender }) {
     const { rows } = await queryDB(
-      `INSERT INTO passengers (user_id, name, email, age)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, email, age, created_at`,
-      [userId, name, email, age]
+      `INSERT INTO passengers (user_id, name, email, age, gender)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, email, age, gender, created_at`,
+      [userId, name, email, age, gender]
     );
     return rows[0];
   }
 
-  static async updatePassenger(userId, passengerId, { name, email, age }) {
+  static async updatePassenger(userId, passengerId, { name, email, age, gender }) {
     const updates = [];
     const values = [];
     let idx = 1;
@@ -39,6 +39,10 @@ class Passenger {
       updates.push(`age = $${idx++}`);
       values.push(age);
     }
+    if (gender !== undefined) {
+      updates.push(`gender = $${idx++}`);
+      values.push(gender);
+    }
 
     if (updates.length === 0) return null;
 
@@ -48,7 +52,7 @@ class Passenger {
       `UPDATE passengers
        SET ${updates.join(", ")}
        WHERE user_id = $${idx++} AND id = $${idx}
-       RETURNING id, name, email, age, created_at`,
+       RETURNING id, name, email, age, gender, created_at`,
       values
     );
     return rows[0];
@@ -58,7 +62,7 @@ class Passenger {
     const { rows } = await queryDB(
       `DELETE FROM passengers
        WHERE user_id = $1 AND id = $2
-       RETURNING id, name, email, age, created_at`,
+       RETURNING id, name, email, age, gender, created_at`,
       [userId, passengerId]
     );
     return rows[0];

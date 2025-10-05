@@ -1,18 +1,34 @@
 import { useEffect } from "react";
-import { useGetBookingsByUserId } from "../services/bookingService";
+import { useApi } from "../../../../services/useApi";
+import bookingService from "../services/bookingService";
 
-export function useUserBookings(userId) {
+export function useUserBookings() {
   const {
     resolve,
-    data: bookings = [],
+    data: bookings,
     isLoading,
     isError,
-    isFallback,
-  } = useGetBookingsByUserId(userId);
+    isSuccess,
+  } = useApi({
+    endpoint: bookingService.getUserBookings,
+    onSuccess: (data) => {
+      // Extract bookings array from response
+      const bookingsArray = data?.data.bookings || [];
+      return Array.isArray(bookingsArray) ? bookingsArray : [];
+    },
+    onError: (error) => {
+      console.error("Failed to fetch user bookings:", error);
+    },
+  });
 
   useEffect(() => {
-    if (userId) resolve();
-  }, [userId, resolve]);
+    resolve();
+  }, [resolve]);
 
-  return { bookings, isLoading, isError, isFallback };
+  return {
+    bookings: bookings || [],
+    isLoading,
+    isError,
+    isSuccess,
+  };
 }

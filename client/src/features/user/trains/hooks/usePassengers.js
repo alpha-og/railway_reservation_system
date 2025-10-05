@@ -25,7 +25,7 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
   const [passengers, setPassengers] = useState(
     initialPassengers.length > 0 
       ? initialPassengers 
-      : [{ name: "", age: "", gender: "Male", coachType: defaultCoachType }]
+      : [{ name: "", email: "", age: "", gender: "Male", coachType: defaultCoachType }]
   );
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +49,7 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
 
   const addPassenger = useCallback(() => {
     const defaultCoachType = availableCoachTypes.length > 0 ? availableCoachTypes[0].value : '';
-    setPassengers(prev => [...prev, { name: "", age: "", gender: "Male", coachType: defaultCoachType }]);
+    setPassengers(prev => [...prev, { name: "", email: "", age: "", gender: "Male", coachType: defaultCoachType }]);
     const newErrors = { ...errors };
     delete newErrors.general;
     setErrors(newErrors);
@@ -105,6 +105,7 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
         name: savedPassenger.name,
         age: savedPassenger.age,
         gender: savedPassenger.gender,
+        ...(savedPassenger.email && { email: savedPassenger.email })
       };
       return updated;
     });
