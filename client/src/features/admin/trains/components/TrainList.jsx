@@ -31,7 +31,7 @@ export default function TrainList() {
     try {
       await trainAdminService.deleteTrain(trainId);
       setTrains((prev) => prev.filter((t) => t.id !== trainId));
-    } catch{
+    } catch {
       setError("Failed to delete train.");
     } finally {
       setLoading(false);
@@ -44,7 +44,7 @@ export default function TrainList() {
         <h2 className="text-2xl font-bold">Trains</h2>
         <button
           className="btn btn-primary"
-          onClick={() => navigate("/admin/trains/create")}
+          onClick={() => navigate({ to: "/admin/trains/create" })}
         >
           + Create Train
         </button>
@@ -69,7 +69,12 @@ export default function TrainList() {
                 <td className="py-2 px-4 flex gap-2">
                   <button
                     className="btn btn-xs btn-info"
-                    onClick={() => navigate(`/admin/trains/${train.id}/details`)}
+                    onClick={() =>
+                      navigate({
+                        to: "/admin/trains/$trainId/details",
+                        params: { trainId: train.id },
+                      })
+                    }
                   >
                     Details
                   </button>

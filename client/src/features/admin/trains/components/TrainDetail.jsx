@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams } from "@tanstack/react-router";
+import { useParams, useNavigate } from "@tanstack/react-router";
 import trainAdminService from "../services/trainAdmin.service";
 
 export default function TrainDetail() {
   const { trainId } = useParams();
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState(true);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -28,7 +29,6 @@ export default function TrainDetail() {
         setCode(train.code || "");
         setCoachTypes(coachTypesRes);
         setSeatTypes(seatTypesRes);
-        // Group seats by seat_type_id for each coach for editing
         setCoaches((train.coaches || []).map(coach => {
           const seatTypeMap = {};
           (coach.seats || []).forEach(seat => {
@@ -243,6 +243,14 @@ export default function TrainDetail() {
               </div>
             ))
           )}
+        </div>
+        <div className="mt-4">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate({ to: "/admin/trains" })}
+          >
+            Back to List
+          </button>
         </div>
       </div>
     );
