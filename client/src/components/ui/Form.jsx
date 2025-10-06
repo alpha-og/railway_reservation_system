@@ -106,6 +106,14 @@ const Select = ({
   );
 };
 
+// Helper function to safely render error messages
+const getErrorMessage = (error) => {
+  if (!error) return null;
+  if (typeof error === 'string') return error;
+  if (typeof error === 'object' && error.message) return error.message;
+  return 'Invalid input';
+};
+
 // FormField wrapper component for consistent form layout
 const FormField = ({ 
   label, 
@@ -115,6 +123,8 @@ const FormField = ({
   className = '',
   ...props 
 }) => {
+  const errorMessage = getErrorMessage(error);
+  
   return (
     <div className={`space-y-2 ${className}`} {...props}>
       {label && (
@@ -126,8 +136,8 @@ const FormField = ({
         </label>
       )}
       {children}
-      {error && (
-        <p className="label-text-alt text-error">{error}</p>
+      {errorMessage && (
+        <p className="label-text-alt text-error">{errorMessage}</p>
       )}
     </div>
   );

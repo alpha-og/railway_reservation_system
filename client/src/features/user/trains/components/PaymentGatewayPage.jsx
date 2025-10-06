@@ -37,7 +37,7 @@ export const PaymentGatewayPage = () => {
   const [upiId, setUpiId] = useState("");
 
   // Parse passengers from search params (for validation but not display)
-  const passengers = search.passengers ? JSON.parse(search.passengers) : [];
+  const _passengers = search.passengers ? JSON.parse(search.passengers) : [];
 
   // Banks for UPI simulation
   const banks = [
