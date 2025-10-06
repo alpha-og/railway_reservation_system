@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { 
   ArrowLeft, 
   Plus, 
@@ -13,12 +13,13 @@ import {
   X,
   AlertCircle,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  Edit3
 } from "lucide-react";
 import Button from "../../../../components/ui/Button.jsx";
 import Card from "../../../../components/ui/Card.jsx";
 import { FormField, Input, Select } from "../../../../components/ui/index.js";
-import { LoadingSkeleton, PageLoadingSkeleton } from "../../../../components/LoadingSkeleton.jsx";
+import { PageLoadingSkeleton } from "../../../../components/LoadingSkeleton.jsx";
 import { getScheduleById, updateSchedule } from "../services/scheduleService.js";
 import stationService from "../../../admin/stations/services/stationService.js";
 import trainService from "../../../admin/trains/services/trainAdmin.service.js";
@@ -167,19 +168,13 @@ export default function ScheduleEdit({ scheduleId }) {
   }
 
   return (
-    <div className="min-h-screen bg-base-200">
-      {/* Animated Background */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-secondary/3 to-accent/5" />
-        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,oklch(var(--color-primary)/0.02)_50%,transparent_75%)]" />
-      </div>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="relative z-10 bg-base-100/80 backdrop-blur-sm border-b border-base-content/10">
+      <div className="bg-white/5 backdrop-blur-sm border-b border-white/10">
         <div className="container mx-auto px-6 py-6">
           <motion.button 
             onClick={() => navigate({ to: "/admin/schedules" })}
-            className="btn btn-ghost btn-sm gap-2 mb-4 group"
+            className="inline-flex items-center gap-2 text-slate-300 hover:text-white transition-colors mb-4 group"
             whileHover={{ x: -4 }}
             transition={{ duration: 0.2 }}
           >
@@ -192,27 +187,27 @@ export default function ScheduleEdit({ scheduleId }) {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-3"
           >
-            <div className="avatar placeholder">
-              <div className="bg-primary text-primary-content rounded-xl w-12 h-12">
-                <Train className="w-6 h-6" />
-              </div>
+            <div className="p-2 bg-blue-500/20 rounded-lg">
+              <Edit3 className="w-6 h-6 text-blue-400" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Edit Schedule</h1>
-              <p className="text-base-content/60">Modify train schedule details and stops</p>
+              <h1 className="text-3xl font-bold text-white">Edit Schedule</h1>
+              <p className="text-slate-400">Modify train schedule details and stops</p>
             </div>
           </motion.div>
         </div>
       </div>
 
-      <div className="relative z-10 container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8">
         {/* Action Message */}
         {actionMessage && (
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`alert mb-6 ${
-              actionMessage.includes("success") ? "alert-success" : "alert-error"
+            className={`mb-6 p-4 rounded-lg border flex items-center gap-3 ${
+              actionMessage.includes("success") 
+                ? "bg-green-500/10 border-green-500/20 text-green-400" 
+                : "bg-red-500/10 border-red-500/20 text-red-400"
             }`}
           >
             {actionMessage.includes("success") ? (
@@ -220,7 +215,7 @@ export default function ScheduleEdit({ scheduleId }) {
             ) : (
               <AlertCircle className="w-5 h-5" />
             )}
-            <span>{actionMessage}</span>
+            {actionMessage}
           </motion.div>
         )}
 
@@ -229,13 +224,13 @@ export default function ScheduleEdit({ scheduleId }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="max-w-4xl mx-auto shadow-2xl bg-base-100/90 backdrop-blur-sm">
-            <form onSubmit={handleSubmit} className="space-y-8">
+          <Card className="max-w-4xl mx-auto bg-white/5 backdrop-blur-sm border-white/10">
+            <form onSubmit={handleSubmit} className="space-y-8 p-8">
               {/* Basic Information */}
               <div>
                 <div className="flex items-center gap-2 mb-6">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <h2 className="text-xl font-semibold">Basic Information</h2>
+                  <Sparkles className="w-5 h-5 text-blue-400" />
+                  <h2 className="text-xl font-semibold text-white">Basic Information</h2>
                 </div>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -254,23 +249,31 @@ export default function ScheduleEdit({ scheduleId }) {
                   </FormField>
 
                   <FormField label="Departure Date" error={errors.departureDate} required>
-                    <Input 
-                      type="date" 
-                      name="departureDate" 
-                      value={formData.departureDate}
-                      onChange={handleChange}
-                      variant={errors.departureDate ? "error" : "bordered"}
-                    />
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input 
+                        type="date" 
+                        name="departureDate" 
+                        value={formData.departureDate}
+                        onChange={handleChange}
+                        variant={errors.departureDate ? "error" : "bordered"}
+                        className="pl-10"
+                      />
+                    </div>
                   </FormField>
 
                   <FormField label="Departure Time" error={errors.departureTime} required>
-                    <Input 
-                      type="time" 
-                      name="departureTime" 
-                      value={formData.departureTime}
-                      onChange={handleChange}
-                      variant={errors.departureTime ? "error" : "bordered"}
-                    />
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input 
+                        type="time" 
+                        name="departureTime" 
+                        value={formData.departureTime}
+                        onChange={handleChange}
+                        variant={errors.departureTime ? "error" : "bordered"}
+                        className="pl-10"
+                      />
+                    </div>
                   </FormField>
                 </div>
               </div>
@@ -281,8 +284,8 @@ export default function ScheduleEdit({ scheduleId }) {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-primary" />
-                    <h2 className="text-xl font-semibold">Schedule Stops</h2>
+                    <MapPin className="w-5 h-5 text-blue-400" />
+                    <h2 className="text-xl font-semibold text-white">Schedule Stops</h2>
                   </div>
                   <Button 
                     type="button" 
@@ -297,9 +300,9 @@ export default function ScheduleEdit({ scheduleId }) {
                 </div>
 
                 {scheduleStops.length === 0 ? (
-                  <div className="text-center py-12 bg-base-200 rounded-2xl">
-                    <MapPin className="w-16 h-16 mx-auto mb-4 text-base-content/30" />
-                    <p className="text-base-content/60">No stops added yet. Click "Add Stop" to begin.</p>
+                  <div className="text-center py-12 bg-slate-800/30 rounded-2xl">
+                    <MapPin className="w-16 h-16 mx-auto mb-4 text-slate-600" />
+                    <p className="text-slate-400">No stops added yet. Click "Add Stop" to begin.</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -309,71 +312,77 @@ export default function ScheduleEdit({ scheduleId }) {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="card bg-base-200 shadow-lg"
+                        className="bg-slate-800/30 border border-slate-700 rounded-lg p-6"
                       >
-                        <div className="card-body p-4">
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="badge badge-primary badge-lg font-bold">
-                                {stop.stopNumber}
-                              </div>
-                              <span className="font-medium">Stop {stop.stopNumber}</span>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-bold">
+                              {stop.stopNumber}
                             </div>
-                            <Button 
-                              type="button" 
-                              onClick={() => removeStop(idx)}
-                              variant="error"
-                              size="sm"
-                              className="btn-circle"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </Button>
+                            <span className="font-medium text-white">Stop {stop.stopNumber}</span>
                           </div>
+                          <Button 
+                            type="button" 
+                            onClick={() => removeStop(idx)}
+                            variant="error"
+                            size="sm"
+                            className="btn-circle"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </Button>
+                        </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <FormField 
-                              label="Station" 
-                              error={errors[`stop${idx}_stationId`]}
-                            >
-                              <Select 
-                                value={stop.stationId} 
-                                onChange={e => handleStopChange(idx, "stationId", e.target.value)}
-                                options={allStations.map(st => ({
-                                  id: st.id,
-                                  name: `${st.name} (${st.code})`
-                                }))}
-                                placeholder="Select Station"
-                                variant={errors[`stop${idx}_stationId`] ? "error" : "bordered"}
-                                size="sm"
-                              />
-                            </FormField>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <FormField 
+                            label="Station" 
+                            error={errors[`stop${idx}_stationId`]}
+                          >
+                            <Select 
+                              value={stop.stationId} 
+                              onChange={e => handleStopChange(idx, "stationId", e.target.value)}
+                              options={allStations.map(st => ({
+                                id: st.id,
+                                name: `${st.name} (${st.code})`
+                              }))}
+                              placeholder="Select Station"
+                              variant={errors[`stop${idx}_stationId`] ? "error" : "bordered"}
+                              size="sm"
+                            />
+                          </FormField>
 
-                            <FormField 
-                              label="Arrival Time" 
-                              error={errors[`stop${idx}_arrivalTime`]}
-                            >
+                          <FormField 
+                            label="Arrival Time" 
+                            error={errors[`stop${idx}_arrivalTime`]}
+                          >
+                            <div className="relative">
+                              <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                               <Input 
                                 type="time" 
                                 value={stop.arrivalTime}
                                 onChange={e => handleStopChange(idx, "arrivalTime", e.target.value)}
                                 variant={errors[`stop${idx}_arrivalTime`] ? "error" : "bordered"}
                                 size="sm"
+                                className="pl-10"
                               />
-                            </FormField>
+                            </div>
+                          </FormField>
 
-                            <FormField 
-                              label="Departure Time" 
-                              error={errors[`stop${idx}_departureTime`]}
-                            >
+                          <FormField 
+                            label="Departure Time" 
+                            error={errors[`stop${idx}_departureTime`]}
+                          >
+                            <div className="relative">
+                              <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                               <Input 
                                 type="time" 
                                 value={stop.departureTime}
                                 onChange={e => handleStopChange(idx, "departureTime", e.target.value)}
                                 variant={errors[`stop${idx}_departureTime`] ? "error" : "bordered"}
                                 size="sm"
+                                className="pl-10"
                               />
-                            </FormField>
-                          </div>
+                            </div>
+                          </FormField>
                         </div>
                       </motion.div>
                     ))}
@@ -381,7 +390,7 @@ export default function ScheduleEdit({ scheduleId }) {
                 )}
                 
                 {errors.scheduleStops && (
-                  <div className="alert alert-error">
+                  <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-3 text-red-400">
                     <AlertCircle className="w-4 h-4" />
                     <span>{errors.scheduleStops}</span>
                   </div>
