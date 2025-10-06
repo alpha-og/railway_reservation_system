@@ -1,12 +1,12 @@
+// client/src/features/admin/stations/components/edit.jsx
+
 import { useParams } from "@tanstack/react-router";
-import StationForm from "../components/StationForm";
+import StationForm from "./StationForm.jsx";
 
-export default function EditStationPage() {
-  const { stationId } = useParams({ from: "/admin/stations/$stationId/edit" });
+function EditStation() {
+  const { stationId } = useParams();
 
-  return (
-    <div className="flex justify-center items-start p-6 min-h-screen bg-gray-50">
-      <StationForm isEditing={true} stationId={stationId} />
-    </div>
-  );
+  return <StationForm stationId={stationId} isEdit={true} />;
 }
+
+export default EditStation;
