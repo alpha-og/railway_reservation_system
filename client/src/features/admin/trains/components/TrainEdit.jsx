@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import trainAdminService from "../services/trainAdmin.service";
 
-export default function TrainDetail() {
+export default function TrainEdit() {
   const { trainId } = useParams();
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState(true);
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [coachTypes, setCoachTypes] = useState([]);
@@ -16,6 +15,7 @@ export default function TrainDetail() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let ignore = false;
     async function fetchData() {
       setLoading(true);
       setError("");
@@ -25,6 +25,7 @@ export default function TrainDetail() {
           trainAdminService.getCoachTypes(),
           trainAdminService.getSeatTypes(),
         ]);
+        if (ignore) return;
         setName(train.name || "");
         setCode(train.code || "");
         setCoachTypes(coachTypesRes);
@@ -46,16 +47,17 @@ export default function TrainDetail() {
             isEditing: false,
           };
         }));
-      } catch {
-        setError("Failed to load train or type data.");
+      } catch (e) {
+        setError(e.message || "Failed to load train or type data.");
       } finally {
         setLoading(false);
       }
     }
     fetchData();
+    return () => { ignore = true; };
   }, [trainId]);
 
-  // --- Edit mode handlers ---
+  // --- Handlers ---
   const handleAddCoach = () => setCoaches(prev => [
     ...prev,
     {
@@ -114,18 +116,18 @@ export default function TrainDetail() {
   const handleSaveCoach = idx => setCoaches(prev =>
     prev.map((coach, i) => i === idx ? { ...coach, isEditing: false } : coach)
   );
-  // Validation
+
+  // --- Validation ---
   const coachCodes = coaches.map(c => (c.code || "").trim().toLowerCase()).filter(Boolean);
   const hasCoachCodeDuplicates = new Set(coachCodes).size !== coachCodes.length;
   function hasSeatNumberDuplicates(coach) {
     let seatNumber = 1;
-    const numbers = coach.seat_types.flatMap((seat) => {
-      const arr = Array.from({ length: Number(seat.seat_count) }, () => seatNumber++);
-      return arr;
-    });
+    const numbers = coach.seat_types.flatMap((seat) =>
+      Array.from({ length: Number(seat.seat_count) }, () => seatNumber++)
+    );
     return new Set(numbers).size !== numbers.length;
   }
-  // Submit
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -178,7 +180,6 @@ export default function TrainDetail() {
         return;
       }
     }
-    // Build seats array for backend (assign unique seat numbers across all seat types)
     const payload = {
       name,
       code,
@@ -200,7 +201,7 @@ export default function TrainDetail() {
     };
     try {
       await trainAdminService.updateTrain(trainId, payload);
-      setViewMode(true);
+      navigate({ to: "/admin/trains/$trainId/view", params: { trainId } });
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to update train.");
     } finally {
@@ -211,57 +212,16 @@ export default function TrainDetail() {
   if (loading) return <div className="p-8 text-lg">Loading...</div>;
   if (error) return <div className="p-8 text-lg text-red-600">{error}</div>;
 
-  // --- VIEW MODE ---
-  if (viewMode) {
-    return (
-      <div className="p-6 max-w-3xl mx-auto">
-        <div className="flex justify-between mb-4">
-          <h2 className="text-2xl font-bold">{name}</h2>
-          <button className="btn btn-outline" onClick={() => setViewMode(false)}>Edit</button>
-        </div>
-        <div className="mb-3"><b>Train Code:</b> {code}</div>
-        <div>
-          <h3 className="font-semibold text-lg mb-2">Coaches</h3>
-          {(!coaches.length) ? (
-            <div>No coaches found.</div>
-          ) : (
-            coaches.map((coach, i) => (
-              <div key={coach.code || i} className="mb-4 border p-3 rounded bg-gray-900 text-yellow-100">
-                <div><b>Type:</b> {coachTypes.find(ct => ct.id === coach.coach_type_id)?.name || coach.coach_type_id}</div>
-                <div><b>Code:</b> {coach.code}</div>
-                <div><b>Fare per km:</b> {coach.fare_per_km}</div>
-                <div>
-                  <b>Seats:</b>
-                  <ul className="ml-5 list-disc">
-                    {coach.seat_types.map((seat) => (
-                      <li key={seat.seat_type_id}>
-                        {seatTypes.find(st => st.id === seat.seat_type_id)?.name || seat.seat_type_id} x {seat.seat_count}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-        <div className="mt-4">
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate({ to: "/admin/trains" })}
-          >
-            Back to List
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // --- EDIT MODE ---
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Edit Train</h2>
-        <button className="btn btn-outline" onClick={() => setViewMode(true)}>Cancel</button>
+        <button
+          className="btn btn-outline"
+          onClick={() => navigate({ to: "/admin/trains/$trainId/view", params: { trainId } })}
+        >
+          Cancel
+        </button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input

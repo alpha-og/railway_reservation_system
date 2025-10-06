@@ -10,7 +10,7 @@ export default function TrainCreate() {
   const [coaches, setCoaches] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +30,6 @@ export default function TrainCreate() {
     fetchData();
   }, []);
 
-  // Add a new coach (empty by default)
   const handleAddCoach = () => {
     setCoaches((prev) => [
       ...prev,
@@ -45,57 +44,38 @@ export default function TrainCreate() {
     ]);
   };
 
-  // Remove a coach by index
   const handleRemoveCoach = (idx) => {
     setCoaches((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  // Handle coach type select
   const handleCoachTypeChange = (idx, coach_type_id) => {
     setCoaches((prev) =>
       prev.map((coach, i) =>
         i === idx
-          ? {
-              ...coach,
-              coach_type_id,
-              fare_per_km: "",
-              seat_types: [],
-              seatTypeToAdd: "",
-              isEditing: true,
-            }
+          ? { ...coach, coach_type_id, fare_per_km: "", seat_types: [], seatTypeToAdd: "", isEditing: true }
           : coach
       )
     );
   };
 
-  // Handle coach code input
   const handleCoachCodeChange = (idx, code) => {
     setCoaches((prev) =>
-      prev.map((coach, i) =>
-        i === idx ? { ...coach, code } : coach
-      )
+      prev.map((coach, i) => (i === idx ? { ...coach, code } : coach))
     );
   };
 
-  // Edit coach details (toggle edit mode)
   const handleEditCoach = (idx) => {
     setCoaches((prev) =>
-      prev.map((coach, i) =>
-        i === idx ? { ...coach, isEditing: true } : coach
-      )
+      prev.map((coach, i) => (i === idx ? { ...coach, isEditing: true } : coach))
     );
   };
 
-  // Update fare per km
   const handleCoachFareChange = (idx, fare_per_km) => {
     setCoaches((prev) =>
-      prev.map((coach, i) =>
-        i === idx ? { ...coach, fare_per_km } : coach
-      )
+      prev.map((coach, i) => (i === idx ? { ...coach, fare_per_km } : coach))
     );
   };
 
-  // Add seat type to coach (dropdown)
   const handleAddSeatType = (coachIdx) => {
     setCoaches((prev) =>
       prev.map((coach, i) => {
@@ -104,82 +84,66 @@ export default function TrainCreate() {
         if (!seatTypeId || coach.seat_types.find(st => st.seat_type_id === seatTypeId)) return coach;
         return {
           ...coach,
-          seat_types: [
-            ...coach.seat_types,
-            { seat_type_id: seatTypeId, seat_count: "0" },
-          ],
+          seat_types: [...coach.seat_types, { seat_type_id: seatTypeId, seat_count: "0" }],
           seatTypeToAdd: "",
         };
       })
     );
   };
 
-  // Remove seat type for a coach
   const handleRemoveSeatType = (coachIdx, seatTypeId) => {
     setCoaches((prev) =>
       prev.map((coach, i) =>
-        i === coachIdx
-          ? {
-              ...coach,
-              seat_types: coach.seat_types.filter((s) => s.seat_type_id !== seatTypeId),
-            }
-          : coach
+        i === coachIdx ? { ...coach, seat_types: coach.seat_types.filter(s => s.seat_type_id !== seatTypeId) } : coach
       )
     );
   };
 
-  // Update seat count for a seat type
   const handleSeatCountChange = (coachIdx, seatIdx, seat_count) => {
     setCoaches((prev) =>
       prev.map((coach, i) =>
         i === coachIdx
-          ? {
-              ...coach,
-              seat_types: coach.seat_types.map((seat, j) =>
-                j === seatIdx ? { ...seat, seat_count } : seat
-              ),
-            }
+          ? { ...coach, seat_types: coach.seat_types.map((seat, j) => (j === seatIdx ? { ...seat, seat_count } : seat)) }
           : coach
       )
     );
   };
 
-  // Handle seat type dropdown for coach
   const handleSeatTypeDropdown = (coachIdx, seatTypeToAdd) => {
     setCoaches((prev) =>
-      prev.map((coach, i) =>
-        i === coachIdx ? { ...coach, seatTypeToAdd } : coach
-      )
+      prev.map((coach, i) => (i === coachIdx ? { ...coach, seatTypeToAdd } : coach))
     );
   };
 
-  // Save coach details (exit edit mode)
   const handleSaveCoach = (idx) => {
     setCoaches((prev) =>
-      prev.map((coach, i) =>
-        i === idx ? { ...coach, isEditing: false } : coach
-      )
+      prev.map((coach, i) => (i === idx ? { ...coach, isEditing: false } : coach))
     );
   };
 
-  // Validate coach code uniqueness (case-insensitive)
   const coachCodes = coaches.map(c => (c.code || "").trim().toLowerCase()).filter(Boolean);
   const hasCoachCodeDuplicates = new Set(coachCodes).size !== coachCodes.length;
 
-  // Validate seat number uniqueness within each coach
   function hasSeatNumberDuplicates(coach) {
     let seatNumber = 1;
-    const numbers = coach.seat_types.flatMap((seat) => {
-      const arr = Array.from({ length: Number(seat.seat_count) }, () => seatNumber++);
-      return arr;
-    });
+    const numbers = coach.seat_types.flatMap((seat) =>
+      Array.from({ length: Number(seat.seat_count) }, () => seatNumber++)
+    );
     return new Set(numbers).size !== numbers.length;
   }
 
-  // Submit
+  const _resetForm = () => {
+    setName("");
+    setCode("");
+    setCoaches([]);
+    setError("");
+    setSuccess(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
     setLoading(true);
     if (!name.trim() || !code.trim()) {
       setError("Train name and code are required.");
@@ -229,8 +193,6 @@ export default function TrainCreate() {
         return;
       }
     }
-
-    // Build seats array for backend (assign unique seat numbers across all seat types)
     const payload = {
       name,
       code,
@@ -253,7 +215,10 @@ export default function TrainCreate() {
 
     try {
       await trainAdminService.createTrain(payload);
-      navigate("/admin/trains");
+      setSuccess(true);
+      setTimeout(() => {
+        navigate({ to: "/admin/trains" });
+      }, 1000);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to create train.");
     } finally {
@@ -381,9 +346,7 @@ export default function TrainCreate() {
                 <div>
                   <label className="block mb-1">Seat Counts:</label>
                   {coach.seat_types.map((seat, seatIdx) => {
-                    const seatType = seatTypes.find(
-                      (st) => st.id === seat.seat_type_id
-                    );
+                    const seatType = seatTypes.find((st) => st.id === seat.seat_type_id);
                     return (
                       <div className="flex items-center mb-2" key={seat.seat_type_id}>
                         <span className="w-32">{seatType ? seatType.name : "Seat"}:</span>
@@ -392,9 +355,7 @@ export default function TrainCreate() {
                           min="1"
                           className="input input-bordered w-32"
                           value={seat.seat_count}
-                          onChange={(e) =>
-                            handleSeatCountChange(idx, seatIdx, e.target.value)
-                          }
+                          onChange={(e) => handleSeatCountChange(idx, seatIdx, e.target.value)}
                           required
                         />
                         <button
@@ -431,9 +392,7 @@ export default function TrainCreate() {
                   <span className="font-bold">Seats:</span>
                   <ul>
                     {coach.seat_types.map((seat) => {
-                      const seatType = seatTypes.find(
-                        (st) => st.id === seat.seat_type_id
-                      );
+                      const seatType = seatTypes.find((st) => st.id === seat.seat_type_id);
                       return (
                         <li key={seat.seat_type_id}>
                           {seatType ? seatType.name : "Seat"}: {seat.seat_count}
@@ -460,6 +419,7 @@ export default function TrainCreate() {
         >
           {loading ? "Creating..." : "Create Train"}
         </button>
+        {success && <p className="text-green-600 mt-2">Train created successfully!</p>}
         {error && <p className="text-red-600 mt-2">{error}</p>}
       </form>
     </div>

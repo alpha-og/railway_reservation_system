@@ -71,12 +71,23 @@ export default function TrainList() {
                     className="btn btn-xs btn-info"
                     onClick={() =>
                       navigate({
-                        to: "/admin/trains/$trainId/details",
-                        params: { trainId: train.id },
+                        to: "/admin/trains/$trainId/view",
+                        params: { trainId: train.id.toString() },
                       })
                     }
                   >
-                    Details
+                    View
+                  </button>
+                  <button
+                    className="btn btn-xs btn-warning"
+                    onClick={() =>
+                      navigate({
+                        to: "/admin/trains/$trainId/edit",
+                        params: { trainId: train.id.toString() },
+                      })
+                    }
+                  >
+                    Edit
                   </button>
                   <button
                     className="btn btn-xs btn-error"
