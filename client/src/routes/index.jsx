@@ -5,6 +5,7 @@ import {
   Testimonials,
   Footer,
 } from "../features/landing/components/";
+import ScrollToTop from "../components/ScrollToTop";
 
 export const Route = createFileRoute("/")({
   component: RouteComponent,
@@ -12,11 +13,12 @@ export const Route = createFileRoute("/")({
 
 function RouteComponent() {
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen w-full bg-slate-900">
       <Hero />
       <Features />
       <Testimonials />
       <Footer />
+      <ScrollToTop />
     </div>
   );
 }

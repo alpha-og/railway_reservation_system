@@ -50,5 +50,6 @@ export const useProfile = () => {
     isSuccess: isAuthenticated ? isSuccess : false,
     isLoading: isAuthenticated ? isLoading : false,
     isError: isAuthenticated ? isError : false,
+    refetch: isAuthenticated ? resolve : () => {},
   };
 };
