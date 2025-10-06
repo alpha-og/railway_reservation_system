@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useParams } from '@tanstack/react-router';
 import TrainEdit from '../../../../features/admin/trains/components/TrainEdit';
 
 export const Route = createFileRoute('/admin/trains/$trainId/edit')({
@@ -6,5 +6,6 @@ export const Route = createFileRoute('/admin/trains/$trainId/edit')({
 })
 
 function RouteComponent() {
-  return <div><TrainEdit/></div>
+  const { trainId } = useParams({ from: '/admin/trains/$trainId/edit' });
+  return <div><TrainEdit trainId={trainId}/></div>
 }

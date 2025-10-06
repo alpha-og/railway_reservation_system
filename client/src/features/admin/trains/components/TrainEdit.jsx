@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import trainAdminService from "../services/trainAdmin.service";
 
-export default function TrainEdit() {
-  const { trainId } = useParams();
+export default function TrainEdit({ trainId }) {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
