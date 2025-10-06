@@ -25,7 +25,7 @@ const NAV_ITEMS = {
   admin: [
     { name: "Trains", to: "/admin/trains" },
     { name: "Stations", to: "/admin/stations" },
-    { name: "Revenue", to: "/admin/revenue" },
+    { name: "Schedules", to: "/admin/schedules" },
     { name: "Logs", to: "/admin/logs" },
   ],
 };

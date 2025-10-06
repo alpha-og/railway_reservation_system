@@ -2,13 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import Button from "../../../../components/ui/Button.jsx";
 import Card from "../../../../components/ui/Card.jsx";
-import {
-  createSchedule,
-} from "../services/scheduleService.js";
+import { getScheduleById, updateSchedule } from "../services/scheduleService.js";
 import stationService from "../../../admin/stations/services/stationService.js";
 import trainService from "../../../admin/trains/services/trainAdmin.service.js";
 
-export default function ScheduleCreate() {
+export default function ScheduleEdit({ scheduleId }) {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     trainId: "",
@@ -22,17 +20,50 @@ export default function ScheduleCreate() {
   const [allTrains, setAllTrains] = useState([]);
 
   useEffect(() => {
-    stationService.getAllStations().then((resp) => {
-      const stations = resp.stations || resp.data?.stations || [];
-      setAllStations(stations);
-      console.log("DEBUG stations:", stations);
-    });
-    trainService.getTrains().then((resp) => {
-      const trains = resp || [];
-      setAllTrains(trains);
-      console.log("DEBUG trains:", trains);
-    });
-  }, []);
+    async function fetchAll() {
+      try {
+        // Get schedule, stations, and trains
+        const [schedResp, stationsResp, trainsResp] = await Promise.all([
+          getScheduleById(scheduleId),
+          stationService.getAllStations(),
+          trainService.getTrains(),
+        ]);
+        // Debug API responses
+        console.log("DEBUG scheduleResp:", schedResp);
+        console.log("DEBUG stationsResp:", stationsResp);
+        console.log("DEBUG trainsResp:", trainsResp);
+
+        // Extract schedule data
+        const schedule =
+          schedResp.data?.schedule ||
+          schedResp.schedule ||
+          schedResp.data ||
+          schedResp;
+
+        setFormData({
+          trainId: schedule.train_id,
+          departureDate: schedule.departure_date,
+          departureTime: schedule.departure_time,
+        });
+
+        // Extract stops, prefill using station object if present
+        setScheduleStops(
+          (schedule.schedule_stops || []).map((stop) => ({
+            stationId: stop.station?.id || stop.station_id,
+            stopNumber: stop.stop_number,
+            arrivalTime: stop.arrival_time,
+            departureTime: stop.departure_time,
+          }))
+        );
+
+        setAllStations(stationsResp.stations || stationsResp.data?.stations || []);
+        setAllTrains(trainsResp.data?.trains || trainsResp.trains || trainsResp || []);
+      } catch {
+        setActionMessage("❌ Could not load schedule.");
+      }
+    }
+    if (scheduleId) fetchAll();
+  }, [scheduleId]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -88,18 +119,18 @@ export default function ScheduleCreate() {
     setActionMessage("");
     if (!validateForm()) return;
     try {
-      const response = await createSchedule({
+      const response = await updateSchedule(scheduleId, {
         trainId: formData.trainId,
         departureDate: formData.departureDate,
         departureTime: formData.departureTime,
         scheduleStops,
       });
-      console.log("DEBUG create response:", response);
+      console.log("DEBUG update response:", response);
       if (response.success) {
-        setActionMessage("✅ Schedule created!");
+        setActionMessage("✅ Schedule updated!");
         setTimeout(() => navigate({ to: "/admin/schedules" }), 1200);
       } else {
-        setActionMessage("❌ Could not create schedule.");
+        setActionMessage("❌ Could not update schedule.");
       }
     } catch (err) {
       setActionMessage("❌ " + (err.message || "Error occurred"));
@@ -113,7 +144,7 @@ export default function ScheduleCreate() {
           className="text-yellow-400 hover:text-yellow-300 mb-4 flex items-center gap-2 font-semibold">
           ← Back to Schedules
         </button>
-        <h1 className="text-4xl font-bold text-yellow-100">Add New Schedule</h1>
+        <h1 className="text-4xl font-bold text-yellow-100">Edit Schedule</h1>
       </div>
       <Card className="p-10 max-w-2xl mx-auto rounded-2xl shadow-lg bg-[#23232e] text-yellow-100">
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -181,7 +212,7 @@ export default function ScheduleCreate() {
               Cancel
             </Button>
             <Button type="submit" className="flex-1 bg-yellow-700 hover:bg-yellow-800 text-yellow-50 rounded-lg shadow">
-              Create Schedule
+              Update Schedule
             </Button>
           </div>
         </form>
