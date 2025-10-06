@@ -23,31 +23,30 @@ const NAV_ITEMS = {
     { name: "Stations", to: "/admin/stations" },
     { name: "Revenue", to: "/admin/revenue" },
     { name: "Logs", to: "/admin/logs" },
-  ]
+  ],
 };
 
 const STYLES = {
   nav: "px-4 py-2 flex justify-between items-center bg-base-300 shadow-md relative",
   desktopNav: "hidden md:flex space-x-4 items-center",
   desktopAuth: "hidden md:flex space-x-4 items-center",
-  navLink: "btn btn-ghost hover:border hover:border-primary transition-all duration-200",
+  navLink:
+    "btn btn-ghost hover:border hover:border-primary transition-all duration-200",
   mobileToggle: "md:hidden btn btn-ghost btn-sm",
   overlay: "fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden",
-  mobileMenu: "fixed top-0 left-0 right-0 bg-base-300 shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden",
-  mobileHeader: "px-4 py-2 flex justify-between items-center border-b border-base-200",
+  mobileMenu:
+    "fixed top-0 left-0 right-0 bg-base-300 shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden",
+  mobileHeader:
+    "px-4 py-2 flex justify-between items-center border-b border-base-200",
   mobileContent: "px-4 py-4",
   mobileNavList: "space-y-2 mb-6",
   mobileAuth: "border-t border-base-200 pt-4",
   mobileAuthSignedIn: "space-y-2",
-  mobileAuthButtons: "space-y-2"
+  mobileAuthButtons: "space-y-2",
 };
 
 const NavLink = ({ item, className, onClick }) => (
-  <Link
-    className={className}
-    to={item.to}
-    onClick={onClick}
-  >
+  <Link className={className} to={item.to} onClick={onClick}>
     {item.name}
   </Link>
 );
@@ -79,22 +78,17 @@ const UserDropdown = ({ profile, onSignOut }) => (
 );
 
 const AuthButtons = ({ mobile = false }) => {
-  const baseClasses = mobile
-    ? "btn w-full"
-    : "btn btn-sm";
+  const baseClasses = mobile ? "btn w-full" : "btn btn-sm";
 
   return (
     <>
       <Link
         to="/signin"
-        className={`${baseClasses} btn-outline ${mobile ? '' : 'mr-2'}`}
+        className={`${baseClasses} btn-outline ${mobile ? "" : "mr-2"}`}
       >
         Sign In
       </Link>
-      <Link
-        to="/signup"
-        className={`${baseClasses} btn-primary`}
-      >
+      <Link to="/signup" className={`${baseClasses} btn-primary`}>
         Sign Up
       </Link>
     </>
@@ -107,7 +101,7 @@ const MobileMenu = ({
   navItems,
   token,
   profile,
-  onSignOut
+  onSignOut,
 }) => (
   <>
     {isOpen && (
@@ -119,7 +113,7 @@ const MobileMenu = ({
     )}
 
     <div
-      className={`${STYLES.mobileMenu} ${isOpen ? 'translate-y-0' : '-translate-y-full'
+      className={`${STYLES.mobileMenu} ${isOpen ? "translate-y-0" : "-translate-y-full"
         }`}
       role="dialog"
       aria-modal="true"
@@ -195,7 +189,7 @@ export default function Navigation() {
 
   const navItems = useMemo(() => {
     if (!token) return NAV_ITEMS.public;
-    if (role?.role === "admin" || role === "admin") return NAV_ITEMS.admin;
+    if (role?.name === "admin") return NAV_ITEMS.admin;
     return NAV_ITEMS.user;
   }, [token, role]);
 
@@ -205,7 +199,7 @@ export default function Navigation() {
   }, [clearAuth, navigate]);
 
   const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen(prev => !prev);
+    setIsMobileMenuOpen((prev) => !prev);
   }, []);
 
   const closeMobileMenu = useCallback(() => {
@@ -215,25 +209,25 @@ export default function Navigation() {
   // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (e) => {
-      if (e.key === 'Escape' && isMobileMenuOpen) {
+      if (e.key === "Escape" && isMobileMenuOpen) {
         closeMobileMenu();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isMobileMenuOpen, closeMobileMenu]);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen]);
 
@@ -246,10 +240,7 @@ export default function Navigation() {
         <ul className={STYLES.desktopNav}>
           {navItems.map((item) => (
             <li key={item.to}>
-              <NavLink
-                item={item}
-                className={STYLES.navLink}
-              />
+              <NavLink item={item} className={STYLES.navLink} />
             </li>
           ))}
         </ul>
@@ -267,7 +258,9 @@ export default function Navigation() {
         <button
           className={STYLES.mobileToggle}
           onClick={toggleMobileMenu}
-          aria-label={isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"}
+          aria-label={
+            isMobileMenuOpen ? "Close mobile menu" : "Open mobile menu"
+          }
           aria-expanded={isMobileMenuOpen}
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
