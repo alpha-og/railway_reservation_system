@@ -8,6 +8,7 @@ export { default as coachTypeRoutes } from "./coachTypesRoutes.js";
 export { default as seatTypeRoutes } from "./seatTypeRoutes.js";
 export { default as trainRoutesUser } from "./trainRoutes_user.js";
 export { default as bookingRoutes } from "./bookingRoutes.js";
+export { default as bookingRoutesAdmin } from "./bookingRoutes_admin.js";
 export { default as profileRoutes } from "./profileRoutes.js";
 export { default as roleRoutes } from "./roleRoutes.js";
 export { default as coachTypeRoutesUser } from "./coachTypesRoutes_user.js";

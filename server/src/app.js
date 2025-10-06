@@ -12,6 +12,7 @@ import {
   seatTypeRoutes,
   profileRoutes,
   bookingRoutes,
+  bookingRoutesAdmin,
   trainRoutesUser,
   stationRoutesUser,
   coachTypeRoutesUser,
@@ -69,6 +70,7 @@ export default function createApp(config) {
 
   api.use("/profile", authenticate(["customer", "admin"]), profileRoutes);
   api.use("/bookings", authenticate("customer"), bookingRoutes);
+  api.use("/admin/bookings", authenticate("admin"), bookingRoutesAdmin);
 
   api.get("/", (req, res) => {
     res.send("This is the Railway Reservation System API");
