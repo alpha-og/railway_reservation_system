@@ -19,14 +19,16 @@ const NAV_ITEMS = {
     { name: "Search", to: "/trains" },
     { name: "My Bookings", to: "/bookings" },
     { name: "PNR Lookup", to: "/pnr-lookup" },
+    { name: "About Us", to: "/about" },
+    { name: "Help", to: "/help" },
+    { name: "Contact Us", to: "/contact" },
   ],
   admin: [
+    { name: "Home", to: "/" },
     { name: "Trains", to: "/admin/trains" },
     { name: "Stations", to: "/admin/stations" },
     { name: "Schedules", to: "/admin/schedules" },
     { name: "PNR Lookup", to: "/pnr-lookup" },
-    { name: "Revenue", to: "/admin/revenue" },
-    { name: "Logs", to: "/admin/logs" },
   ],
 };
 
