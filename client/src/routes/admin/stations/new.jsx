@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
-import StationForm from '../../../features/admin/stations/components/StationForm';
+import StationCreate from '../../../features/admin/stations/components/StationCreate';
 
 export const Route = createFileRoute('/admin/stations/new')({
-  component: NewStationPage,
-});
+  component: RouteComponent,
+})
 
-function NewStationPage() {
-  return <StationForm isEditing={false} />;
+function RouteComponent() {
+  return <div><StationCreate/></div>
 }

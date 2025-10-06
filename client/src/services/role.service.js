@@ -5,7 +5,7 @@ const getRoles = async () => {
 };
 
 const getRole = async (id) => {
-  return (await client.get(`/roles/`, { params: { id } })).data;
+  return (await client.get(`/roles/${id}`)).data;
 };
 
 export default {

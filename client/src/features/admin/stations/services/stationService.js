@@ -1,69 +1,57 @@
-let MOCK_STATIONS = [
-  { id: 1, name: "Mumbai Central", code: "BCT" },
-  { id: 2, name: "New Delhi", code: "NDLS" },
-  { id: 3, name: "Bangalore City", code: "SBC" },
-];
+import client from "../../../../services/config/axiosClient.js";
 
-const getStations = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(MOCK_STATIONS);
-    }, 500);
-  });
+async function getAllStations(filters = {}) {
+  return (await client.get("/admin/stations", { params: filters })).data;
+}
+
+async function getStationById(stationId) {
+  return (await client.get(`/admin/stations/${stationId}`)).data;
+}
+
+async function createStation(stationData) {
+  return (await client.post("/admin/stations", stationData)).data;
+}
+
+async function updateStation(stationId, stationData) {
+  return (await client.patch(`/admin/stations/${stationId}`, stationData)).data;
+}
+
+async function deleteStation(stationId) {
+  return (await client.delete(`/admin/stations/${stationId}`)).data;
+}
+
+// Always returns ALL distances; filter in frontend
+async function getStationDistances() {
+  return (await client.get("/admin/station-distances")).data;
+}
+
+async function createStationDistance(from_station_id, to_station_id, distance) {
+  return (
+    await client.post("/admin/station-distances", {
+      from_station_id,
+      to_station_id,
+      distance,
+    })
+  ).data;
+}
+
+async function updateStationDistance(id, distance) {
+  return (await client.patch(`/admin/station-distances/${id}`, { distance }))
+    .data;
+}
+
+async function deleteStationDistance(id) {
+  return (await client.delete(`/admin/station-distances/${id}`)).data;
+}
+
+export default {
+  getAllStations,
+  getStationById,
+  createStation,
+  updateStation,
+  deleteStation,
+  getStationDistances,
+  createStationDistance,
+  updateStationDistance,
+  deleteStationDistance,
 };
-
-const getStation = (id) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const station = MOCK_STATIONS.find((s) => s.id === parseInt(id));
-      if (station) {
-        resolve(station);
-      } else {
-        reject(new Error("Station not found"));
-      }
-    }, 500);
-  });
-};
-
-const addStation = (newStation) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const newId = MOCK_STATIONS.length
-        ? Math.max(...MOCK_STATIONS.map((s) => s.id)) + 1
-        : 1;
-      const stationWithId = { ...newStation, id: newId };
-      MOCK_STATIONS.push(stationWithId);
-      resolve(stationWithId);
-    }, 500);
-  });
-};
-
-const updateStation = (id, updatedData) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const index = MOCK_STATIONS.findIndex((s) => s.id === parseInt(id));
-      if (index !== -1) {
-        MOCK_STATIONS[index] = { ...MOCK_STATIONS[index], ...updatedData };
-        resolve(MOCK_STATIONS[index]);
-      } else {
-        reject(new Error("Station not found"));
-      }
-    }, 500);
-  });
-};
-
-const deleteStation = (id) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const initialLength = MOCK_STATIONS.length;
-      MOCK_STATIONS = MOCK_STATIONS.filter((s) => s.id !== parseInt(id));
-      if (MOCK_STATIONS.length < initialLength) {
-        resolve({ success: true });
-      } else {
-        reject(new Error("Station not found"));
-      }
-    }, 500);
-  });
-};
-
-export { getStations, getStation, addStation, updateStation, deleteStation };
