@@ -16,7 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 
-export const Route = createFileRoute("/(user)/contact")({
+export const Route = createFileRoute("/contact")({
   component: RouteComponent,
 });
 

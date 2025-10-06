@@ -1,5 +1,5 @@
 import { useParams, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Train,
   MapPin,
@@ -47,8 +47,8 @@ export default function BookingDetails() {
       await navigator.clipboard.writeText(formattedBooking.pnr);
       setCopiedPNR(true);
       setTimeout(() => setCopiedPNR(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy PNR:", err);
+    } catch {
+      console.error("Failed to copy PNR");
     }
   };
 
@@ -62,7 +62,7 @@ export default function BookingDetails() {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
+      } catch {
         console.log("Share cancelled");
       }
     } else {

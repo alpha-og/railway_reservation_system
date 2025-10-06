@@ -53,7 +53,7 @@ export default function PaymentPage() {
   };
 
   const [timeLeft, setTimeLeft] = useState(getInitialTimeLeft);
-  const [errors, setErrors] = useState({});
+  const [_errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -61,7 +61,7 @@ export default function PaymentPage() {
   const [bookingCreated, setBookingCreated] = useState(!!search.bookingId);
   const [currentBookingId, setCurrentBookingId] = useState(search.bookingId);
   const {
-    processPayment,
+    processPayment: _processPayment,
     isSuccess: paymentSuccess,
     isError: paymentError,
     error: paymentErrorMessage,

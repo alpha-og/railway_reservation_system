@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetSavedPassengers } from "../services/passengersService";
-import { validatePassenger, validatePassengerList } from "../../../../lib/validationUtils";
+import { passengerListSchema } from "../../../../schemas/passenger";
 
 export function useSavedPassengers() {
   const {
@@ -21,15 +23,44 @@ export function useSavedPassengers() {
 export function usePassengerForm(initialPassengers = [], availableCoachTypes = []) {
   const defaultCoachType = availableCoachTypes.length > 0 ? availableCoachTypes[0].value : '';
   
-  const [passengers, setPassengers] = useState(initialPassengers);
-  const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  // Initialize form with default values
+  const defaultValues = {
+    passengers: initialPassengers.length > 0 
+      ? initialPassengers.map(p => ({
+          name: p.name || '',
+          email: p.email || '',
+          age: p.age || '',
+          gender: p.gender || 'Male',
+          coachType: p.coachType || defaultCoachType
+        }))
+      : [{ 
+          name: '', 
+          email: '', 
+          age: '', 
+          gender: 'Male', 
+          coachType: defaultCoachType 
+        }]
+  };
+
+  const form = useForm({
+    resolver: zodResolver(passengerListSchema),
+    defaultValues,
+    mode: 'onBlur'
+  });
+
+  const { append, remove } = useFieldArray({
+    control: form.control,
+    name: "passengers"
+  });
 
   // Update passengers' coach types when available coach types become available
   useEffect(() => {
     if (availableCoachTypes.length > 0) {
-      setPassengers(prev => prev.map(passenger => {
+      const currentPassengers = form.getValues('passengers');
+      const updatedPassengers = currentPassengers.map(passenger => {
         const hasValidCoachType = passenger.coachType && 
           availableCoachTypes.some(option => option.value === passenger.coachType);
         
@@ -37,79 +68,55 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
           return { ...passenger, coachType: availableCoachTypes[0].value };
         }
         return passenger;
-      }));
+      });
+      
+      form.setValue('passengers', updatedPassengers);
     }
-  }, [availableCoachTypes]);
+  }, [availableCoachTypes, form]);
 
   const addPassenger = useCallback(() => {
     const defaultCoachType = availableCoachTypes.length > 0 ? availableCoachTypes[0].value : '';
-    setPassengers(prev => [...prev, { name: "", email: "", age: "", gender: "Male", coachType: defaultCoachType }]);
-    const newErrors = { ...errors };
-    delete newErrors.general;
-    setErrors(newErrors);
-  }, [errors, availableCoachTypes]);
+    append({ 
+      name: "", 
+      email: "", 
+      age: "", 
+      gender: "Male", 
+      coachType: defaultCoachType 
+    });
+    
+    // Clear any general errors when adding a passenger
+    form.clearErrors('passengers');
+  }, [append, availableCoachTypes, form]);
 
   const removePassenger = useCallback((index) => {
-    setPassengers(prev => prev.filter((_, i) => i !== index));
-    
-    const newErrors = { ...errors };
-    delete newErrors[index];
-    
-    // Reindex remaining passenger errors
-    const reindexedErrors = {};
-    Object.keys(newErrors).forEach(key => {
-      if (key !== 'general' && parseInt(key) > index) {
-        reindexedErrors[parseInt(key) - 1] = newErrors[key];
-      } else if (key !== 'general' && parseInt(key) < index) {
-        reindexedErrors[key] = newErrors[key];
-      } else if (key === 'general') {
-        reindexedErrors[key] = newErrors[key];
-      }
-    });
-    setErrors(reindexedErrors);
-  }, [errors]);
+    remove(index);
+    form.clearErrors(`passengers.${index}`);
+  }, [remove, form]);
 
   const updatePassenger = useCallback((index, field, value) => {
-    setPassengers(prev => {
-      const updated = [...prev];
-      updated[index][field] = value;
-      return updated;
-    });
-    
-    // Real-time validation
-    const passengerErrors = validatePassenger(passengers[index] ? { ...passengers[index], [field]: value } : { [field]: value });
-    const newErrors = { ...errors };
-    
-    if (Object.keys(passengerErrors).length === 0) {
-      delete newErrors[index];
-    } else {
-      newErrors[index] = passengerErrors;
-    }
-    
-    setErrors(newErrors);
-  }, [passengers, errors]);
+    form.setValue(`passengers.${index}.${field}`, value);
+    form.trigger(`passengers.${index}.${field}`);
+  }, [form]);
 
   const autofillPassenger = useCallback((index, savedPassenger) => {
     if (!savedPassenger) return;
     
-    setPassengers(prev => {
-      const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        name: savedPassenger.name,
-        age: savedPassenger.age,
-        gender: savedPassenger.gender,
-        ...(savedPassenger.email && { email: savedPassenger.email })
-      };
-      return updated;
-    });
-  }, []);
+    const currentPassenger = form.getValues(`passengers.${index}`);
+    const updatedPassenger = {
+      ...currentPassenger,
+      name: savedPassenger.name,
+      age: savedPassenger.age,
+      gender: savedPassenger.gender,
+      ...(savedPassenger.email && { email: savedPassenger.email })
+    };
+    
+    form.setValue(`passengers.${index}`, updatedPassenger);
+    form.trigger(`passengers.${index}`);
+  }, [form]);
 
   const validateForm = useCallback(() => {
-    const validationErrors = validatePassengerList(passengers);
-    setErrors(validationErrors || {});
-    return !validationErrors;
-  }, [passengers]);
+    return form.trigger();
+  }, [form]);
 
   const setSubmitting = useCallback((submitting) => {
     setIsSubmitting(submitting);
@@ -120,13 +127,31 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
   }, []);
 
   const clearErrors = useCallback(() => {
-    setErrors({});
-  }, []);
+    form.clearErrors();
+  }, [form]);
+
+  // Get passengers data and errors
+  const passengers = form.watch('passengers');
+  const errors = form.formState.errors;
+
+  // Transform form errors to match the old API for backward compatibility
+  const transformedErrors = {};
+  if (errors.passengers) {
+    if (Array.isArray(errors.passengers)) {
+      errors.passengers.forEach((passengerError, index) => {
+        if (passengerError) {
+          transformedErrors[index] = passengerError;
+        }
+      });
+    } else if (errors.passengers.message) {
+      transformedErrors.general = errors.passengers.message;
+    }
+  }
 
   return {
     passengers,
-    setPassengers,
-    errors,
+    setPassengers: (newPassengers) => form.setValue('passengers', newPassengers),
+    errors: transformedErrors,
     isSubmitting,
     showSuccess,
     addPassenger,
@@ -137,5 +162,9 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
     setSubmitting,
     setSuccess,
     clearErrors,
+    // Expose form methods for direct access if needed
+    register: form.register,
+    control: form.control,
+    formState: form.formState
   };
 }

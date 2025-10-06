@@ -9,13 +9,17 @@ import { useProfile } from "../hooks/useProfile.js";
 const NAV_ITEMS = {
   public: [
     { name: "Home", to: "/" },
-    { name: "Search Trains", to: "/trains" },
+    { name: "Search", to: "/trains" },
+    { name: "About Us", to: "/about" },
+    { name: "Help", to: "/help" },
     { name: "Contact Us", to: "/contact" },
   ],
   user: [
     { name: "Home", to: "/" },
-    { name: "Search Trains", to: "/trains" },
+    { name: "Search", to: "/trains" },
     { name: "My Bookings", to: "/bookings" },
+    { name: "About Us", to: "/about" },
+    { name: "Help", to: "/help" },
     { name: "Contact Us", to: "/contact" },
   ],
   admin: [

@@ -4,7 +4,7 @@ import {
   Features,
   Testimonials,
   Footer,
-} from "../features/landing/components/";
+} from "../../features/landing/components/";
 
 export const Route = createFileRoute("/(user)/dashboard")({
   component: RouteComponent,

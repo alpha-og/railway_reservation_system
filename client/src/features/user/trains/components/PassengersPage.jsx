@@ -134,7 +134,7 @@ export default function PassengersPage() {
 
     try {
       await createBooking(bookingData);
-    } catch (error) {
+    } catch {
       setSubmitting(false);
     }
   };
@@ -237,7 +237,7 @@ export default function PassengersPage() {
                     <div className="sm:col-span-2">
                       <FormInput
                         label="Full Name" 
-                        error={errors[index]?.name}
+                        error={errors[index]?.name || ''}
                         required
                         type="text"
                         className="text-sm sm:text-base"
@@ -252,7 +252,7 @@ export default function PassengersPage() {
                     <div className="sm:col-span-2">
                       <FormInput
                         label="Email" 
-                        error={errors[index]?.email}
+                        error={errors[index]?.email || ''}
                         required
                         type="email"
                         className="text-sm sm:text-base"
@@ -269,7 +269,7 @@ export default function PassengersPage() {
                     {/* Age Field */}
                     <FormInput
                       label="Age" 
-                      error={errors[index]?.age}
+                      error={errors[index]?.age || ''}
                       required
                       type="number"
                       className="text-sm sm:text-base"
@@ -284,7 +284,7 @@ export default function PassengersPage() {
                     {/* Gender Field */}
                     <FormSelect
                       label="Gender" 
-                      error={errors[index]?.gender}
+                      error={errors[index]?.gender || ''}
                       required
                       className="text-sm sm:text-base"
                       value={passenger.gender}
@@ -302,7 +302,7 @@ export default function PassengersPage() {
                     <div className="sm:col-span-2">
                       <FormSelect
                         label="Coach Type" 
-                        error={errors[index]?.coachType}
+                        error={errors[index]?.coachType || ''}
                         required
                         className="text-sm sm:text-base"
                         value={passenger.coachType}
