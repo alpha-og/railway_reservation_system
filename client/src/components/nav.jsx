@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Info, HelpCircle, Phone } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import Branding from "./branding.jsx";
 import { useRole } from "../hooks/useRole.js";
@@ -19,9 +19,6 @@ const NAV_ITEMS = {
     { name: "Search", to: "/trains" },
     { name: "My Bookings", to: "/bookings" },
     { name: "PNR Lookup", to: "/pnr-lookup" },
-    { name: "About Us", to: "/about" },
-    { name: "Help", to: "/help" },
-    { name: "Contact Us", to: "/contact" },
   ],
   admin: [
     { name: "Trains", to: "/admin/trains" },
@@ -74,6 +71,26 @@ const UserDropdown = ({ profile, onSignOut }) => (
           Profile
         </Link>
       </li>
+      <div className="border-t border-base-200 my-2 mx-2"></div>
+      <li>
+        <Link to="/about" className="gap-2">
+          <Info size={16} />
+          About Us
+        </Link>
+      </li>
+      <li>
+        <Link to="/help" className="gap-2">
+          <HelpCircle size={16} />
+          Help
+        </Link>
+      </li>
+      <li>
+        <Link to="/contact" className="gap-2">
+          <Phone size={16} />
+          Contact Us
+        </Link>
+      </li>
+      <div className="border-t border-base-200 my-2 mx-2"></div>
       <li>
         <button onClick={onSignOut} className="gap-2">
           <LogOut size={16} />
@@ -171,6 +188,32 @@ const MobileMenu = ({
                 <User size={16} />
                 Profile
               </Link>
+              <div className="border-t border-base-200 my-3 mx-4"></div>
+              <Link
+                to="/about"
+                className="btn btn-ghost w-full justify-start gap-2"
+                onClick={onClose}
+              >
+                <Info size={16} />
+                About Us
+              </Link>
+              <Link
+                to="/help"
+                className="btn btn-ghost w-full justify-start gap-2"
+                onClick={onClose}
+              >
+                <HelpCircle size={16} />
+                Help
+              </Link>
+              <Link
+                to="/contact"
+                className="btn btn-ghost w-full justify-start gap-2"
+                onClick={onClose}
+              >
+                <Phone size={16} />
+                Contact Us
+              </Link>
+              <div className="border-t border-base-200 my-3 mx-4"></div>
               <button
                 onClick={() => {
                   onSignOut();
