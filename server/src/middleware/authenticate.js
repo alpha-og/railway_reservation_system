@@ -52,6 +52,7 @@ function authenticate(authorizedRoles = null) {
     }
 
     req.userId = userId;
+    req.role = rows[0].name;
     next();
   };
 }

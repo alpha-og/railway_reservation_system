@@ -68,6 +68,38 @@ class Booking {
     return result.rows[0];
   }
 
+  static async findByPnr(pnr, userId = null) {
+    const query = `
+      SELECT 
+        b.*,
+        bs.name as booking_status,
+        t.name as train_name,
+        t.code as train_code,
+        fs.name as source_station,
+        fs.code as source_station_code,
+        ts.name as destination_station,
+        ts.code as destination_station_code,
+        TO_CHAR(s.departure_date, 'YYYY-MM-DD') AS departure_date,
+        s.departure_time,
+        ss_from.departure_time as from_departure_time,
+        ss_to.arrival_time as to_arrival_time,
+        sd.distance as journey_distance
+      FROM ${this.TABLE} b
+      LEFT JOIN booking_statuses bs ON b.status_id = bs.id
+      LEFT JOIN schedules s ON b.schedule_id = s.id
+      LEFT JOIN trains t ON s.train_id = t.id
+      LEFT JOIN stations fs ON b.from_station_id = fs.id
+      LEFT JOIN stations ts ON b.to_station_id = ts.id
+      LEFT JOIN schedule_stops ss_from ON s.id = ss_from.schedule_id AND ss_from.station_id = b.from_station_id
+      LEFT JOIN schedule_stops ss_to ON s.id = ss_to.schedule_id AND ss_to.station_id = b.to_station_id
+      LEFT JOIN station_distances sd ON sd.from_station_id = b.from_station_id AND sd.to_station_id = b.to_station_id
+      WHERE b.pnr = $1 ${userId ? 'AND b.user_id = $2' : ''}
+    `;
+    const params = userId ? [pnr, userId] : [pnr];
+    const result = await queryDB(query, params);
+    return result.rows[0];
+  }
+
   static async findAllByUser(userId) {
     const query = `
       SELECT 
