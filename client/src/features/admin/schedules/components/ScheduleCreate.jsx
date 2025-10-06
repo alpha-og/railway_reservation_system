@@ -12,8 +12,9 @@ export default function StationCreate() {
   const [loading, setLoading] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
   const [allStations, setAllStations] = useState([]);
-  const [distances, setDistances] = useState({}); // {toStationId: distance}
+  const [distances, setDistances] = useState({}); // { toStationId: distance }
 
+  // Fetch all stations for distance selection
   useEffect(() => {
     stationService.getAllStations().then((resp) => {
       const stations = resp.stations || resp.data?.stations || [];
@@ -23,13 +24,13 @@ export default function StationCreate() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
     setActionMessage("");
   }
 
   function handleDistanceChange(toStationId, value) {
-    setDistances(prev => ({
+    setDistances((prev) => ({
       ...prev,
       [toStationId]: value,
     }));
@@ -63,11 +64,11 @@ export default function StationCreate() {
         city: formData.city.trim(),
       };
       const response = await stationService.createStation(submitData);
-      const newStationId = response.data?.station?.id || response.station?.id;
-      if (response.success && newStationId) {
-        // Add distances
+      if (response.success && response.data?.station?.id) {
+        // Create distances
+        const newStationId = response.data.station.id;
         const distancePromises = Object.entries(distances)
-          .filter(([toStationId, dist]) => toStationId && dist && !isNaN(dist) && Number(dist) > 0)
+          .filter(([dist]) => dist && !isNaN(dist) && Number(dist) > 0)
           .map(([toStationId, dist]) =>
             stationService.createStationDistance(newStationId, toStationId, Number(dist))
           );
@@ -107,7 +108,9 @@ export default function StationCreate() {
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g., New Delhi Railway Station"
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg bg-[#191922] text-yellow-100 ${errors.name ? "border-red-500" : "border-yellow-700"}`}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg bg-[#191922] text-yellow-100 ${
+                errors.name ? "border-red-500" : "border-yellow-700"
+              }`}
             />
             {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
             <p className="mt-1 text-xs text-yellow-400">Full official station name (2-100 characters)</p>
@@ -123,7 +126,9 @@ export default function StationCreate() {
               onChange={handleChange}
               placeholder="e.g., NDLS"
               maxLength={10}
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent uppercase text-lg bg-[#191922] text-yellow-100 ${errors.code ? "border-red-500" : "border-yellow-700"}`}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent uppercase text-lg bg-[#191922] text-yellow-100 ${
+                errors.code ? "border-red-500" : "border-yellow-700"
+              }`}
             />
             {errors.code && <p className="mt-1 text-sm text-red-400">{errors.code}</p>}
             <p className="mt-1 text-xs text-yellow-400">Unique code (1-10 chars, letters and numbers only)</p>
@@ -138,17 +143,21 @@ export default function StationCreate() {
               value={formData.city}
               onChange={handleChange}
               placeholder="e.g., New Delhi"
-              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg bg-[#191922] text-yellow-100 ${errors.city ? "border-red-500" : "border-yellow-700"}`}
+              className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-lg bg-[#191922] text-yellow-100 ${
+                errors.city ? "border-red-500" : "border-yellow-700"
+              }`}
             />
             {errors.city && <p className="mt-1 text-sm text-red-400">{errors.city}</p>}
             <p className="mt-1 text-xs text-yellow-400">City where the station is located (2-50 characters)</p>
           </div>
           <div>
             <label className="block text-base font-semibold text-yellow-400 mb-2">
-              Distances <span className="text-yellow-300">(from this station)</span>
+              Distances to Other Stations
             </label>
             <div className="space-y-2">
-              {allStations.map(st => (
+              {allStations
+                .filter(s => !formData.code || s.code !== formData.code) // exclude self
+                .map(st => (
                 <div key={st.id} className="flex items-center gap-3">
                   <span className="w-32 text-yellow-200">{st.name} ({st.code})</span>
                   <input

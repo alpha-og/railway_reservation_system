@@ -6,93 +6,91 @@ import stationService from "../services/stationService.js";
 
 export default function StationEdit({ stationId }) {
   const navigate = useNavigate();
-  const isEdit = Boolean(stationId);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    city: "",
-  });
+  const [formData, setFormData] = useState({ name: "", code: "", city: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(isEdit);
+  const [fetchLoading, setFetchLoading] = useState(true);
   const [fetchError, setFetchError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
+  const [allStations, setAllStations] = useState([]);
+  const [distances, setDistances] = useState({}); // {toStationId: {id, distance}}
 
   useEffect(() => {
-    if (isEdit && stationId) {
-      fetchStationData();
-    }
-  }, [isEdit, stationId]);
+    async function fetchAll() {
+      setFetchLoading(true);
+      setFetchError("");
+      try {
+        const [stationResp, stationsResp, distancesResp] = await Promise.all([
+          stationService.getStationById(stationId),
+          stationService.getAllStations(),
+          stationService.getStationDistances(),
+        ]);
 
-  async function fetchStationData() {
-    setFetchLoading(true);
-    setFetchError("");
-    try {
-      const response = await stationService.getStationById(stationId);
-      const station =
-        response?.station ||
-        response?.data?.station ||
-        (response?.success && response?.data?.station);
+        const station =
+          stationResp?.station ||
+          stationResp?.data?.station ||
+          (stationResp?.success && stationResp?.data?.station);
+        setFormData({
+          name: station?.name || "",
+          code: station?.code || "",
+          city: station?.city || "",
+        });
 
-      if (!station) {
-        setFetchError("Station not found or could not be loaded.");
+        const stationsArr = stationsResp?.stations || stationsResp?.data?.stations || [];
+        setAllStations(stationsArr);
+
+        const distancesArr =
+          distancesResp?.distances ||
+          distancesResp?.data?.distances ||
+          [];
+
+        const distMap = {};
+        for (const d of distancesArr) {
+          if (String(d.from_station_id) === String(stationId)) {
+            distMap[d.to_station_id] = { id: d.id, distance: d.distance };
+          }
+        }
+        setDistances(distMap);
+      } catch (error) {
+        setFetchError(error.message || "Failed to fetch station data");
         setFormData({ name: "", code: "", city: "" });
-        return;
+      } finally {
+        setFetchLoading(false);
       }
-      setFormData({
-        name: station.name || "",
-        code: station.code || "",
-        city: station.city || "",
-      });
-    } catch (error) {
-      setFetchError(error.message || "Failed to fetch station data");
-      setFormData({ name: "", code: "", city: "" });
-    } finally {
-      setFetchLoading(false);
     }
-  }
+    if (stationId) fetchAll();
+  }, [stationId]);
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
     setActionMessage("");
+  }
+
+  function handleDistanceChange(toStationId, value) {
+    setDistances(prev => ({
+      ...prev,
+      [toStationId]: {
+        ...prev[toStationId],
+        distance: value,
+      },
+    }));
   }
 
   function validateForm() {
     const newErrors = {};
-    if (!formData.name.trim()) {
-      newErrors.name = "Station name is required";
-    } else if (formData.name.length < 2) {
-      newErrors.name = "Station name must be at least 2 characters";
-    } else if (formData.name.length > 100) {
-      newErrors.name = "Station name must not exceed 100 characters";
-    }
-    if (!formData.code.trim()) {
-      newErrors.code = "Station code is required";
-    } else if (formData.code.length < 1) {
-      newErrors.code = "Station code must be at least 1 character";
-    } else if (formData.code.length > 10) {
-      newErrors.code = "Station code must not exceed 10 characters";
-    } else if (!/^[A-Z0-9]+$/.test(formData.code.toUpperCase())) {
-      newErrors.code = "Station code must contain only letters and numbers";
-    }
-    if (!formData.city.trim()) {
-      newErrors.city = "City is required";
-    } else if (formData.city.length < 2) {
-      newErrors.city = "City name must be at least 2 characters";
-    } else if (formData.city.length > 50) {
-      newErrors.city = "City name must not exceed 50 characters";
-    }
+    if (!formData.name.trim()) newErrors.name = "Station name is required";
+    else if (formData.name.length < 2) newErrors.name = "Station name must be at least 2 characters";
+    else if (formData.name.length > 100) newErrors.name = "Station name must not exceed 100 characters";
+    if (!formData.code.trim()) newErrors.code = "Station code is required";
+    else if (formData.code.length < 1) newErrors.code = "Station code must be at least 1 character";
+    else if (formData.code.length > 10) newErrors.code = "Station code must not exceed 10 characters";
+    else if (!/^[A-Z0-9]+$/.test(formData.code.toUpperCase())) newErrors.code = "Station code must contain only letters and numbers";
+    if (!formData.city.trim()) newErrors.city = "City is required";
+    else if (formData.city.length < 2) newErrors.city = "City name must be at least 2 characters";
+    else if (formData.city.length > 50) newErrors.city = "City name must not exceed 50 characters";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -101,7 +99,6 @@ export default function StationEdit({ stationId }) {
     e.preventDefault();
     setActionMessage("");
     if (!validateForm()) return;
-
     try {
       setLoading(true);
       const submitData = {
@@ -110,24 +107,31 @@ export default function StationEdit({ stationId }) {
         city: formData.city.trim(),
       };
       const response = await stationService.updateStation(stationId, submitData);
-
       if (response.success) {
+        const distanceOps = [];
+        for (const st of allStations) {
+          if (String(st.id) === String(stationId)) continue; // skip self
+          const toStationId = st.id;
+          const distVal = distances[toStationId]?.distance;
+          const distId = distances[toStationId]?.id;
+          if (distVal && !isNaN(distVal) && Number(distVal) > 0) {
+            if (distId) {
+              distanceOps.push(stationService.updateStationDistance(distId, Number(distVal)));
+            } else {
+              distanceOps.push(stationService.createStationDistance(stationId, toStationId, Number(distVal)));
+            }
+          } else if (distId && (!distVal || Number(distVal) === 0)) {
+            distanceOps.push(stationService.deleteStationDistance(distId));
+          }
+        }
+        await Promise.all(distanceOps);
         setActionMessage("✅ Station updated successfully!");
         setTimeout(() => navigate({ to: "/admin/stations" }), 1200);
       } else {
         setActionMessage("❌ An error occurred. Try again.");
       }
     } catch (error) {
-      if (error.issues) {
-        const backendErrors = {};
-        error.issues.forEach((issue) => {
-          backendErrors[issue.path[0]] = issue.message;
-        });
-        setErrors(backendErrors);
-        setActionMessage("❌ Please fix the errors above.");
-      } else {
-        setActionMessage("❌ " + (error.message || "An error occurred"));
-      }
+      setActionMessage("❌ " + (error.message || "An error occurred"));
     } finally {
       setLoading(false);
     }
@@ -227,6 +231,30 @@ export default function StationEdit({ stationId }) {
             />
             {errors.city && <p className="mt-1 text-sm text-red-400">{errors.city}</p>}
             <p className="mt-1 text-xs text-yellow-400">City where the station is located (2-50 characters)</p>
+          </div>
+          <div>
+            <label className="block text-base font-semibold text-yellow-400 mb-2">
+              Distances <span className="text-yellow-300">(from this station)</span>
+            </label>
+            <div className="space-y-2">
+              {allStations
+                .filter(st => String(st.id) !== String(stationId))
+                .map(st => (
+                  <div key={st.id} className="flex items-center gap-3">
+                    <span className="w-32 text-yellow-200">{st.name} ({st.code})</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={distances[st.id]?.distance ?? ""}
+                      placeholder="Distance (km)"
+                      className="w-32 px-2 py-1 border border-yellow-800 rounded bg-[#191922] text-yellow-100"
+                      onChange={e => handleDistanceChange(st.id, e.target.value)}
+                    />
+                  </div>
+                ))}
+            </div>
+            <p className="mt-1 text-xs text-yellow-400">Leave blank or zero to remove a distance.</p>
           </div>
           {actionMessage && (
             <div className={`py-2 text-center rounded-lg font-semibold ${actionMessage.startsWith("✅") ? "text-green-400 bg-green-950" : "text-red-400 bg-red-950"}`}>

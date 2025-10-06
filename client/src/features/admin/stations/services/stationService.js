@@ -1,44 +1,47 @@
-// client/src/features/admin/stations/services/stationService.js
-
 import client from "../../../../services/config/axiosClient.js";
 
-// ============================================
-// Get all stations with optional filters
-// ============================================
 async function getAllStations(filters = {}) {
-  return (
-    await client.get("/admin/stations", {
-      params: filters, // { search, city }
-    })
-  ).data;
+  return (await client.get("/admin/stations", { params: filters })).data;
 }
 
-// ============================================
-// Get single station by ID
-// ============================================
 async function getStationById(stationId) {
   return (await client.get(`/admin/stations/${stationId}`)).data;
 }
 
-// ============================================
-// Create new station
-// ============================================
 async function createStation(stationData) {
   return (await client.post("/admin/stations", stationData)).data;
 }
 
-// ============================================
-// Update existing station
-// ============================================
 async function updateStation(stationId, stationData) {
   return (await client.patch(`/admin/stations/${stationId}`, stationData)).data;
 }
 
-// ============================================
-// Delete station
-// ============================================
 async function deleteStation(stationId) {
   return (await client.delete(`/admin/stations/${stationId}`)).data;
+}
+
+// Always returns ALL distances; filter in frontend
+async function getStationDistances() {
+  return (await client.get("/admin/station-distances")).data;
+}
+
+async function createStationDistance(from_station_id, to_station_id, distance) {
+  return (
+    await client.post("/admin/station-distances", {
+      from_station_id,
+      to_station_id,
+      distance,
+    })
+  ).data;
+}
+
+async function updateStationDistance(id, distance) {
+  return (await client.patch(`/admin/station-distances/${id}`, { distance }))
+    .data;
+}
+
+async function deleteStationDistance(id) {
+  return (await client.delete(`/admin/station-distances/${id}`)).data;
 }
 
 export default {
@@ -47,4 +50,8 @@ export default {
   createStation,
   updateStation,
   deleteStation,
+  getStationDistances,
+  createStationDistance,
+  updateStationDistance,
+  deleteStationDistance,
 };
