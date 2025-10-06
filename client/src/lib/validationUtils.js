@@ -9,8 +9,10 @@ export const validatePassenger = (passenger) => {
     errors.name = 'Name can only contain letters and spaces';
   }
   
-  // Email validation (optional field)
-  if (passenger.email && passenger.email.trim()) {
+  // Email validation (required field)
+  if (!passenger.email?.trim()) {
+    errors.email = 'Email is required';
+  } else {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(passenger.email.trim())) {
       errors.email = 'Please enter a valid email address';

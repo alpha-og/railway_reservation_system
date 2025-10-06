@@ -128,7 +128,7 @@ export default function PassengersPage() {
         age: parseInt(passenger.age),
         gender: passenger.gender,
         coachType: passenger.coachType,
-        ...(passenger.email && passenger.email.trim() && { email: passenger.email.trim() })
+        email: passenger.email?.trim() || ''
       }))
     };
 
@@ -251,13 +251,14 @@ export default function PassengersPage() {
                     {/* Email Field */}
                     <div className="sm:col-span-2">
                       <FormInput
-                        label="Email (Optional)" 
+                        label="Email" 
                         error={errors[index]?.email}
+                        required
                         type="email"
                         className="text-sm sm:text-base"
                         value={passenger.email || ''}
                         onChange={(e) => updatePassenger(index, "email", e.target.value)}
-                        placeholder="Enter email address (optional)"
+                        placeholder="Enter email address"
                         disabled={isSubmitting || isCreatingBooking}
                       />
                       <div className="text-xs text-base-content/60 mt-1">
