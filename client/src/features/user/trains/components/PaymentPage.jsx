@@ -31,7 +31,28 @@ export default function PaymentPage() {
     search.to,
   );
 
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  // Calculate initial time left based on booking creation time
+  const getInitialTimeLeft = () => {
+    const bookingId = search.bookingId;
+    if (!bookingId) return 600; // 10 minutes if no booking
+
+    const storageKey = `payment_timer_${bookingId}`;
+    const stored = localStorage.getItem(storageKey);
+    
+    if (stored) {
+      const { startTime } = JSON.parse(stored);
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, 600 - elapsed); // 10 minutes total
+      return remaining;
+    } else {
+      // First time - store the start time
+      const startTime = Date.now();
+      localStorage.setItem(storageKey, JSON.stringify({ startTime }));
+      return 600;
+    }
+  };
+
+  const [timeLeft, setTimeLeft] = useState(getInitialTimeLeft);
   const [errors, setErrors] = useState({});
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState("");
@@ -92,9 +113,15 @@ export default function PaymentPage() {
     };
   }, [passengers, getCoachPrice, getCoachTypeName]);
 
-  // Timer
+  // Timer with cleanup on expiry
   useEffect(() => {
     if (timeLeft <= 0) {
+      // Clean up timer data when expired
+      const bookingId = search.bookingId;
+      if (bookingId) {
+        localStorage.removeItem(`payment_timer_${bookingId}`);
+      }
+      
       navigate({
         to: "/trains/$trainId/book/passengers",
         params: { trainId },
@@ -111,7 +138,7 @@ export default function PaymentPage() {
     return () => clearInterval(timer);
   }, [timeLeft, trainId, navigate, search]);
 
-  const formatTime = (sec) => {
+  const formatTimerTime = (sec) => {
     const m = Math.floor(sec / 60);
     const s = sec % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
@@ -144,6 +171,11 @@ export default function PaymentPage() {
         setCurrentBookingId(bookingId);
         setBookingCreated(true);
         setMessage("Booking created successfully!");
+        
+        // Store timer start time for this new booking
+        const storageKey = `payment_timer_${bookingId}`;
+        const startTime = Date.now();
+        localStorage.setItem(storageKey, JSON.stringify({ startTime }));
       }
 
       // Step 2: Navigate to Payment Gateway Page
@@ -209,7 +241,7 @@ export default function PaymentPage() {
             <AlertTriangle className="stroke-current shrink-0 h-6 w-6" />
             <div>
               <div className="font-bold">
-                Time Remaining: {formatTime(timeLeft)}
+                Time Remaining: {formatTimerTime(timeLeft)}
               </div>
               <div className="text-xs">
                 Please complete your payment before the timer expires

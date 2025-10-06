@@ -20,7 +20,7 @@ export default function PassengersPage() {
     : [];
 
   // Custom hooks for data and state management
-  const { savedPassengers, isLoading: loadingPassengers } = useSavedPassengers();
+  const { savedPassengers, isLoading: loadingPassengers, isError: savedPassengersError, isFallback } = useSavedPassengers();
   const { isLoading: loadingCoachTypes, getCoachPrice, getCoachTypeName, getCoachTypeOptions } = useCoachTypes();
   const { availabilityData } = useScheduleAvailability(search.scheduleId);
 
@@ -67,9 +67,12 @@ export default function PassengersPage() {
 
   // Handle passenger autofill
   const handleAutofillPassenger = (index, passengerId) => {
-    if (!savedPassengers || !Array.isArray(savedPassengers)) return;
+    if (!savedPassengers || !Array.isArray(savedPassengers)) {
+      return;
+    }
     
-    const selected = savedPassengers.find((p) => p.id === parseInt(passengerId));
+    const selected = savedPassengers.find((p) => p.id === passengerId);
+    
     if (selected) {
       autofillPassenger(index, selected);
     }
@@ -78,7 +81,6 @@ export default function PassengersPage() {
   // Handle booking success
   useEffect(() => {
     if (bookingSuccess && booking) {
-      console.log("Booking created successfully:", booking);
       setSuccess(true);
       setTimeout(() => {
         navigate({
@@ -99,7 +101,6 @@ export default function PassengersPage() {
   // Handle booking error
   useEffect(() => {
     if (bookingError) {
-      console.error("Failed to create booking:", bookingError);
       setSubmitting(false);
     }
   }, [bookingError, setSubmitting]);
@@ -134,7 +135,6 @@ export default function PassengersPage() {
     try {
       await createBooking(bookingData);
     } catch (error) {
-      console.error("Error creating booking:", error);
       setSubmitting(false);
     }
   };
@@ -184,6 +184,16 @@ export default function PassengersPage() {
             </div>
           )}
 
+          {/* Saved Passengers Error */}
+          {savedPassengersError && (
+            <div className="alert alert-warning mb-6">
+              <XCircle className="stroke-current shrink-0 h-6 w-6" />
+              <span className="text-sm sm:text-base">
+                Unable to load saved passengers. {isFallback ? "Using demo data." : "You can still enter passenger details manually."}
+              </span>
+            </div>
+          )}
+
           {/* Passenger Forms */}
           <div className="space-y-4 sm:space-y-6">
             {passengers.map((passenger, index) => (
@@ -193,7 +203,7 @@ export default function PassengersPage() {
                     <h3 className="card-title text-lg sm:text-xl">
                       Passenger {index + 1}
                     </h3>
-                    {passengers.length > 1 && (
+                    {passengers.length > 0 && (
                       <button
                         type="button"
                         onClick={() => removePassenger(index)}
@@ -207,7 +217,7 @@ export default function PassengersPage() {
                   </div>
 
                   {/* Saved Passenger Selection */}
-                  {((savedPassengers && savedPassengers.length > 0) || loadingPassengers) && (
+                  {(loadingPassengers || (savedPassengers && savedPassengers.length > 0)) && (
                     <FormField label="Quick Fill from Saved Passengers" className="mb-4">
                       <FormSelect
                         options={savedPassengers?.map(sp => ({
@@ -217,7 +227,7 @@ export default function PassengersPage() {
                         placeholder={loadingPassengers ? "Loading saved passengers..." : "-- Choose a saved passenger --"}
                         loading={loadingPassengers}
                         onChange={(e) => handleAutofillPassenger(index, e.target.value)}
-                        disabled={isSubmitting || isCreatingBooking}
+                        disabled={isSubmitting || isCreatingBooking || loadingPassengers}
                       />
                     </FormField>
                   )}
@@ -318,7 +328,7 @@ export default function PassengersPage() {
               disabled={isSubmitting || isCreatingBooking}
             >
               <Plus className="h-5 w-5 mr-2" />
-              Add Another Passenger
+              {passengers.length === 0 ? "Add Passenger" : "Add Another Passenger"}
             </Button>
           </div>
 

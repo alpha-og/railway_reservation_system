@@ -7,6 +7,10 @@ import {
   CheckCircle,
   AlertCircle,
   ArrowLeft,
+  Wallet,
+  QrCode,
+  DollarSign,
+  Phone,
 } from "lucide-react";
 import { ErrorBoundary } from "../../../../components";
 import bookingService from "../services/booking.service";
@@ -37,10 +41,10 @@ export const PaymentGatewayPage = () => {
 
   // Banks for UPI simulation
   const banks = [
-    { id: "paytm", name: "Paytm", logo: "💰" },
-    { id: "gpay", name: "Google Pay", logo: "🔵" },
-    { id: "phonepe", name: "PhonePe", logo: "🟣" },
-    { id: "bhim", name: "BHIM UPI", logo: "🔷" },
+    { id: "paytm", name: "Paytm", icon: Wallet },
+    { id: "gpay", name: "Google Pay", icon: QrCode },
+    { id: "phonepe", name: "PhonePe", icon: Phone },
+    { id: "bhim", name: "BHIM UPI", icon: DollarSign },
   ];
 
   // Reset state when component mounts
@@ -407,7 +411,7 @@ export const PaymentGatewayPage = () => {
                               >
                                 <div className="card-body items-center text-center p-4">
                                   <div className="text-2xl mb-1">
-                                    {bank.logo}
+                                    <bank.icon className="h-6 w-6" />
                                   </div>
                                   <div className="text-xs font-medium">
                                     {bank.name}
