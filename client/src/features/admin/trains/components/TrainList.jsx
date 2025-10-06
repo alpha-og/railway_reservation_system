@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { 
   Plus, 
   Edit, 
