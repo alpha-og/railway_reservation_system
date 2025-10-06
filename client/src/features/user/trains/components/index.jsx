@@ -5,6 +5,7 @@ export { default as TrainSchedule } from "./trainSchedule.jsx";
 export { default as TrainBookNew } from "./trainBookNew.jsx";
 export { default as PassengersPage } from "./PassengersPage.jsx";
 export { default as PaymentPage } from "./PaymentPage.jsx";
+export { default as PaymentGatewayPage } from "./PaymentGatewayPage.jsx";
 export { default as TrainGallery } from "./trainGallery.jsx";
 export { default as TrainDetail } from "./trainDetail.jsx";
 export { default as BookingProgress } from "./BookingProgress.jsx";

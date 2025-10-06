@@ -14,7 +14,7 @@ export const useTrainBooking = () => {
     isFallback,
     resolve,
   } = useApi({
-    endpoint: () => bookingService.createBooking(bookingData),
+    endpoint: bookingService.createBooking,
     onSuccess: (responseBody) => {
       return responseBody.data.booking;
     },
@@ -22,22 +22,26 @@ export const useTrainBooking = () => {
 
   const createBooking = (data) => {
     setBookingData(data);
-    return resolve();
   };
 
   const resetBooking = () => {
     setBookingData(null);
   };
 
-  return { 
+  useEffect(() => {
+    if (bookingData) {
+      resolve(bookingData);
+    }
+  }, [bookingData, resolve]);
+  return {
     booking: bookingResult,
-    error, 
-    isSuccess, 
-    isLoading, 
-    isError, 
+    error,
+    isSuccess,
+    isLoading,
+    isError,
     isFallback,
     createBooking,
-    resetBooking
+    resetBooking,
   };
 };
 
@@ -63,7 +67,15 @@ export const useBookingDetails = (bookingId) => {
     }
   }, [bookingId, resolve]);
 
-  return { booking, error, isSuccess, isLoading, isError, isFallback, refetch: resolve };
+  return {
+    booking,
+    error,
+    isSuccess,
+    isLoading,
+    isError,
+    isFallback,
+    refetch: resolve,
+  };
 };
 
 export const useUserBookings = () => {
@@ -86,5 +98,14 @@ export const useUserBookings = () => {
     resolve();
   }, [resolve]);
 
-  return { bookings, error, isSuccess, isLoading, isError, isFallback, refetch: resolve };
+  return {
+    bookings,
+    error,
+    isSuccess,
+    isLoading,
+    isError,
+    isFallback,
+    refetch: resolve,
+  };
 };
+

@@ -9,8 +9,9 @@ const updateProfileSchema = z.object({
 
 const createPassengerSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email").min(1, "Email is required"),
+  email: z.string().email("Invalid email"),
   age: z.number().min(0, "Age must be valid"),
+  gender: z.string().min(1, "Gender is required"),
 });
 
 const updatePassengerSchema = z.object({

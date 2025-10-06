@@ -19,14 +19,9 @@ export function useSavedPassengers() {
 }
 
 export function usePassengerForm(initialPassengers = [], availableCoachTypes = []) {
-  // Get the first available coach type as default
   const defaultCoachType = availableCoachTypes.length > 0 ? availableCoachTypes[0].value : '';
   
-  const [passengers, setPassengers] = useState(
-    initialPassengers.length > 0 
-      ? initialPassengers 
-      : [{ name: "", age: "", gender: "Male", coachType: defaultCoachType }]
-  );
+  const [passengers, setPassengers] = useState(initialPassengers);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -35,7 +30,6 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
   useEffect(() => {
     if (availableCoachTypes.length > 0) {
       setPassengers(prev => prev.map(passenger => {
-        // If passenger has no coach type or has an invalid coach type, set the default
         const hasValidCoachType = passenger.coachType && 
           availableCoachTypes.some(option => option.value === passenger.coachType);
         
@@ -49,7 +43,7 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
 
   const addPassenger = useCallback(() => {
     const defaultCoachType = availableCoachTypes.length > 0 ? availableCoachTypes[0].value : '';
-    setPassengers(prev => [...prev, { name: "", age: "", gender: "Male", coachType: defaultCoachType }]);
+    setPassengers(prev => [...prev, { name: "", email: "", age: "", gender: "Male", coachType: defaultCoachType }]);
     const newErrors = { ...errors };
     delete newErrors.general;
     setErrors(newErrors);
@@ -105,6 +99,7 @@ export function usePassengerForm(initialPassengers = [], availableCoachTypes = [
         name: savedPassenger.name,
         age: savedPassenger.age,
         gender: savedPassenger.gender,
+        ...(savedPassenger.email && { email: savedPassenger.email })
       };
       return updated;
     });

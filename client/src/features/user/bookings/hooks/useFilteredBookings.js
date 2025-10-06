@@ -7,7 +7,10 @@ export function useFilteredBookings(
   searchTerm
 ) {
   return useMemo(() => {
-    return bookings.filter((b) => {
+    // Ensure bookings is an array
+    const bookingsArray = Array.isArray(bookings) ? bookings : [];
+    
+    return bookingsArray.filter((b) => {
       if (!b) return false;
 
       const status = b.status?.toLowerCase() || "";

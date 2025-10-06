@@ -6,6 +6,7 @@ import { BookingProgress } from "./index";
 import { CheckCircle, XCircle, Trash2, Plus, ArrowLeft, ArrowRight } from "lucide-react";
 import { useSavedPassengers, usePassengerForm } from "../hooks/usePassengers";
 import { useCoachTypes, useScheduleAvailability } from "../hooks/useCoachData";
+import { useTrainBooking } from "../hooks/useTrainBooking";
 import coachTypeService from "../services/coachType.service";
 
 export default function PassengersPage() {
@@ -19,9 +20,18 @@ export default function PassengersPage() {
     : [];
 
   // Custom hooks for data and state management
-  const { savedPassengers, isLoading: loadingPassengers } = useSavedPassengers();
+  const { savedPassengers, isLoading: loadingPassengers, isError: savedPassengersError, isFallback } = useSavedPassengers();
   const { isLoading: loadingCoachTypes, getCoachPrice, getCoachTypeName, getCoachTypeOptions } = useCoachTypes();
   const { availabilityData } = useScheduleAvailability(search.scheduleId);
+
+  // Booking hook
+  const { 
+    booking, 
+    error: bookingError, 
+    isSuccess: bookingSuccess, 
+    isLoading: isCreatingBooking, 
+    createBooking 
+  } = useTrainBooking();
 
   // Get available coach type options for this schedule
   const availableCoachOptions = useMemo(() => 
@@ -57,39 +67,76 @@ export default function PassengersPage() {
 
   // Handle passenger autofill
   const handleAutofillPassenger = (index, passengerId) => {
-    if (!savedPassengers || !Array.isArray(savedPassengers)) return;
+    if (!savedPassengers || !Array.isArray(savedPassengers)) {
+      return;
+    }
     
-    const selected = savedPassengers.find((p) => p.id === parseInt(passengerId));
+    const selected = savedPassengers.find((p) => p.id === passengerId);
+    
     if (selected) {
       autofillPassenger(index, selected);
     }
   };
 
+  // Handle booking success
+  useEffect(() => {
+    if (bookingSuccess && booking) {
+      setSuccess(true);
+      setTimeout(() => {
+        navigate({
+          to: "/trains/$trainId/book/payment",
+          params: { trainId },
+          search: {
+            scheduleId: search.scheduleId,
+            from: search.from,
+            to: search.to,
+            passengers: JSON.stringify(passengers),
+            bookingId: booking.id,
+          },
+        });
+      }, 800);
+    }
+  }, [bookingSuccess, booking, navigate, trainId, search, passengers, setSuccess]);
+
+  // Handle booking error
+  useEffect(() => {
+    if (bookingError) {
+      setSubmitting(false);
+    }
+  }, [bookingError, setSubmitting]);
+
   // Handle form submission
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setSubmitting(true);
     
     if (!validateForm()) {
       setSubmitting(false);
       return;
     }
-    
-    // Show success state briefly
-    setSuccess(true);
-    
-    setTimeout(() => {
-      navigate({
-        to: "/trains/$trainId/book/payment",
-        params: { trainId },
-        search: {
-          scheduleId: search.scheduleId,
-          from: search.from,
-          to: search.to,
-          passengers: JSON.stringify(passengers),
-          bookingId: `B${Date.now()}`,
-        },
-      });
-    }, 800);
+
+    // Calculate total amount
+    const totalAmount = passengers.reduce((total, p) => total + getCoachPrice(p.coachType), 0);
+
+    // Prepare booking data
+    const bookingData = {
+      scheduleId: search.scheduleId,
+      fromStationId: search.from,
+      toStationId: search.to,
+      totalAmount,
+      passengers: passengers.map(passenger => ({
+        name: passenger.name,
+        age: parseInt(passenger.age),
+        gender: passenger.gender,
+        coachType: passenger.coachType,
+        email: passenger.email?.trim() || ''
+      }))
+    };
+
+    try {
+      await createBooking(bookingData);
+    } catch (error) {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -130,10 +177,20 @@ export default function PassengersPage() {
           )}
 
           {/* General Error */}
-          {errors.general && (
+          {(errors.general || bookingError) && (
             <div className="alert alert-error mb-6">
               <XCircle className="stroke-current shrink-0 h-6 w-6" />
-              <span className="text-sm sm:text-base">{errors.general}</span>
+              <span className="text-sm sm:text-base">{errors.general || bookingError?.message || "An error occurred while creating the booking"}</span>
+            </div>
+          )}
+
+          {/* Saved Passengers Error */}
+          {savedPassengersError && (
+            <div className="alert alert-warning mb-6">
+              <XCircle className="stroke-current shrink-0 h-6 w-6" />
+              <span className="text-sm sm:text-base">
+                Unable to load saved passengers. {isFallback ? "Using demo data." : "You can still enter passenger details manually."}
+              </span>
             </div>
           )}
 
@@ -146,12 +203,12 @@ export default function PassengersPage() {
                     <h3 className="card-title text-lg sm:text-xl">
                       Passenger {index + 1}
                     </h3>
-                    {passengers.length > 1 && (
+                    {passengers.length > 0 && (
                       <button
                         type="button"
                         onClick={() => removePassenger(index)}
                         className="btn btn-error btn-sm"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isCreatingBooking}
                       >
                         <Trash2 className="h-4 w-4" />
                         <span className="ml-2">Remove</span>
@@ -160,7 +217,7 @@ export default function PassengersPage() {
                   </div>
 
                   {/* Saved Passenger Selection */}
-                  {((savedPassengers && savedPassengers.length > 0) || loadingPassengers) && (
+                  {(loadingPassengers || (savedPassengers && savedPassengers.length > 0)) && (
                     <FormField label="Quick Fill from Saved Passengers" className="mb-4">
                       <FormSelect
                         options={savedPassengers?.map(sp => ({
@@ -170,7 +227,7 @@ export default function PassengersPage() {
                         placeholder={loadingPassengers ? "Loading saved passengers..." : "-- Choose a saved passenger --"}
                         loading={loadingPassengers}
                         onChange={(e) => handleAutofillPassenger(index, e.target.value)}
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isCreatingBooking || loadingPassengers}
                       />
                     </FormField>
                   )}
@@ -187,8 +244,26 @@ export default function PassengersPage() {
                         value={passenger.name}
                         onChange={(e) => updatePassenger(index, "name", e.target.value)}
                         placeholder="Enter full name"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isCreatingBooking}
                       />
+                    </div>
+
+                    {/* Email Field */}
+                    <div className="sm:col-span-2">
+                      <FormInput
+                        label="Email" 
+                        error={errors[index]?.email}
+                        required
+                        type="email"
+                        className="text-sm sm:text-base"
+                        value={passenger.email || ''}
+                        onChange={(e) => updatePassenger(index, "email", e.target.value)}
+                        placeholder="Enter email address"
+                        disabled={isSubmitting || isCreatingBooking}
+                      />
+                      <div className="text-xs text-base-content/60 mt-1">
+                        Email helps us match with your saved passenger details for future bookings
+                      </div>
                     </div>
 
                     {/* Age Field */}
@@ -203,7 +278,7 @@ export default function PassengersPage() {
                       placeholder="Age"
                       min="1"
                       max="120"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isCreatingBooking}
                     />
 
                     {/* Gender Field */}
@@ -214,7 +289,7 @@ export default function PassengersPage() {
                       className="text-sm sm:text-base"
                       value={passenger.gender}
                       onChange={(e) => updatePassenger(index, "gender", e.target.value)}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || isCreatingBooking}
                       placeholder="Select gender"
                       options={[
                         { value: "Male", label: "Male" },
@@ -232,7 +307,7 @@ export default function PassengersPage() {
                         className="text-sm sm:text-base"
                         value={passenger.coachType}
                         onChange={(e) => updatePassenger(index, "coachType", e.target.value)}
-                        disabled={isSubmitting || loadingCoachTypes || availableCoachOptions.length === 0}
+                        disabled={isSubmitting || isCreatingBooking || loadingCoachTypes || availableCoachOptions.length === 0}
                         placeholder={loadingCoachTypes ? "Loading coach types..." : availableCoachOptions.length === 0 ? "No available coach types" : "Select coach type"}
                         loading={loadingCoachTypes}
                         options={availableCoachOptions}
@@ -251,10 +326,10 @@ export default function PassengersPage() {
               size="lg" 
               className="w-full sm:w-auto" 
               onClick={addPassenger}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCreatingBooking}
             >
               <Plus className="h-5 w-5 mr-2" />
-              Add Another Passenger
+              {passengers.length === 0 ? "Add Passenger" : "Add Another Passenger"}
             </Button>
           </div>
 
@@ -297,7 +372,7 @@ export default function PassengersPage() {
                   }
                 });
               }}
-              disabled={isSubmitting}
+              disabled={isSubmitting || isCreatingBooking}
             >
               <ArrowLeft className="h-5 w-5 mr-2" />
               <span className="hidden sm:inline">Back to Journey Details</span>
@@ -307,12 +382,12 @@ export default function PassengersPage() {
             <Button
               variant="primary"
               size="lg" 
-              className={`order-1 sm:order-2 ${isSubmitting ? 'loading' : ''}`}
+              className={`order-1 sm:order-2 ${(isSubmitting || isCreatingBooking) ? 'loading' : ''}`}
               onClick={handleSubmit}
-              disabled={isSubmitting || passengers.length === 0}
+              disabled={isSubmitting || isCreatingBooking || passengers.length === 0}
             >
-              {isSubmitting ? (
-                'Validating...'
+              {(isSubmitting || isCreatingBooking) ? (
+                'Creating Booking...'
               ) : (
                 <>
                   <span className="hidden sm:inline">Continue to Payment</span>
