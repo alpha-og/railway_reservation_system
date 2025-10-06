@@ -2,6 +2,7 @@ import * as z from "zod";
 import { Booking } from "../models/index.js";
 import { AppError, asyncErrorHandler } from "../utils/errors.js";
 import { queryDB } from "../utils/db.js";
+import { bookingScheduler } from "../services/bookingScheduler.js";
 
 const getAllBookings = asyncErrorHandler(async (req, res) => {
   const bookings = await Booking.findAllByUser(req.userId);
@@ -244,7 +245,29 @@ const cancelBooking = asyncErrorHandler(async (req, res) => {
   }
 
   const updated = await Booking.cancelBooking(bookingId);
-  return res.success({ booking: updated });
+  return res.success({ 
+    booking: updated,
+    message: "Booking cancelled successfully. Seats have been freed and refund will be processed if applicable."
+  });
+});
+
+// Admin endpoint to manually trigger auto-cancellation
+const autoCancelExpiredBookings = asyncErrorHandler(async (req, res) => {
+  const cancelledCount = await bookingScheduler.triggerNow();
+  
+  return res.success({
+    cancelledCount,
+    message: `Auto-cancelled ${cancelledCount} expired booking(s)`
+  });
+});
+
+// Admin endpoint to get scheduler status
+const getSchedulerStatus = asyncErrorHandler(async (req, res) => {
+  const status = bookingScheduler.getStatus();
+  
+  return res.success({
+    scheduler: status
+  });
 });
 
 export default {
@@ -253,4 +276,6 @@ export default {
   createBooking,
   confirmBooking,
   cancelBooking,
+  autoCancelExpiredBookings,
+  getSchedulerStatus,
 };

@@ -184,10 +184,11 @@ class Booking {
             passengerId = existingResult.rows[0].id;
             const updatePassengerQuery = `
               UPDATE passengers 
-              SET name = $1, age = $2, gender = $3, updated_at = NOW()
+              SET name = $1, age = $2, gender = $3
               WHERE id = $4 AND user_id = $5
               RETURNING *
             `;
+            // TODO: Add updated_at column to passengers table and include: updated_at = NOW()
             await client.query(updatePassengerQuery, [
               passenger.name,
               passenger.age,
@@ -733,54 +734,24 @@ class Booking {
     const client = await getDBClient();
 
     try {
-      // Begin transaction
-      await client.query("BEGIN");
-
+      // Simply update the booking status - trigger handles the rest
       const bookingQuery = `
         UPDATE ${this.TABLE}
         SET status_id = (
           SELECT id FROM booking_statuses WHERE name = 'Cancelled' LIMIT 1
-        )
+        ),
+        updated_at = NOW()
         WHERE id = $1
         RETURNING *
       `;
       const { rows: bookingRows } = await client.query(bookingQuery, [
         bookingId,
       ]);
-      const booking = bookingRows[0];
-
-      if (!booking) {
-        await client.query("ROLLBACK");
-        return null;
-      }
-
-      // Check if there's a payment for this booking
-      const paymentQuery = `SELECT * FROM payments WHERE booking_id = $1 LIMIT 1`;
-      const { rows: paymentRows } = await client.query(paymentQuery, [
-        bookingId,
-      ]);
-      const payment = paymentRows[0];
-
-      if (payment) {
-        // Create refund entry
-        const refundQuery = `
-          INSERT INTO refunds (payment_id, amount, status_id, refund_date)
-          VALUES ($1, $2, (SELECT id FROM refund_statuses WHERE name='Completed' LIMIT 1), NOW())
-          RETURNING *
-        `;
-        await client.query(refundQuery, [payment.id, payment.amount]);
-      }
-
-      // Commit transaction
-      await client.query("COMMIT");
-
-      return booking;
+      
+      return bookingRows[0] || null;
     } catch (error) {
-      // Rollback transaction on error
-      await client.query("ROLLBACK");
       throw new Error(`Failed to cancel booking: ${error.message}`);
     } finally {
-      // Release the client back to the pool
       client.release();
     }
   }
