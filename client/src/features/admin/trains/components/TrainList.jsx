@@ -79,17 +79,6 @@ export default function TrainList() {
                     View
                   </button>
                   <button
-                    className="btn btn-xs btn-warning"
-                    onClick={() =>
-                      navigate({
-                        to: "/admin/trains/$trainId/edit",
-                        params: { trainId: train.id.toString() },
-                      })
-                    }
-                  >
-                    Edit
-                  </button>
-                  <button
                     className="btn btn-xs btn-error"
                     onClick={() => handleDelete(train.id)}
                   >
