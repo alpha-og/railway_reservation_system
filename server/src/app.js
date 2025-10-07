@@ -27,49 +27,6 @@ import responseTransformer from "./middleware/responseTransformer.js";
 export default function createApp(config) {
   const app = express();
 
-  // --- force the CORS header manually ---
-  app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (
-      origin === "http://34.93.174.157" ||
-      origin === "http://localhost:5173"
-    ) {
-      res.header("Access-Control-Allow-Origin", origin);
-    }
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-    );
-    res.header(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    );
-
-    // stop OPTIONS early
-    if (req.method === "OPTIONS") {
-      return res.sendStatus(204);
-    }
-    next();
-  });
-
-  // const corsOptions = {
-  //   origin: function (origin, callback) {
-  //     const allowed = ["http://34.93.174.157", "http://localhost:5173"];
-  //     if (!origin || allowed.includes(origin)) {
-  //       callback(null, origin);
-  //     } else {
-  //       callback(new Error("Not allowed by CORS"));
-  //     }
-  //   },
-  //   credentials: true,
-  //   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  //   allowedHeaders: ["Content-Type", "Authorization"],
-  // };
-  //
-  // app.use(cors(corsOptions));
-  // app.options("*", cors(corsOptions));
-
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());

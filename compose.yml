@@ -1,21 +1,5 @@
 services:
-  prod-client:
-    profiles:
-      - prod
-    build:
-      context: .
-      dockerfile: ./client/Dockerfile.prod
-    env_file:
-      - ./client/.env.production
-    ports:
-      - "${PROD_CLIENT_PORT}:${PROD_CLIENT_PORT}"
-    networks:
-      - prod-network
-    depends_on:
-      - prod-server
   prod-server:
-    profiles:
-      - prod
     build:
       context: .
       dockerfile: ./server/Dockerfile.prod
@@ -27,9 +11,8 @@ services:
       - prod-network
     depends_on:
       - prod-db
+
   prod-db:
-    profiles:
-      - prod
     image: cleisonfmelo/postgres-pg-cron:latest 
     env_file:
       - ./server/.env.production
@@ -40,15 +23,22 @@ services:
     networks:
       - prod-network
 
+  nginx-proxy:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile.prod  # Build client + Nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - prod-network
+    depends_on:
+      - prod-server
+
 volumes:
-  # dev-db-data:
-  # test-db-data:
   prod-db-data:
 
 networks:
-  # dev-network:
-  #   driver: bridge
-  # test-network:
-  #   driver: bridge
   prod-network:
     driver: bridge
