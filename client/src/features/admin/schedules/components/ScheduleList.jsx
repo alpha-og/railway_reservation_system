@@ -14,7 +14,10 @@ import {
   RefreshCw,
   AlertCircle,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  Eye,
+  Route,
+  Navigation
 } from "lucide-react";
 import Button from "../../../../components/ui/Button.jsx";
 import Card from "../../../../components/ui/Card.jsx";
@@ -132,6 +135,34 @@ export default function ScheduleList() {
       minute: '2-digit',
       hour12: true
     });
+  };
+
+  const getStopsDisplay = (stopsCount) => {
+    if (stopsCount === 0) {
+      return {
+        icon: AlertCircle,
+        text: "No stops",
+        className: "bg-slate-600/20 text-slate-400 border border-slate-500/30"
+      };
+    } else if (stopsCount <= 3) {
+      return {
+        icon: MapPin,
+        text: `${stopsCount} stop${stopsCount !== 1 ? 's' : ''}`,
+        className: "bg-green-500/20 text-green-300 border border-green-500/30"
+      };
+    } else if (stopsCount <= 7) {
+      return {
+        icon: Route,
+        text: `${stopsCount} stops`,
+        className: "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+      };
+    } else {
+      return {
+        icon: Navigation,
+        text: `${stopsCount} stops`,
+        className: "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+      };
+    }
   };
 
   if (loading) return <LoadingSkeleton />;
@@ -300,127 +331,157 @@ export default function ScheduleList() {
                         <tr className="border-b border-slate-700">
                           <th className="text-left py-4 px-4 text-slate-300 font-medium">Date & Time</th>
                           <th className="text-left py-4 px-4 text-slate-300 font-medium">Train</th>
-                          <th className="text-left py-4 px-4 text-slate-300 font-medium">Stops</th>
+                          <th className="text-left py-4 px-4 text-slate-300 font-medium">Route Info</th>
                           <th className="text-right py-4 px-4 text-slate-300 font-medium">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredSchedules.map((schedule, index) => (
-                          <motion.tr 
-                            key={schedule.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="border-b border-slate-800 hover:bg-slate-800/30 transition-colors"
-                          >
-                            <td className="py-4 px-4">
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 font-medium text-white">
-                                  <Calendar className="w-4 h-4 text-blue-400" />
-                                  {formatDate(schedule.departure_date)}
+                        {filteredSchedules.map((schedule, index) => {
+                          const stopsCount = schedule.schedule_stops?.length || 0;
+                          const stopsDisplay = getStopsDisplay(stopsCount);
+                          const StopIcon = stopsDisplay.icon;
+                          
+                          return (
+                            <motion.tr 
+                              key={schedule.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="border-b border-slate-800 hover:bg-slate-800/30 transition-colors"
+                            >
+                              <td className="py-4 px-4">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2 font-medium text-white">
+                                    <Calendar className="w-4 h-4 text-blue-400" />
+                                    {formatDate(schedule.departure_date)}
+                                  </div>
+                                  <div className="flex items-center gap-2 text-sm text-slate-400">
+                                    <Clock className="w-3 h-3" />
+                                    {formatTime(schedule.departure_time)}
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2 text-sm text-slate-400">
-                                  <Clock className="w-3 h-3" />
-                                  {formatTime(schedule.departure_time)}
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center gap-2">
+                                  <Train className="w-4 h-4 text-green-400" />
+                                  <span className="font-medium text-white">{trainName(schedule.train_id)}</span>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-2">
-                                <Train className="w-4 h-4 text-green-400" />
-                                <span className="font-medium text-white">{trainName(schedule.train_id)}</span>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4 text-orange-400" />
-                                <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium">
-                                  {schedule.schedule_stops?.length || 0} stops
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-4 px-4">
-                              <div className="flex items-center justify-end gap-2">
-                                <Button 
-                                  onClick={() => navigate({ to: `/admin/schedules/${schedule.id}/edit` })}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-blue-400 hover:bg-blue-500/10"
-                                  title="Edit Schedule"
-                                >
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button 
-                                  onClick={() => setDeleteConfirm(schedule.id)}
-                                  variant="ghost"
-                                  size="sm"
-                                  className="text-red-400 hover:bg-red-500/10"
-                                  title="Delete Schedule"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </motion.tr>
-                        ))}
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center gap-2">
+                                  <span className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${stopsDisplay.className}`}>
+                                    <StopIcon className="w-4 h-4" />
+                                    {stopsDisplay.text}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button 
+                                    onClick={() => navigate({ to: `/admin/schedules/${schedule.id}/view` })}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-blue-400 hover:bg-blue-500/10"
+                                    title="View Details"
+                                  >
+                                    <Eye className="w-4 h-4" />
+                                  </Button>
+                                  <Button 
+                                    onClick={() => navigate({ to: `/admin/schedules/${schedule.id}/edit` })}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-green-400 hover:bg-green-500/10"
+                                    title="Edit Schedule"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button 
+                                    onClick={() => setDeleteConfirm(schedule.id)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-400 hover:bg-red-500/10"
+                                    title="Delete Schedule"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </motion.tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
 
                   {/* Mobile Card View */}
                   <div className="md:hidden space-y-4">
-                    {filteredSchedules.map((schedule, index) => (
-                      <motion.div 
-                        key={schedule.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="p-4 bg-slate-800/30 rounded-lg border border-slate-700"
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 font-medium text-white">
-                              <Calendar className="w-4 h-4 text-blue-400" />
-                              {formatDate(schedule.departure_date)}
+                    {filteredSchedules.map((schedule, index) => {
+                      const stopsCount = schedule.schedule_stops?.length || 0;
+                      const stopsDisplay = getStopsDisplay(stopsCount);
+                      const StopIcon = stopsDisplay.icon;
+                      
+                      return (
+                        <motion.div 
+                          key={schedule.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="p-4 bg-slate-800/30 rounded-lg border border-slate-700"
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 font-medium text-white">
+                                <Calendar className="w-4 h-4 text-blue-400" />
+                                {formatDate(schedule.departure_date)}
+                              </div>
+                              <div className="flex items-center gap-2 text-sm text-slate-400">
+                                <Clock className="w-3 h-3" />
+                                {formatTime(schedule.departure_time)}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-slate-400">
-                              <Clock className="w-3 h-3" />
-                              {formatTime(schedule.departure_time)}
+                            <div className="flex gap-2">
+                              <Button 
+                                onClick={() => navigate({ to: `/admin/schedules/${schedule.id}/view` })}
+                                variant="ghost"
+                                size="sm"
+                                className="text-blue-400 hover:bg-blue-500/10"
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                onClick={() => navigate({ to: `/admin/schedules/${schedule.id}/edit` })}
+                                variant="ghost"
+                                size="sm"
+                                className="text-green-400 hover:bg-green-500/10"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                onClick={() => setDeleteConfirm(schedule.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-400 hover:bg-red-500/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button 
-                              onClick={() => navigate({ to: `/admin/schedules/${schedule.id}/edit` })}
-                              variant="ghost"
-                              size="sm"
-                              className="text-blue-400 hover:bg-blue-500/10"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button 
-                              onClick={() => setDeleteConfirm(schedule.id)}
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-400 hover:bg-red-500/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Train className="w-4 h-4 text-green-400" />
+                              <span className="font-medium text-white">{trainName(schedule.train_id)}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${stopsDisplay.className}`}>
+                                <StopIcon className="w-4 h-4" />
+                                {stopsDisplay.text}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Train className="w-4 h-4 text-green-400" />
-                            <span className="font-medium text-white">{trainName(schedule.train_id)}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-orange-400" />
-                            <span className="bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium">
-                              {schedule.schedule_stops?.length || 0} stops
-                            </span>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

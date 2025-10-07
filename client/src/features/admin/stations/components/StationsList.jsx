@@ -14,7 +14,8 @@ import {
   Sparkles,
   Building2,
   Code,
-  Calendar
+  Calendar,
+  Eye
 } from "lucide-react";
 import Button from "../../../../components/ui/Button.jsx";
 import Card from "../../../../components/ui/Card.jsx";
@@ -305,13 +306,28 @@ export default function StationsList() {
                                 <Button 
                                   onClick={() =>
                                     navigate({
-                                      to: "/admin/stations/$stationId/edit",
+                                      to: "/admin/stations/$stationId/view",
                                       params: { stationId: station.id.toString() },
                                     })
                                   }
                                   variant="ghost"
                                   size="sm"
                                   className="text-blue-400 hover:bg-blue-500/10"
+                                  title="View Details"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                                <Button 
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/admin/stations/$stationId/edit",
+                                      params: { stationId: station.id.toString() },
+                                    })
+                                  }
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-green-400 hover:bg-green-500/10"
+                                  title="Edit Station"
                                 >
                                   <Edit className="w-4 h-4" />
                                 </Button>
@@ -320,6 +336,7 @@ export default function StationsList() {
                                   variant="ghost"
                                   size="sm"
                                   className="text-red-400 hover:bg-red-500/10"
+                                  title="Delete Station"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -360,13 +377,28 @@ export default function StationsList() {
                             <Button 
                               onClick={() =>
                                 navigate({
-                                  to: "/admin/stations/$stationId/edit",
+                                  to: "/admin/stations/$stationId/view",
                                   params: { stationId: station.id.toString() },
                                 })
                               }
                               variant="ghost"
                               size="sm"
                               className="text-blue-400 hover:bg-blue-500/10"
+                              title="View Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              onClick={() =>
+                                navigate({
+                                  to: "/admin/stations/$stationId/edit",
+                                  params: { stationId: station.id.toString() },
+                                })
+                              }
+                              variant="ghost"
+                              size="sm"
+                              className="text-green-400 hover:bg-green-500/10"
+                              title="Edit Station"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -375,6 +407,7 @@ export default function StationsList() {
                               variant="ghost"
                               size="sm"
                               className="text-red-400 hover:bg-red-500/10"
+                              title="Delete Station"
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
