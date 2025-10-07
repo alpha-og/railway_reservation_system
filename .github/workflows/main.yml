@@ -19,6 +19,12 @@ jobs:
         username: ${{ secrets.GCP_USERNAME }} # e.g., tve23cs131
         key: ${{ secrets.GCP_SSH_KEY }}       # The private key (gcp_key) content
         script: |
-          cd /home/${{ secrets.GCP_USERNAME }}/rental-management
+          cd /home/${{ secrets.GCP_USERNAME }}/
+
+          if [ ! -d "railway_reservation_system" ]; then
+              git clone https://github.com/alpha-og/railway_reservation_system.git
+          fi
+
+          cd /home/${{ secrets.GCP_USERNAME }}/railway_reservation_system
           git pull origin main
           pnpm docker:prod -d
