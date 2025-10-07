@@ -66,7 +66,7 @@ export default function ProfilePage() {
   };
 
   const getRoleDisplay = () => {
-    if (role?.role) return role.role;
+    if (role?.name) return role.name;
     if (profile?.role) return profile.role;
     return "User";
   };
