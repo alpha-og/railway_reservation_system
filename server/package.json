@@ -10,7 +10,7 @@
     "migrate:prod": "DATABASE_URL=postgres://postgres:postgres@prod-db:5432/sidetrack-db node-pg-migrate",
     "seed": "node src/scripts/seed.js",
     "prepare-db:prod": "pnpm migrate:prod up && pnpm seed",
-    "start": "pnpm prepare-db:prod && node src/index.js"
+    "start": "node src/index.js"
   },
   "keywords": [],
   "author": "",
