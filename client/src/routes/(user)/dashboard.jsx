@@ -5,6 +5,7 @@ import {
   Testimonials,
   Footer,
 } from "../../features/landing/components/";
+import ScrollToTop from "../../components/ScrollToTop";
 
 export const Route = createFileRoute("/(user)/dashboard")({
   component: RouteComponent,
@@ -17,6 +18,7 @@ function RouteComponent() {
       <Features />
       <Testimonials />
       <Footer />
+      <ScrollToTop />
     </div>
   );
 }
