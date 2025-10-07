@@ -1,0 +1,52 @@
+services:
+  prod-client:
+    profiles:
+      - prod
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile.prod
+    env_file:
+      - ./client/.env.production
+    ports:
+      - "${PROD_CLIENT_PORT}:${PROD_CLIENT_PORT}"
+    networks:
+      - prod-network
+    depends_on:
+      - prod-server
+  prod-server:
+    profiles:
+      - prod
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile.prod
+    env_file:
+      - ./server/.env.production
+    ports:
+      - "${PROD_SERVER_PORT}:${PROD_SERVER_PORT}"
+    networks:
+      - prod-network
+    depends_on:
+      - prod-db
+  prod-db:
+    profiles:
+      - prod
+    image: postgres:alpine
+    env_file:
+      - ./server/.env.production
+    volumes:
+      - prod-db-data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+
+volumes:
+  # dev-db-data:
+  # test-db-data:
+  prod-db-data:
+
+networks:
+  # dev-network:
+  #   driver: bridge
+  # test-network:
+  #   driver: bridge
+  prod-network:
+    driver: bridge

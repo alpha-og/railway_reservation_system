@@ -1,0 +1,14 @@
+**/node_modules
+.git
+.gitignore
+**/*.md
+**/dist
+**/.next
+**/out
+**/build
+.eslintcache
+**/.DS_Store
+next-env.d.ts
+**/Dockerfile*
+**/docker-compose.yml
+**/compose.yml

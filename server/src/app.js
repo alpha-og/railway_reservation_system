@@ -32,7 +32,7 @@ export default function createApp(config) {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: ["http://localhost:5173"],
+      origin: [config.clientUrl],
       credentials: true,
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
       allowedHeaders: ["Content-Type", "Authorization"],

@@ -1,0 +1,15 @@
+{
+  "name": "railway_reservation_system",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker:prod": "docker compose --profile prod up --build",
+    "docker:clean": "docker image prune -f"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.16.1"
+}
