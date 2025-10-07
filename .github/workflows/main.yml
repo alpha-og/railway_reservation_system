@@ -1,0 +1,24 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to GCP
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.GCP_HOST }}         # e.g., 34.31.143.138
+        username: ${{ secrets.GCP_USERNAME }} # e.g., tve23cs131
+        key: ${{ secrets.GCP_SSH_KEY }}       # The private key (gcp_key) content
+        script: |
+          cd /home/${{ secrets.GCP_USERNAME }}/rental-management
+          git pull origin main
+          pnpm docker:prod -d
