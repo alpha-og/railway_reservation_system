@@ -43,6 +43,18 @@ export default function createApp(config) {
     }),
   );
 
+  app.options(
+    "*",
+    cors({
+      origin: [
+        config.clientUrl,
+        "http://localhost:5173",
+        "http://34.93.174.157:80",
+      ],
+      credentials: true,
+    }),
+  );
+
   // register response transformer middleware
   app.use(responseTransformer);
 
