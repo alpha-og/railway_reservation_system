@@ -359,14 +359,7 @@ export default function PnrBookingDetails({ booking }) {
           <Card shadow="xl" className="border border-warning/10">
             <Card.Title className="text-lg mb-4">Quick Actions</Card.Title>
             <div className="space-y-3">
-              <button className="btn btn-outline btn-block hover:btn-primary transition-all duration-200">
-                <Download className="w-5 h-5 mr-2" />
-                Download Ticket
-              </button>
-              <button className="btn btn-outline btn-block hover:btn-secondary transition-all duration-200">
-                <Printer className="w-5 h-5 mr-2" />
-                Print Ticket
-              </button>
+              {/* Download and Print buttons hidden */}
             </div>
           </Card>
         </div>
