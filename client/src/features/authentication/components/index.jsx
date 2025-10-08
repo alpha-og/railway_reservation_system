@@ -1,2 +1,2 @@
-export { default as SignupForm } from "./SignupForm.jsx";
-export { default as SigninForm } from "./SigninForm.jsx";
+export { default as SignupForm } from "./signupForm.jsx";
+export { default as SigninForm } from "./signinForm.jsx";
