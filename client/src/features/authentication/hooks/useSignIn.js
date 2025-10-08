@@ -28,7 +28,7 @@ export const useSignIn = () => {
       if (user.roleId === "admin") {
         router.navigate({ to: "/admin" });
       } else {
-        router.navigate({ to: "/" });
+        router.navigate({ to: "/dashboard" });
       }
     },
   });
