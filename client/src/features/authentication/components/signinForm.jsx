@@ -131,18 +131,18 @@ export default function SigninForm() {
                   Email Address
                 </label>
                 <div className="relative group">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/40 group-focus-within:text-primary transition-colors" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/40 group-focus-within:text-primary transition-colors z-10" />
                   <input
                     {...register("email")}
                     type="email"
                     placeholder="you@example.com"
                     disabled={signIn.isLoading}
-                    className={`input input-bordered w-full pl-10 pr-4 bg-base-200/50 border-base-content/20 text-base-content placeholder-base-content/40 focus:border-primary focus:bg-base-100 transition-all duration-300 ${
+                    className={`input input-bordered w-full pl-10 ${!errors.email && watch("email")?.includes("@") ? "pr-10" : "pr-4"} bg-base-200/50 border-base-content/20 text-base-content placeholder-base-content/40 focus:border-primary focus:bg-base-100 transition-all duration-300 ${
                       errors.email ? "border-error focus:border-error" : ""
                     }`}
                   />
                   {!errors.email && watch("email")?.includes("@") && (
-                    <CheckCircle2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-success" />
+                    <CheckCircle2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-success z-10" />
                   )}
                 </div>
                 {errors.email && (
@@ -168,7 +168,7 @@ export default function SigninForm() {
                   Password
                 </label>
                 <div className="relative group">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/40 group-focus-within:text-primary transition-colors" />
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-base-content/40 group-focus-within:text-primary transition-colors z-10" />
                   <input
                     {...register("password")}
                     type={showPassword ? "text" : "password"}
@@ -181,7 +181,7 @@ export default function SigninForm() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/40 hover:text-base-content transition-colors"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-base-content/40 hover:text-base-content transition-colors z-10"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -206,7 +206,9 @@ export default function SigninForm() {
                   className="alert alert-error shadow-lg"
                 >
                   <AlertCircle className="w-5 h-5" />
-                  <span className="text-sm">{signIn.error.title}</span>
+                  <span className="text-sm">
+                    {signIn.error?.title || signIn.error?.message || "An error occurred. Please try again."}
+                  </span>
                 </motion.div>
               )}
 
