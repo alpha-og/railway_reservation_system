@@ -27,6 +27,7 @@ const NAV_ITEMS = {
   public: [
     { name: "Home", to: "/", icon: Home },
     { name: "Search Trains", to: "/trains", icon: Search },
+    { name: "PNR Lookup", to: "/pnr-lookup", icon: Calendar },
     { name: "About Us", to: "/about", icon: Info },
     { name: "Help", to: "/help", icon: HelpCircle },
     { name: "Contact Us", to: "/contact", icon: Phone },
@@ -36,9 +37,6 @@ const NAV_ITEMS = {
     { name: "Search Trains", to: "/trains", icon: Search },
     { name: "My Bookings", to: "/bookings", icon: Bookmark },
     { name: "PNR Lookup", to: "/pnr-lookup", icon: Calendar },
-    { name: "About Us", to: "/about", icon: Info },
-    { name: "Help", to: "/help", icon: HelpCircle },
-    { name: "Contact Us", to: "/contact", icon: Phone },
   ],
   admin: [
     { name: "Dashboard", to: "/", icon: Home },
@@ -331,7 +329,8 @@ export default function Navigation() {
   const navItems = useMemo(() => {
     if (!token) return NAV_ITEMS.public;
     if (role?.name === "admin") return NAV_ITEMS.admin;
-    return NAV_ITEMS.user;
+    else if (role?.name === "customer") return NAV_ITEMS.user;
+    return NAV_ITEMS.public;
   }, [token, role]);
 
   const handleSignOut = useCallback(() => {
